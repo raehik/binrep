@@ -1,7 +1,6 @@
 name: binrep
 version: 0.1.0
 synopsis: Encode binary representations via types.
-
 description: Please see README.md.
 extra-source-files:
 - README.md
