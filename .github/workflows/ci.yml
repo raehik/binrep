@@ -1,3 +1,14 @@
+# The matrix feature is overused because it lets us do globals and interpolation
+# in more places (where we're for some reason forbidden from using workflow
+# environment variables).
+#
+# TODO
+#
+#   * Uploading executables by running `cabal install`, because that saves them
+#     to a known place. Not ideal, and we guess that "known" place.
+#   * `cabal build` and `cabal install` have bugs and inconsistencies, stripping
+#     may not work, our flags might get thrown away between `cabal` calls.
+
 name: CI
 
 on:
@@ -9,42 +20,28 @@ on:
     - opened
     - synchronize
 
+# If env.exe exists, jobs will build and upload the specified executable with
+# optimizations (-O2). If it doesn't exist, jobs will build without
+# optimizations (-O0).
+#env:
+#  exe: bytepatch
+
 jobs:
-  ubuntu-stack-test:
-    runs-on: ubuntu-latest
-    name: Ubuntu / Stack / test
-    steps:
-
-    - uses: actions/checkout@v2
-
-    # relative paths are relative to the project directory
-    - name: Cache Stack build artifacts (user + project)
-      uses: actions/cache@v2
-      with:
-        path: |
-          ~/.stack
-          .stack-work
-        # best effort for cache: tie it to Stack resolver and package config
-        key: ${{ runner.os }}-latest-stack-${{ hashFiles('stack.yaml.lock', 'package.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-latest-stack
-
-    - name: Install project dependencies
-      run: stack --no-terminal test --only-dependencies
-
-    - name: Build and run tests
-      run: stack --no-terminal haddock --test --no-haddock-deps
 
   ubuntu-cabal-test:
-    runs-on: ubuntu-latest
-    name: Ubuntu / GHC ${{ matrix.ghc }}, Cabal / test
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} / test / GHC ${{ matrix.ghc }}, Cabal
     strategy:
-      fail-fast: false  # don't stop if one job (= GHC version) fails
+      fail-fast: false
       matrix:
-        cabal: ["3.6"]  # ghcup recommended as of 2022-04-22
+        os: [ubuntu-latest]
+        cabal: [latest]
         ghc:
-        - "9.2"
-        - "8.10"
+        - 9.2.2
+        - 8.10.7
+        include:
+        - ghc: 9.2.2
+          build: release
 
     steps:
 
@@ -81,23 +78,51 @@ jobs:
         path: |
           ${{ steps.setup-haskell-build-env.outputs.cabal-store }}
           dist-newstyle
-        key: ${{ runner.os }}-cabal-${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
-        restore-keys: |
-          ${{ runner.os }}-cabal-${{ matrix.ghc }}
+        key:          test-cabal-build-artifacts-${{ runner.os }}-ghc_${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
+        restore-keys: test-cabal-build-artifacts-${{ runner.os }}-ghc_${{ matrix.ghc }}
+
+    - name: Build (exe)
+      if: "env.exe != 0 && matrix.build == 'release'"
+      run: cabal build -O2
+    - name: Build (skip exe)
+      if: "env.exe != 0 && matrix.build != 'release'"
+      run: cabal build -O0
+    - name: Build (no exe)
+      if: "env.exe == 0"
+      run: cabal build -O0
 
     - name: Test
       run: cabal test --test-show-details=streaming
       env:
         HSPEC_OPTIONS: --color
 
+    - name: Install
+      if: "env.exe != 0 && matrix.build == 'release'"
+      run: cabal install
+
+    # note that Cabal uses symlinks -- actions/upload-artifact@v2 apparently
+    # dereferences for us
+    - name: Upload executable
+      if: "env.exe != 0 && matrix.build == 'release'"
+      uses: actions/upload-artifact@v2
+      with:
+        path: ~/.cabal/bin/${{ env.exe }}
+        name: ${{ env.exe }}-${{ runner.os }}-ghc_${{ matrix.ghc }}-cabal-${{ github.sha }}
+        if-no-files-found: error
+
   mac-cabal-test:
-    runs-on: macos-latest
-    name: Mac / GHC ${{ matrix.ghc }}, Cabal / test
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} / test / GHC ${{ matrix.ghc }}, Cabal
     strategy:
-      fail-fast: false  # don't stop if one job (= GHC version) fails
+      fail-fast: false
       matrix:
-        cabal: ["3.6"]  # ghcup recommended as of 2022-04-22
-        ghc: ["9.2"]
+        os: [macos-latest]
+        cabal: [latest]
+        ghc:
+        - 9.2.2
+        include:
+        - ghc: 9.2.2
+          build: release
 
     steps:
 
@@ -119,33 +144,56 @@ jobs:
         path: |
           ${{ steps.setup-haskell-build-env.outputs.cabal-store }}
           dist-newstyle
-        key: ${{ runner.os }}-latest-cabal-${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
-        restore-keys: |
-          ${{ runner.os }}-latest-cabal-${{ matrix.ghc }}
+        key:          test-cabal-build-artifacts-${{ runner.os }}-ghc_${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
+        restore-keys: test-cabal-build-artifacts-${{ runner.os }}-ghc_${{ matrix.ghc }}
 
-    - name: Build
-      run: cabal build
+    - name: Build (exe)
+      if: "env.exe != 0 && matrix.build == 'release'"
+      run: cabal build -O2
+    - name: Build (skip exe)
+      if: "env.exe != 0 && matrix.build != 'release'"
+      run: cabal build -O0
+    - name: Build (no exe)
+      if: "env.exe == 0"
+      run: cabal build -O0
 
     - name: Test
       run: cabal test --test-show-details=streaming
       env:
         HSPEC_OPTIONS: --color
 
-  windows-cabal-build:
-    runs-on: windows-latest
-    name: Windows / GHC ${{ matrix.ghc }}, Cabal / test
+    - name: Install
+      if: "env.exe != 0 && matrix.build == 'release'"
+      run: cabal install
+
+    # note that Cabal uses symlinks -- actions/upload-artifact@v2 apparently
+    # dereferences for us
+    - name: Upload executable
+      if: "env.exe != 0 && matrix.build == 'release'"
+      uses: actions/upload-artifact@v2
+      with:
+        path: ~/.cabal/bin/${{ env.exe }}
+        name: ${{ env.exe }}-${{ runner.os }}-ghc_${{ matrix.ghc }}-cabal-${{ github.sha }}
+        if-no-files-found: error
+
+  windows-cabal-test:
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} / test / GHC ${{ matrix.ghc }}, Cabal
     strategy:
-      fail-fast: false  # don't stop if one job (= GHC version) fails
+      fail-fast: false
       matrix:
-        cabal: ["3.6"]  # ghcup recommended as of 2022-04-22
-        ghc: ["9.2"]
+        os: [windows-latest]
+        cabal: [latest]
+        ghc:
+        - 9.2.2
+        include:
+        - ghc: 9.2.2
+          build: release
 
     steps:
 
     # TODO can't do cache fixer on Windows b/c it's a Bash script...
     - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
 
     - name: Setup Haskell build environment
       id: setup-haskell-build-env
@@ -162,14 +210,34 @@ jobs:
         path: |
           ${{ steps.setup-haskell-build-env.outputs.cabal-store }}
           dist-newstyle
-        key: ${{ runner.os }}-latest-cabal-${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
-        restore-keys: |
-          ${{ runner.os }}-latest-cabal-${{ matrix.ghc }}
+        key:          test-cabal-build-artifacts-${{ runner.os }}-ghc_${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
+        restore-keys: test-cabal-build-artifacts-${{ runner.os }}-ghc_${{ matrix.ghc }}
 
-    - name: Build
-      run: cabal build
+    - name: Build (exe)
+      if: "env.exe != 0 && matrix.build == 'release'"
+      run: cabal build -O2
+    - name: Build (skip exe)
+      if: "env.exe != 0 && matrix.build != 'release'"
+      run: cabal build -O0
+    - name: Build (no exe)
+      if: "env.exe == 0"
+      run: cabal build -O0
 
     - name: Test
       run: cabal test --test-show-details=streaming
       env:
         HSPEC_OPTIONS: --color
+
+    - name: Install
+      if: "env.exe != 0 && matrix.build == 'release'"
+      run: cabal install
+
+    # note that Cabal uses symlinks -- actions/upload-artifact@v2 apparently
+    # dereferences for us
+    - name: Upload executable
+      if: "env.exe != 0 && matrix.build == 'release'"
+      uses: actions/upload-artifact@v2
+      with:
+        path: C:/cabal/bin/${{ env.exe }}.exe
+        name: ${{ env.exe }}-${{ runner.os }}-ghc_${{ matrix.ghc }}-cabal-${{ github.sha }}
+        if-no-files-found: error

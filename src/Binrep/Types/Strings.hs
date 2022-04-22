@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Binscheme.Types.Strings where
+module Binrep.Types.Strings where
 
-import Binscheme.Codec
-import Binscheme.ByteLen
-import Binscheme.Types.Ints
-import Binscheme.Util
+import Binrep.Codec
+import Binrep.ByteLen
+import Binrep.Types.Ints
+import Binrep.Util
 import Refined
 import Refined.WithRefine
 import Data.ByteString qualified as BS

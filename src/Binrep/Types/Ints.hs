@@ -1,7 +1,7 @@
-module Binscheme.Types.Ints where
+module Binrep.Types.Ints where
 
-import Binscheme.Codec
-import Binscheme.ByteLen
+import Binrep.Codec
+import Binrep.ByteLen
 import GHC.Generics ( Generic )
 import Data.Typeable
 import Data.Word

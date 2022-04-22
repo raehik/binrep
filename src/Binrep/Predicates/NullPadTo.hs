@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Binscheme.Predicates.NullPadTo where
+module Binrep.Predicates.NullPadTo where
 
-import Binscheme.Codec
-import Binscheme.ByteLen
-import Binscheme.Util ( tshow )
+import Binrep.Codec
+import Binrep.ByteLen
+import Binrep.Util ( tshow )
 import Refined
 import Refined.WithRefine
 import Data.Serialize

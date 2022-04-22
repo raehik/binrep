@@ -11,10 +11,10 @@ packages:
     pantry-tree:
       size: 662
       sha256: a3a4188f29e18a707a03a5faa180651a41e481e58dde30cbbdb278156afd9643
-    commit: d519581601ddce33d5be0a55bcf247c9df4e1093
+    commit: c3630a5ae3adf8860aafd82e1a38617ef75009f6
   original:
     git: https://github.com/raehik/refined-with
-    commit: d519581601ddce33d5be0a55bcf247c9df4e1093
+    commit: c3630a5ae3adf8860aafd82e1a38617ef75009f6
 snapshots:
 - completed:
     size: 539378

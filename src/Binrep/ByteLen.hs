@@ -7,7 +7,7 @@ So far I haven't got another use for it, and I feel there should be some better
 way to define it but the types don't fit well. So I'll leave it as is for now.
 -}
 
-module Binscheme.ByteLen where
+module Binrep.ByteLen where
 
 import Numeric.Natural
 

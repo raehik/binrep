@@ -1,4 +1,4 @@
-module Binscheme.Codec where
+module Binrep.Codec where
 
 import Data.ByteString qualified as BS
 import Data.ByteString.Lazy qualified as BL
@@ -21,9 +21,10 @@ import Data.Serialize
 -- come with a proof that it's not oversized.
 --
 -- The idea is to use this typeclass along with various annotated newtypes to
--- allow defining a Haskell type's binary schema directly in the types. In cases
--- where you're doing intermediate serialization and not much else, it may be
--- convenient. You will need to do a bunch of (free at runtime) wrapping though.
+-- allow defining a Haskell type's binary representation directly in the types.
+-- In cases where you're doing intermediate serialization and not much else, it
+-- may be convenient. You will need to do a bunch of (free at runtime) wrapping
+-- though.
 class BinaryCodec a where
     toBin   :: Putter a     -- ^ Encode to   binary. Same as cereal's 'put'.
     fromBin :: Get a        -- ^ Decode from binary. Same as cereal's 'get'.

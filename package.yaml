@@ -1,16 +1,17 @@
-name: binscheme
+name: binrep
 version: 0.1.0
-synopsis: TODO
+synopsis: Encode binary representations via types.
+
 description: Please see README.md.
 extra-source-files:
 - README.md
 - CHANGELOG.md
 category: Data
-tested-with: TODO
+tested-with: GHC ==8.10.7 || ==9.2.2
 license: MIT
 license-file: LICENSE
 
-github: raehik/binscheme
+github: raehik/binrep
 maintainer: Ben Orchard <thefirstmuffinman@gmail.com>
 author: Ben Orchard
 
@@ -63,15 +64,14 @@ default-extensions:
 - MagicHash # pretty much syntactic, but too weird
 - ScopedTypeVariables # probs dangerous to have as default
 
-# TODO
 dependencies:
-- base
-- bytestring
-- cereal
-- refined
-- refined-with
-- aeson # only OK because we use refined, which uses aeson
-- text
+- base >= 4.14 && < 5
+- bytestring ^>= 0.11
+- cereal ^>= 0.5.8.1
+- refined ^>= 0.6.3
+- refined-with ^>= 0.1.0
+- aeson ^>= 2.0 # only OK because we use refined, which uses aeson
+- text ^>= 1.2
 
 library:
   source-dirs: src

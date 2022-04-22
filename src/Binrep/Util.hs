@@ -1,4 +1,4 @@
-module Binscheme.Util where
+module Binrep.Util where
 
 import Data.Text qualified as Text
 import Data.Text ( Text )

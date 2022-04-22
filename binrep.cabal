@@ -4,38 +4,38 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 
-name:           binscheme
+name:           binrep
 version:        0.1.0
-synopsis:       TODO
+synopsis:       Encode binary representations via types.
 description:    Please see README.md.
 category:       Data
-homepage:       https://github.com/raehik/binscheme#readme
-bug-reports:    https://github.com/raehik/binscheme/issues
+homepage:       https://github.com/raehik/binrep#readme
+bug-reports:    https://github.com/raehik/binrep/issues
 author:         Ben Orchard
 maintainer:     Ben Orchard <thefirstmuffinman@gmail.com>
 license:        MIT
 license-file:   LICENSE
 build-type:     Simple
 tested-with:
-    TODO
+    GHC ==8.10.7 || ==9.2.2
 extra-source-files:
     README.md
     CHANGELOG.md
 
 source-repository head
   type: git
-  location: https://github.com/raehik/binscheme
+  location: https://github.com/raehik/binrep
 
 library
   exposed-modules:
-      Binscheme.ByteLen
-      Binscheme.Codec
-      Binscheme.Predicates.NullPadTo
-      Binscheme.Types.Ints
-      Binscheme.Types.Strings
-      Binscheme.Util
+      Binrep.ByteLen
+      Binrep.Codec
+      Binrep.Predicates.NullPadTo
+      Binrep.Types.Ints
+      Binrep.Types.Strings
+      Binrep.Util
   other-modules:
-      Paths_binscheme
+      Paths_binrep
   hs-source-dirs:
       src
   default-extensions:
@@ -71,11 +71,11 @@ library
       MagicHash
       ScopedTypeVariables
   build-depends:
-      aeson
-    , base
-    , bytestring
-    , cereal
-    , refined
-    , refined-with
-    , text
+      aeson ==2.0.*
+    , base >=4.14 && <5
+    , bytestring ==0.11.*
+    , cereal >=0.5.8.1 && <0.6
+    , refined >=0.6.3 && <0.7
+    , refined-with >=0.1.0 && <0.2
+    , text ==1.2.*
   default-language: Haskell2010
