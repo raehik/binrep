@@ -1,0 +1,81 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+
+name:           binscheme
+version:        0.1.0
+synopsis:       TODO
+description:    Please see README.md.
+category:       Data
+homepage:       https://github.com/raehik/binscheme#readme
+bug-reports:    https://github.com/raehik/binscheme/issues
+author:         Ben Orchard
+maintainer:     Ben Orchard <thefirstmuffinman@gmail.com>
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+tested-with:
+    TODO
+extra-source-files:
+    README.md
+    CHANGELOG.md
+
+source-repository head
+  type: git
+  location: https://github.com/raehik/binscheme
+
+library
+  exposed-modules:
+      Binscheme.ByteLen
+      Binscheme.Codec
+      Binscheme.Predicates.NullPadTo
+      Binscheme.Types.Ints
+      Binscheme.Types.Strings
+      Binscheme.Util
+  other-modules:
+      Paths_binscheme
+  hs-source-dirs:
+      src
+  default-extensions:
+      EmptyCase
+      FlexibleContexts
+      FlexibleInstances
+      InstanceSigs
+      MultiParamTypeClasses
+      PolyKinds
+      LambdaCase
+      DerivingStrategies
+      StandaloneDeriving
+      DeriveAnyClass
+      DeriveGeneric
+      DeriveDataTypeable
+      DeriveFunctor
+      DeriveFoldable
+      DeriveTraversable
+      DeriveLift
+      ImportQualifiedPost
+      StandaloneKindSignatures
+      DerivingVia
+      RoleAnnotations
+      TypeApplications
+      DataKinds
+      TypeFamilies
+      TypeOperators
+      BangPatterns
+      GADTs
+      DefaultSignatures
+      RankNTypes
+      UndecidableInstances
+      MagicHash
+      ScopedTypeVariables
+  build-depends:
+      aeson
+    , base
+    , bytestring
+    , cereal
+    , refined
+    , refined-with
+    , text
+  default-language: Haskell2010
