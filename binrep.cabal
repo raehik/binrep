@@ -5,8 +5,8 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           binrep
-version:        0.1.0
-synopsis:       Encode binary representations via types.
+version:        0.2.0
+synopsis:       Encode precise binary representations directly in types.
 description:    Please see README.md.
 category:       Data
 homepage:       https://github.com/raehik/binrep#readme
@@ -28,11 +28,23 @@ source-repository head
 
 library
   exposed-modules:
-      Binrep.ByteLen
-      Binrep.Codec
-      Binrep.Predicates.NullPadTo
-      Binrep.Types.Ints
-      Binrep.Types.Strings
+      Binrep
+      Binrep.BLen
+      Binrep.CBLen
+      Binrep.Example
+      Binrep.Generic
+      Binrep.Generic.BLen
+      Binrep.Generic.CBLen
+      Binrep.Generic.Get
+      Binrep.Generic.Internal
+      Binrep.Generic.Put
+      Binrep.Get
+      Binrep.Predicate.NullPadTo
+      Binrep.Put
+      Binrep.Type.ByteString
+      Binrep.Type.Common
+      Binrep.Type.Int
+      Binrep.Type.Text
       Binrep.Util
   other-modules:
       Paths_binrep
@@ -70,12 +82,13 @@ library
       UndecidableInstances
       MagicHash
       ScopedTypeVariables
+  ghc-options: -Wall
   build-depends:
       aeson ==2.0.*
     , base >=4.14 && <5
     , bytestring ==0.11.*
     , cereal >=0.5.8.1 && <0.6
+    , either >=5.0.1.1 && <5.1
     , refined >=0.6.3 && <0.7
-    , refined-with >=0.1.0 && <0.2
-    , text ==1.2.*
+    , text ==2.0.*
   default-language: Haskell2010

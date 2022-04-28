@@ -1,14 +1,44 @@
 # binrep
-Haskell data types with their binary representation explicitly built into the
-types. Intended for simple binary file parsing.
+tl;dr aeson for binary
 
-The binary and cereal libraries are for passing Haskell data between other
-binary and cereal users. Thus, data representation is largely obscured. For
-example, in `cereal`, all data is handled in big-endian format. If you use the
-`Serialize` typeclass methods for parsing and serializing, you would never know.
+binrep defines a set of binary representation primitives such as endianness,
+machine integers and null-padding via various `newtype` wrappers, and provides
+generic derivers for parsing & serializing types made out of these primitives.
 
-binrep never makes decisions by itself. You can't parse/serialize a `Word64`
-without either providing the endianness to use at runtime, or encoding the
-endianness into the type.
+## Why not binary or cereal?
+The binary and cereal libraries are **binary serialization** libraries.
+They are interested in defining efficient binary en/decoders for Haskell data.
+However, their typeclasses make term-level decisions about representation. For
+example, machine integers are encoded with big endian.
 
-See the Hackage documentation for details.
+binrep encourages you to describe the **binary representation** directly in
+types, and has its own typeclasses with instances based around that. Thus,
+binrep will not encode a `Word64` unless you either provide the endianness to
+use at runtime, or encode its endianness via some `newtype` wrapper.
+
+## Generic binary representation
+binrep's generic deriving makes very few decisions:
+
+  * Empty constructors are empty - 0 bytes.
+  * Fields are encoded sequentially in the order they appear in the data type.
+  * Sum types are special, similar to aeson: see below.
+
+### Generic sum type encoding
+Sum types (data types with multiple constructors) are handled by first encoding
+a "tag field", the value of which then indicates which constructor to use.
+Here's the trick -- you provide the type to use for the tag. You'll probably
+want to stick with machine integers, but you may choose the size and endianness
+(well, you have to).
+
+You must also provide a function to convert from constructor strings to your
+tag. We encourage the aeson approach of encoding tags in constructor names:
+
+```haskell
+data BinarySumType = B1 | B2
+
+getConstructorTag :: String -> Word8
+getConstructorTag = read . drop 1
+
+-- >>> getConstructorTag "B1"
+-- 1
+```

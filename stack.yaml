@@ -2,5 +2,7 @@ resolver: nightly-2022-03-30
 packages: [.]
 
 extra-deps:
-- git: https://github.com/raehik/refined-with
-  commit: c3630a5ae3adf8860aafd82e1a38617ef75009f6
+- text-2.0@sha256:86e64bc76fefb8f0f6529d28ddf24b2a29d43591a8b9b7c7094f481a0db2fb7d,7788
+# currently depends on my predicate polykind fix
+- git: https://github.com/raehik/refined
+  commit: 952e0348348aaf11c8b93c6e1ac6d33a0cbbb6b1

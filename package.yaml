@@ -1,6 +1,6 @@
 name: binrep
-version: 0.1.0
-synopsis: Encode binary representations via types.
+version: 0.2.0
+synopsis: Encode precise binary representations directly in types.
 description: Please see README.md.
 extra-source-files:
 - README.md
@@ -68,9 +68,11 @@ dependencies:
 - bytestring ^>= 0.11
 - cereal ^>= 0.5.8.1
 - refined ^>= 0.6.3
-- refined-with ^>= 0.1.0
 - aeson ^>= 2.0 # only OK because we use refined, which uses aeson
-- text ^>= 1.2
+- text ^>= 2.0 # for a useful decodeASCII
+- either ^>= 5.0.1.1
 
 library:
   source-dirs: src
+  ghc-options:
+  - -Wall

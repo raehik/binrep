@@ -1,27 +1,31 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Binrep.Predicates.NullPadTo where
+module Binrep.Predicate.NullPadTo where
 
-import Binrep.Codec
-import Binrep.ByteLen
+import Binrep.BLen
+import Binrep.CBLen
+import Binrep.Put
+import Binrep.Get
 import Binrep.Util ( tshow )
+
 import Refined
-import Refined.WithRefine
-import Data.Serialize
+import Refined.Unsafe
+
 import GHC.TypeNats
-import Numeric.Natural
 import GHC.Natural ( minusNaturalMaybe )
 import GHC.Exts ( proxy#, Proxy# )
 import Data.Typeable
+import Data.Serialize qualified as Cereal
 import Data.ByteString qualified as BS
 
-data NullPadTo (n :: Nat)
+data NullPadTo (n :: Natural)
 
-instance KnownNat n => ByteLen (WithRefine 'Enforced (NullPadTo n) a) where
-    blen = const n
-      where n = natVal' (proxy# :: Proxy# n)
+-- | The size of some null-padded data is known - at compile time!
+type instance CBLen (Refined (NullPadTo n) a) = n
 
-instance (ByteLen a, KnownNat n) => Predicate (NullPadTo n) a where
+deriving anyclass instance KnownNat n => BLen (Refined (NullPadTo n) a)
+
+instance (BLen a, KnownNat n) => Predicate (NullPadTo n) a where
     validate p a
       | len > n
           = throwRefineOtherException (typeRep p) $
@@ -31,6 +35,15 @@ instance (ByteLen a, KnownNat n) => Predicate (NullPadTo n) a where
         n = natVal' (proxy# :: Proxy# n)
         len = blen a
 
+instance (Put a, BLen a, KnownNat n) => Put (Refined (NullPadTo n) a) where
+    put wrnpa = do
+        let npa = unrefine wrnpa
+        put npa
+        let paddingLength = n - blen npa
+        Cereal.putByteString $ BS.replicate (fromIntegral paddingLength) 0x00
+      where
+        n = natVal' (proxy# :: Proxy# n)
+
 -- | predicate is inherently enforced due to checking length to calculate how
 --   many succeeding nulls to parse
 --
@@ -38,32 +51,24 @@ instance (ByteLen a, KnownNat n) => Predicate (NullPadTo n) a where
 -- padding, just that the data is chunked correctly. I figure we care about
 -- correctness here, so it'd be nice to know about the padding well-formedness
 -- (i.e. that it's all nulls).
-instance (BinaryCodec a, ByteLen a, KnownNat n)
-      => BinaryCodec (WithRefine 'Enforced (NullPadTo n) a) where
-    fromBin = do
-        a <- fromBin
+instance (Get a, BLen a, KnownNat n) => Get (Refined (NullPadTo n) a) where
+    get = do
+        a <- get
         let len = blen a
         case minusNaturalMaybe n len of
           Nothing -> fail $ "too long: " <> show len <> " > " <> show n
           Just nullstrLen -> do
             getNNulls nullstrLen
-            return $ reallyUnsafeEnforce a
-      where
-        n = natVal' (proxy# :: Proxy# n)
-    toBin wrnpa = do
-        let npa = unWithRefine wrnpa
-        toBin npa
-        let paddingLength = n - blen npa
-        putByteString $ BS.replicate (fromIntegral paddingLength) 0x00
+            return $ reallyUnsafeRefine a
       where
         n = natVal' (proxy# :: Proxy# n)
 
-getNNulls :: Natural -> Get ()
+getNNulls :: Natural -> Cereal.Get ()
 getNNulls = \case 0 -> return ()
-                  n -> getWord8 >>= \case
+                  n -> Cereal.getWord8 >>= \case
                          0x00    -> getNNulls $ n-1
                          nonNull -> do
-                           offset <- bytesRead
+                           offset <- Cereal.bytesRead
                            fail $  "expected null, found: "<> show nonNull
                                 <> " at offset " <> show offset
                                 <> ", " <> show n <> " more nulls to go"
