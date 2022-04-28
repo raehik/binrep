@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Binrep.Predicate.NullPadTo where
+module Binrep.Predicate.NullPad where
 
 import Binrep.BLen
 import Binrep.CBLen
@@ -18,14 +18,16 @@ import Data.Typeable
 import Data.Serialize qualified as Cereal
 import Data.ByteString qualified as BS
 
-data NullPadTo (n :: Natural)
+data NullPad (n :: Natural)
+
+type NullPadded n a = Refined (NullPad n) a
 
 -- | The size of some null-padded data is known - at compile time!
-type instance CBLen (Refined (NullPadTo n) a) = n
+type instance CBLen (NullPadded n a) = n
 
-deriving anyclass instance KnownNat n => BLen (Refined (NullPadTo n) a)
+deriving anyclass instance KnownNat n => BLen (NullPadded n a)
 
-instance (BLen a, KnownNat n) => Predicate (NullPadTo n) a where
+instance (BLen a, KnownNat n) => Predicate (NullPad n) a where
     validate p a
       | len > n
           = throwRefineOtherException (typeRep p) $
@@ -35,7 +37,7 @@ instance (BLen a, KnownNat n) => Predicate (NullPadTo n) a where
         n = natVal' (proxy# :: Proxy# n)
         len = blen a
 
-instance (Put a, BLen a, KnownNat n) => Put (Refined (NullPadTo n) a) where
+instance (Put a, BLen a, KnownNat n) => Put (NullPadded n a) where
     put wrnpa = do
         let npa = unrefine wrnpa
         put npa
@@ -44,14 +46,14 @@ instance (Put a, BLen a, KnownNat n) => Put (Refined (NullPadTo n) a) where
       where
         n = natVal' (proxy# :: Proxy# n)
 
--- | predicate is inherently enforced due to checking length to calculate how
---   many succeeding nulls to parse
+-- | Safety: we assert actual length is within expected length (in order to
+--   calculate how much padding to parse).
 --
 -- Note that the consumer probably doesn't care about the content of the
 -- padding, just that the data is chunked correctly. I figure we care about
 -- correctness here, so it'd be nice to know about the padding well-formedness
 -- (i.e. that it's all nulls).
-instance (Get a, BLen a, KnownNat n) => Get (Refined (NullPadTo n) a) where
+instance (Get a, BLen a, KnownNat n) => Get (NullPadded n a) where
     get = do
         a <- get
         let len = blen a

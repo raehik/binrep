@@ -39,7 +39,7 @@ library
       Binrep.Generic.Internal
       Binrep.Generic.Put
       Binrep.Get
-      Binrep.Predicate.NullPadTo
+      Binrep.Predicate.NullPad
       Binrep.Put
       Binrep.Type.ByteString
       Binrep.Type.Common
