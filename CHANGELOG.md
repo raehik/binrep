@@ -1,3 +1,9 @@
+## 0.2.0 (Unreleased)
+Rewrite.
+
+  * BinaryCodec split into Get and Put, naming moved to cereal's convention
+  * generics (!)
+
 ## 0.1.0 (2022-04-22)
 Initial release.
 
