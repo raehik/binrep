@@ -1,7 +1,13 @@
-{-
+{- | Machine bytestrings.
+
 I mix string and bytestring terminology here due to bad C influences, but this
 module is specifically interested in bytestrings and their encoding. String/text
 encoding is handled in another module.
+
+Note that the length prefix predicate is also defined here... because that's
+just Pascal-style bytestrings, extended to other types. I can't easily put it in
+an orphan module, because we define byte length for *all length-prefixed types*
+in one fell swoop.
 -}
 
 {-# LANGUAGE OverloadedStrings #-}
@@ -24,6 +30,8 @@ import Data.Serialize qualified as Cereal
 import Data.Word
 import Numeric.Natural
 import Data.Typeable ( Typeable, typeRep, Proxy, typeOf )
+import GHC.TypeNats ( KnownNat )
+
 import Control.Monad ( replicateM )
 
 -- | Bytestring representation.
@@ -36,6 +44,9 @@ data Rep
   -- ^ Pascal-style bytestring. Length defined in a prefixing integer of given
   --   size and endianness.
 
+-- | A bytestring using the given representation, stored in the 'Text' type.
+type AsByteString (rep :: Rep) = Refined rep BS.ByteString
+
 getCString :: Cereal.Get BS.ByteString
 getCString = go mempty
   where go buf = do
@@ -43,38 +54,39 @@ getCString = go mempty
               0x00    -> return $ BL.toStrict $ B.toLazyByteString buf
               nonNull -> go $ buf <> B.word8 nonNull
 
-instance BLen (Refined 'C BS.ByteString) where
+instance BLen (AsByteString 'C) where
     blen cbs = fromIntegral $ BS.length (unrefine cbs) + 1
 
-instance Put (Refined 'C BS.ByteString) where
+instance Put (AsByteString 'C) where
     put cbs = do
         Cereal.putByteString $ unrefine cbs
         Cereal.putWord8 0x00
 
 -- | Total shite parsing efficiency. But, to be fair, that's why we don't
 --   serialize arbitrary-length C strings!
-instance Get (Refined 'C BS.ByteString) where
+instance Get (AsByteString 'C) where
     get = reallyUnsafeRefine <$> getCString
 
--- | TODO why safe
-instance (BLen a, itype ~ I 'U size e, BLen itype)
-      => BLen (Refined ('Pascal size e) a) where
-    blen rpa = blen @itype undefined + blen (unrefine rpa)
+-- | Look at this! Fully type safe!! Oh my god!!!!!!
+instance (BLen a, itype ~ I 'U size end, KnownNat (CBLen itype))
+      => BLen (LenPfx size end a) where
+    blen rpa = cblen @itype + blen (unrefine rpa)
 
--- | TODO explain why safe
-instance Put (Refined ('Pascal 'I1 e) BS.ByteString) where
+instance Put (AsByteString ('Pascal 'I1 e)) where
     put rpbs = do
         put @(I 'U 'I1 e) $ fromIntegral $ BS.length pbs
         Cereal.putByteString pbs
       where pbs = unrefine rpbs
-instance Get (Refined ('Pascal 'I1 e) BS.ByteString) where
+
+-- | Safe: The number of bytes we get is limited by the prefix type.
+instance Get (AsByteString ('Pascal 'I1 e)) where
     get = do
         len <- get @(I 'U 'I1 e)
         pbs <- Cereal.getByteString $ fromIntegral len
         return $ reallyUnsafeRefine pbs
 
-deriving anyclass instance PutWith r (Refined ('Pascal 'I1 e) BS.ByteString)
-deriving anyclass instance GetWith r (Refined ('Pascal 'I1 e) BS.ByteString)
+deriving anyclass instance PutWith r (AsByteString ('Pascal 'I1 e))
+deriving anyclass instance GetWith r (AsByteString ('Pascal 'I1 e))
 
 -- TODO finish and explain why safe. actually should use singletons!
 instance PutWith Rep BS.ByteString where
@@ -146,13 +158,19 @@ validateLengthPrefixed p f a
     len  = f a
     max' = maxBound @irep
 
+--------------------------------------------------------------------------------
+
+-- | A value prefixed with its length via an unsigned machine integer using the
+--   given size and endianness.
+type LenPfx (size :: ISize) (end :: Endianness) a = Refined ('Pascal size end) a
+
 instance
     ( Put a
     , irep ~ IRep 'U size
     , Num irep, Integral irep
-    , itype ~ I 'U size e
+    , itype ~ I 'U size end
     , Put itype)
-      => Put (Refined ('Pascal size e) [a]) where
+      => Put (LenPfx size end [a]) where
     put ras = do
         put @itype $ fromIntegral $ length as
         mapM_ (put @a) as
@@ -163,9 +181,9 @@ instance
     ( Get a
     , irep ~ IRep 'U size
     , Num irep, Integral irep
-    , itype ~ I 'U size e
+    , itype ~ I 'U size end
     , Get itype)
-      => Get (Refined ('Pascal size e) [a]) where
+      => Get (LenPfx size end [a]) where
     get = do
         len <- get @itype
         as <- replicateM (fromIntegral len) (get @a)

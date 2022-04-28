@@ -3,7 +3,6 @@ module Binrep.BLen where
 import Binrep.CBLen
 
 import GHC.TypeNats
-import GHC.Exts ( proxy#, Proxy# )
 import Data.Word
 import Data.Int
 
@@ -24,7 +23,7 @@ import Data.Int
 class BLen a where
     blen :: a -> Natural
     default blen :: KnownNat (CBLen a) => a -> Natural
-    blen _ = natVal' (proxy# :: Proxy# (CBLen a))
+    blen _ = cblen @a
 
 -- | @O(n)@
 instance BLen a => BLen [a] where

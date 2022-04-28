@@ -3,6 +3,7 @@
 
 module Binrep.Type.Text
   ( Encoding(..)
+  , AsText
   , Encode, encode
   , Decode(..)
   , encodeToRep
@@ -41,7 +42,11 @@ data Encoding
   | UTF16 Endianness
   | UTF32 Endianness
   | ASCII -- ^ 7-bit
+  | SJIS
     deriving stock (Generic, Typeable, Data, Show, Eq)
+
+-- | A string of a given encoding, stored in the 'Text' type.
+type AsText (enc :: Encoding) = Refined enc Text
 
 -- | Bytestring encoders for text validated for a given encoding.
 class Encode (enc :: Encoding) where
@@ -62,7 +67,7 @@ instance Encode ('UTF32 'BE) where encode' = Text.encodeUtf32BE
 instance Encode ('UTF32 'LE) where encode' = Text.encodeUtf32LE
 
 -- | Encode some validated text.
-encode :: forall (enc :: Encoding). Encode enc => Refined enc Text -> Bytes
+encode :: forall enc. Encode enc => AsText enc -> Bytes
 encode = encode' @enc . unrefine
 
 -- | Any 'Text' value is always valid UTF-8.
@@ -82,7 +87,7 @@ instance Predicate 'ASCII Text where
 
 class Decode (enc :: Encoding) where
     -- | Decode a 'ByteString' to 'Text' with an explicit encoding.
-    decode :: Bytes -> Either String (Refined enc Text)
+    decode :: Bytes -> Either String (AsText enc)
 
 instance Decode 'UTF8  where decode = decodeText Text.decodeUtf8'
 instance Decode ('UTF16 'BE) where decode = decodeText $ wrapUnsafeDecoder Text.decodeUtf16BE
@@ -104,14 +109,14 @@ instance Decode 'ASCII where decode = decodeText $ wrapUnsafeDecoder Text.decode
 --
 -- >>> let Right t = refine @'UTF8 (Text.pack "hi")
 -- >>> :t t
--- t :: Refined 'UTF8 Text
+-- t :: AsText 'UTF8
 -- >>> let Right bs = encodeToRep @'C t
 -- >>> :t bs
 -- bs :: Refined 'C Bytes
 encodeToRep
     :: forall (rep :: Rep) enc
     .  (Encode enc, Predicate rep Bytes)
-    => Refined enc Text
+    => AsText enc
     -> Either RefineException (Refined rep Bytes)
 encodeToRep = refine . encode
 
@@ -120,9 +125,9 @@ encodeToRep = refine . encode
 
 -- | Helper for decoding a 'Bytes' to a 'Text' tagged with its encoding.
 decodeText
-    :: forall (enc :: Encoding) e. Show e
+    :: forall enc e. Show e
     => (Bytes -> Either e Text) -> Bytes
-    -> Either String (Refined enc Text)
+    -> Either String (AsText enc)
 decodeText f = Either.mapBoth show reallyUnsafeRefine . f
 
 -- | Run an unsafe decoder safely.
