@@ -23,6 +23,13 @@ runPut = Cereal.runPut . put
 instance Put a => Put [a] where
     put = mapM_ put
 
+instance (Put a, Put b) => Put (a, b) where
+    put (a, b) = put a *> put b
+
+-- TODO: We have to be very careful if we want to provide an 'Either' instance.
+-- cereal serializes Left=0, Right=1 (and, uh, doesn't check ==1 when parsing
+-- lol. just 0 or Right). Similarly for Maybe (0=Nothing, 1=Just).
+
 -- | Serialize the bytestring as-is.
 --
 -- Careful -- the only way you're going to be able to parse this is to read

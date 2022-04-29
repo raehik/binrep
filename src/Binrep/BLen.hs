@@ -31,6 +31,9 @@ class BLen a where
 instance BLen a => BLen [a] where
     blen = sum . map blen
 
+instance (BLen a, BLen b) => BLen (a, b) where
+    blen (a, b) = blen a + blen b
+
 instance BLen B.ByteString where
     blen = naturalFromPosInt . B.length
 

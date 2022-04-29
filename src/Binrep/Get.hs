@@ -32,6 +32,12 @@ instance Get a => Get [a] where
               True -> return $ reverse $ a : as
               False -> go $ a : as
 
+instance (Get a, Get b) => Get (a, b) where
+    get = do
+        a <- get
+        b <- get
+        return (a, b)
+
 instance Get B.ByteString where
     -- This is inefficient (does a ton of work checking things that don't
     -- matter), but safe and in the library.
