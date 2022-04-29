@@ -33,7 +33,13 @@ instance Get a => Get [a] where
               False -> go $ a : as
 
 instance Get B.ByteString where
-    get = Cereal.getByteStringEOF
+    -- This is inefficient (does a ton of work checking things that don't
+    -- matter), but safe and in the library.
+    get = Cereal.getBytes =<< Cereal.remaining
+    -- I have an alternative that just appends buffer and returns -- still does
+    -- work, just very little. But it might not be correct, and I'm still
+    -- discussing whether they can add it.
+    --get = Cereal.getByteStringEOF
 
 instance Get Word8 where get = Cereal.getWord8
 instance Get  Int8 where get = Cereal.getInt8

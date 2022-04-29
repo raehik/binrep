@@ -15,17 +15,6 @@ packages:
   original:
     git: https://github.com/raehik/refined
     commit: 952e0348348aaf11c8b93c6e1ac6d33a0cbbb6b1
-- completed:
-    name: cereal
-    version: 0.5.8.2
-    git: https://github.com/raehik/cereal
-    pantry-tree:
-      size: 1815
-      sha256: 98f8da3898d7117cfc71de714d9cc07382739b921a0cba81f9c02c7b3d88eeaf
-    commit: 1c2e1fc36bb1cd18eb4843a0998b938464005b01
-  original:
-    git: https://github.com/raehik/cereal
-    commit: 1c2e1fc36bb1cd18eb4843a0998b938464005b01
 snapshots:
 - completed:
     size: 539378
