@@ -69,7 +69,7 @@ dependencies:
 - cereal ^>= 0.5.8.1
 - refined ^>= 0.6.3
 - aeson ^>= 2.0 # only OK because we use refined, which uses aeson
-- text ^>= 2.0 # for a useful decodeASCII
+- text ^>= 1.2
 - either ^>= 5.0.1.1
 
 library:

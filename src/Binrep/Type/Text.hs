@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE CPP #-}
 
 module Binrep.Type.Text
   ( Encoding(..)
@@ -95,9 +96,10 @@ instance Decode ('UTF16 'LE) where decode = decodeText $ wrapUnsafeDecoder Text.
 instance Decode ('UTF32 'BE) where decode = decodeText $ wrapUnsafeDecoder Text.decodeUtf32BE
 instance Decode ('UTF32 'LE) where decode = decodeText $ wrapUnsafeDecoder Text.decodeUtf32LE
 
--- Note that before @text-2.0@, @decodeASCII@ generated a warning and simply
--- pointed to @decodeUtf8@. So careful weakening that constraint.
+-- Pre-@text-2.0@, @decodeASCII@ generated a warning and ran @decodeUtf8@.
+#if MIN_VERSION_text(2,0,0)
 instance Decode 'ASCII where decode = decodeText $ wrapUnsafeDecoder Text.decodeASCII
+#endif
 
 --------------------------------------------------------------------------------
 -- Helpers
