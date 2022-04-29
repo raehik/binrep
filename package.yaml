@@ -76,3 +76,16 @@ library:
   source-dirs: src
   ghc-options:
   - -Wall
+
+tests:
+  spec:
+    source-dirs: test
+    main: Spec.hs
+    build-tools:
+    - hspec-discover >= 2.7 && < 2.10
+    dependencies:
+    - binrep
+    - hspec >= 2.7 && < 2.10
+    - QuickCheck ^>= 2.14.2
+    - quickcheck-instances ^>= 0.3.26
+    - generic-random ^>= 1.5.0.1

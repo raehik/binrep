@@ -92,3 +92,61 @@ library
     , refined >=0.6.3 && <0.7
     , text ==1.2.*
   default-language: Haskell2010
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      ArbitraryOrphans
+      LawsSpec
+      Paths_binrep
+  hs-source-dirs:
+      test
+  default-extensions:
+      EmptyCase
+      FlexibleContexts
+      FlexibleInstances
+      InstanceSigs
+      MultiParamTypeClasses
+      PolyKinds
+      LambdaCase
+      DerivingStrategies
+      StandaloneDeriving
+      DeriveAnyClass
+      DeriveGeneric
+      DeriveDataTypeable
+      DeriveFunctor
+      DeriveFoldable
+      DeriveTraversable
+      DeriveLift
+      ImportQualifiedPost
+      StandaloneKindSignatures
+      DerivingVia
+      RoleAnnotations
+      TypeApplications
+      DataKinds
+      TypeFamilies
+      TypeOperators
+      BangPatterns
+      GADTs
+      DefaultSignatures
+      RankNTypes
+      UndecidableInstances
+      MagicHash
+      ScopedTypeVariables
+  build-tool-depends:
+      hspec-discover:hspec-discover >=2.7 && <2.10
+  build-depends:
+      QuickCheck >=2.14.2 && <2.15
+    , aeson ==2.0.*
+    , base >=4.14 && <5
+    , binrep
+    , bytestring ==0.11.*
+    , cereal >=0.5.8.1 && <0.6
+    , either >=5.0.1.1 && <5.1
+    , generic-random >=1.5.0.1 && <1.6
+    , hspec >=2.7 && <2.10
+    , quickcheck-instances >=0.3.26 && <0.4
+    , refined >=0.6.3 && <0.7
+    , text ==1.2.*
+  default-language: Haskell2010

@@ -14,6 +14,8 @@ import Binrep.Generic.CBLen
 
 import Numeric ( readHex )
 
+-- TODO better error handling (see what aeson does)
+
 -- | Obtain the tag for a sum type value by applying a function to the
 --   constructor name, and reading the result as a hexadecimal number.
 cSumTagHex :: Integral a => (String -> String) -> String -> a
