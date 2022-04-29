@@ -2,12 +2,10 @@ resolver: nightly-2022-03-30
 packages: [.]
 
 extra-deps:
-- text-2.0@sha256:86e64bc76fefb8f0f6529d28ddf24b2a29d43591a8b9b7c7094f481a0db2fb7d,7788
-
 # currently depends on my predicate polykind fix
 - git: https://github.com/raehik/refined
   commit: 952e0348348aaf11c8b93c6e1ac6d33a0cbbb6b1
 
-# my EOF getter
+# currently depends on my EOF getter
 - git: https://github.com/raehik/cereal
   commit: 1c2e1fc36bb1cd18eb4843a0998b938464005b01
