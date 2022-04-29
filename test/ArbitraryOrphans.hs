@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+
 module ArbitraryOrphans() where
 
 import Test.QuickCheck ( Arbitrary )

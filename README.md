@@ -41,4 +41,9 @@ getConstructorTag = read . drop 1
 
 -- >>> getConstructorTag "B1"
 -- 1
+
+-- Or use our generic helper, which takes hex values:
+--
+-- >>> cSumTagHex @Word8 (drop . 1) "BFF"
+-- 255
 ```

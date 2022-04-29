@@ -2,7 +2,10 @@
 Rewrite.
 
   * BinaryCodec split into Get and Put, naming moved to cereal's convention
-  * generics (!)
+  * CBLen for constant length types (!)
+  * generics (!!)
+  * tests (including for generic derivers)
+  * the fastest `Int {- positive -} -> Natural` you ever did see
 
 ## 0.1.0 (2022-04-22)
 Initial release.

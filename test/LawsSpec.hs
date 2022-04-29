@@ -36,7 +36,7 @@ type W8BE = (I 'U 'I8 'BE)
 
 data D
   = D01Bla Word8 W1 W8BE
-  | D23    B.ByteString
+  | D23    W2LE B.ByteString
   | DFF1a2b
     deriving (Generic, Eq, Show)
 
