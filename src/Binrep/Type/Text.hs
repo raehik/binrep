@@ -15,7 +15,7 @@ import Binrep.Type.ByteString ( Rep )
 import Refined
 import Refined.Unsafe
 
-import Data.ByteString qualified as BS
+import Data.ByteString qualified as B
 import Data.Text qualified as Text
 import Data.Text ( Text )
 import Data.Char qualified as Char
@@ -30,7 +30,7 @@ import System.IO.Unsafe qualified
 import Control.Exception qualified
 import Data.Text.Encoding.Error qualified
 
-type Bytes = BS.ByteString
+type Bytes = B.ByteString
 
 -- | Character encoding.
 --

@@ -1,8 +1,10 @@
 module Binrep.BLen where
 
 import Binrep.CBLen
+import Binrep.Util
 
 import GHC.TypeNats
+import Data.ByteString qualified as B
 import Data.Word
 import Data.Int
 
@@ -28,6 +30,9 @@ class BLen a where
 -- | @O(n)@
 instance BLen a => BLen [a] where
     blen = sum . map blen
+
+instance BLen B.ByteString where
+    blen = naturalFromPosInt . B.length
 
 deriving anyclass instance BLen Word8
 deriving anyclass instance BLen  Int8
