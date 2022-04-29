@@ -3,7 +3,7 @@ module Binrep.Get
   , GetWith(..), runGetWith
   ) where
 
-import Data.ByteString qualified as BS
+import Data.ByteString qualified as B
 import Data.Serialize.Get qualified as Cereal
 
 import Data.Word
@@ -15,9 +15,9 @@ class Get a where
 
 -- | Run the parser.
 --
--- If parsing succeeds, the remaining unconsumed 'BS.ByteString' (potentially
--- 'BS.empty') is returned.
-runGet :: Get a => BS.ByteString -> Either String (a, BS.ByteString)
+-- If parsing succeeds, the remaining unconsumed 'B.ByteString' (potentially
+-- 'B.empty') is returned.
+runGet :: Get a => B.ByteString -> Either String (a, B.ByteString)
 runGet = runGetCereal get
 
 -- | Parse heterogeneous lists in order. No length indicator, so either fails or
@@ -31,6 +31,9 @@ instance Get a => Get [a] where
             Cereal.isEmpty >>= \case
               True -> return $ reverse $ a : as
               False -> go $ a : as
+
+instance Get B.ByteString where
+    get = Cereal.getByteStringEOF
 
 instance Get Word8 where get = Cereal.getWord8
 instance Get  Int8 where get = Cereal.getInt8
@@ -59,18 +62,18 @@ class GetWith r a where
 deriving anyclass instance Get a => GetWith r [a]
 
 -- | Run the parser with the given environment.
-runGetWith :: GetWith r a => r -> BS.ByteString -> Either String (a, BS.ByteString)
+runGetWith :: GetWith r a => r -> B.ByteString -> Either String (a, B.ByteString)
 runGetWith = runGetCereal . getWith
 
 --------------------------------------------------------------------------------
 
 -- | Proper 'Cereal.Get' runner, because the library doesn't come with one.
-runGetCereal :: Cereal.Get a -> BS.ByteString -> Either String (a, BS.ByteString)
+runGetCereal :: Cereal.Get a -> B.ByteString -> Either String (a, B.ByteString)
 runGetCereal f = handleCerealResult . Cereal.runGetPartial f
 
 -- | Helper for unwrapping 'Cereal.Get.Result's.
-handleCerealResult :: Cereal.Result a -> Either String (a, BS.ByteString)
+handleCerealResult :: Cereal.Result a -> Either String (a, B.ByteString)
 handleCerealResult = \case
   Cereal.Done a bs'  -> Right (a, bs')
   Cereal.Fail e _bs' -> Left $ "cereal error: "<>e
-  Cereal.Partial f   -> handleCerealResult $ f BS.empty -- cereal moves to Fail
+  Cereal.Partial f   -> handleCerealResult $ f B.empty -- cereal moves to Fail

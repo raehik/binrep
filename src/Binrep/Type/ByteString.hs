@@ -23,7 +23,7 @@ import Binrep.Util
 import Refined
 import Refined.Unsafe
 
-import Data.ByteString qualified as BS
+import Data.ByteString qualified as B
 import Data.ByteString.Lazy qualified as BL
 import Data.ByteString.Builder qualified as B
 import Data.Serialize qualified as Cereal
@@ -45,9 +45,9 @@ data Rep
   --   size and endianness.
 
 -- | A bytestring using the given representation, stored in the 'Text' type.
-type AsByteString (rep :: Rep) = Refined rep BS.ByteString
+type AsByteString (rep :: Rep) = Refined rep B.ByteString
 
-getCString :: Cereal.Get BS.ByteString
+getCString :: Cereal.Get B.ByteString
 getCString = go mempty
   where go buf = do
             Cereal.getWord8 >>= \case
@@ -55,7 +55,7 @@ getCString = go mempty
               nonNull -> go $ buf <> B.word8 nonNull
 
 instance BLen (AsByteString 'C) where
-    blen cbs = fromIntegral $ BS.length (unrefine cbs) + 1
+    blen cbs = naturalFromPosInt (B.length (unrefine cbs)) + 1
 
 instance Put (AsByteString 'C) where
     put cbs = do
@@ -74,7 +74,7 @@ instance (BLen a, itype ~ I 'U size end, KnownNat (CBLen itype))
 
 instance Put (AsByteString ('Pascal 'I1 e)) where
     put rpbs = do
-        put @(I 'U 'I1 e) $ fromIntegral $ BS.length pbs
+        put @(I 'U 'I1 e) $ fromIntegral $ B.length pbs
         Cereal.putByteString pbs
       where pbs = unrefine rpbs
 
@@ -89,7 +89,7 @@ deriving anyclass instance PutWith r (AsByteString ('Pascal 'I1 e))
 deriving anyclass instance GetWith r (AsByteString ('Pascal 'I1 e))
 
 -- TODO finish and explain why safe. actually should use singletons!
-instance PutWith Rep BS.ByteString where
+instance PutWith Rep B.ByteString where
     putWith strRep bs =
         case strRep of
           C -> case refine @'C bs of
@@ -102,28 +102,28 @@ instance PutWith Rep BS.ByteString where
                 then Left "bytestring too long for configured static-size length prefix"
                 else Right $ B.byteString bs
               _ -> undefined
-      where len = BS.length bs
+      where len = B.length bs
 
 -- TODO finish and explain why safe. actually should use singletons!
-instance GetWith Rep BS.ByteString where
+instance GetWith Rep B.ByteString where
     getWith = \case C -> getCString
                     Pascal _size _e -> undefined
 
 -- | A C-style bytestring must not contain any null bytes.
-instance Predicate 'C BS.ByteString where
+instance Predicate 'C B.ByteString where
     validate p bs
-     | BS.any (== 0x00) bs = throwRefineOtherException (typeRep p) $
+     | B.any (== 0x00) bs = throwRefineOtherException (typeRep p) $
         "null byte not permitted in in C-style bytestring"
      | otherwise = success
 
--- | Is the given 'BS.ByteString' short enough to allow placing its length in
---   the given size prefix?
+-- | Is the given 'B.ByteString' short enough to allow placing its length in the
+--   given size prefix?
 instance
     ( irep ~ IRep 'U size
     , Bounded irep, Integral irep
     , Show irep, Typeable size, Typeable e
-    ) => Predicate ('Pascal size e) BS.ByteString where
-    validate p = validateLengthPrefixed @size p (fromIntegral . BS.length)
+    ) => Predicate ('Pascal size e) B.ByteString where
+    validate p = validateLengthPrefixed @size p (fromIntegral . B.length)
 
 -- | Is the given list-like short enough to allow placing its length in the
 --   given size prefix?
