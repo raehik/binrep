@@ -88,6 +88,8 @@ instance Predicate 'ASCII Text where
 
 class Decode (enc :: Encoding) where
     -- | Decode a 'ByteString' to 'Text' with an explicit encoding.
+    --
+    -- This is intended to be used with visible type applications.
     decode :: Bytes -> Either String (AsText enc)
 
 instance Decode 'UTF8  where decode = decodeText Text.decodeUtf8'
