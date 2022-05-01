@@ -33,6 +33,7 @@ library
       Binrep.CBLen
       Binrep.Example
       Binrep.Example.Tiff
+      Binrep.Extra.HexByteString
       Binrep.Generic
       Binrep.Generic.BLen
       Binrep.Generic.CBLen
