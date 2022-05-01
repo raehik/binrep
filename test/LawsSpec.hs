@@ -10,6 +10,7 @@ import Test.QuickCheck
 import ArbitraryOrphans()
 
 import Binrep
+import Binrep.Generic
 import Binrep.Type.Int
 import Binrep.Type.Common ( Endianness(..) )
 import Data.Word ( Word8 )

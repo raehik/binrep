@@ -62,6 +62,9 @@ binrep's generic deriving makes very few decisions:
   * Sum types are encoded via a tag obtained from the constructor names.
     * It's the same approach as aeson, with a bit more flexibility: see below.
 
+Due to sum type handling (and so that classes can stay independent from their
+generic derivers), you must provide a deriver config.
+
 ### Generic sum type encoding
 Data types with multiple constructors are handled by first encoding a "tag
 field", the value of which then indicates which constructor to use. Here's the

@@ -30,12 +30,11 @@ instance (GGet l, GGet r) => GGet (l :*: r) where
                   r <- gget cfg
                   return $ l :*: r
 
--- | Constructor sums are differentiated by a prefixing tag byte of constant
---   size. By enforcing constant size, we prevent parsing ambiguity.
+-- | Constructor sums are differentiated by a prefix tag.
 instance GGetSum (l :+: r) => GGet (l :+: r) where
     gget cfg = do
         tag <- get
-        case ggetSum cfg tag of
+        case ggetsum cfg tag of
           Just parser -> parser
           Nothing -> fail $ "invalid sum type tag: "<>showHex tag ""
 
@@ -50,16 +49,16 @@ instance GGet f => GGet (M1 i d f) where
 --------------------------------------------------------------------------------
 
 class GGetSum f where
-    ggetSum :: (Get w, Integral w, Show w) => Cfg w -> w -> Maybe (Cereal.Get (f a))
+    ggetsum :: (Get w, Integral w, Show w) => Cfg w -> w -> Maybe (Cereal.Get (f a))
 
 instance (GGetSum l, GGetSum r) => GGetSum (l :+: r) where
-    ggetSum cfg tag = l <|> r
+    ggetsum cfg tag = l <|> r
       where
-        l = fmap L1 <$> ggetSum cfg tag
-        r = fmap R1 <$> ggetSum cfg tag
+        l = fmap L1 <$> ggetsum cfg tag
+        r = fmap R1 <$> ggetsum cfg tag
 
 -- | Bad. Need to wrap this like SumFromString in Aeson.
 instance (GGet r, Constructor c) => GGetSum (C1 c r) where
-    ggetSum cfg tag
+    ggetsum cfg tag
      | tag == (cSumTag cfg) (conName' @c) = Just $ gget cfg
      | otherwise = Nothing

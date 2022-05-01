@@ -26,12 +26,9 @@ instance Put c => GPut (K1 i c) where
 instance (GPut l, GPut r) => GPut (l :*: r) where
     gput cfg (l :*: r) = gput cfg l *> gput cfg r
 
--- | Constructor sums are differentiated by a prefixing tag byte of constant
---   size. By enforcing constant size, we prevent parsing ambiguity.
+-- | Constructor sums are differentiated by a prefix tag.
 instance (GPutSum (l :+: r), GetConName (l :+: r)) => GPut (l :+: r) where
-    gput cfg a = do
-        put $ cSumTag cfg $ getConName a
-        gputSum cfg a
+    gput = gputsum
 
 -- | Refuse to derive instance for void datatype.
 instance TypeError GErrRefuseVoid => GPut V1 where
@@ -44,14 +41,16 @@ instance GPut f => GPut (M1 i d f) where
 --------------------------------------------------------------------------------
 
 class GPutSum f where
-    gputSum :: Put w => Cfg w -> Cereal.Putter (f a)
+    gputsum :: Put w => Cfg w -> Cereal.Putter (f a)
 
 instance (GPutSum l, GPutSum r) => GPutSum (l :+: r) where
-    gputSum cfg = \case L1 a -> gputSum cfg a
-                        R1 a -> gputSum cfg a
+    gputsum cfg = \case L1 a -> gputsum cfg a
+                        R1 a -> gputsum cfg a
 
 instance (GPut r, Constructor c) => GPutSum (C1 c r) where
-    gputSum cfg = gput cfg . unM1
+    gputsum cfg x = do
+        put ((cSumTag cfg) (conName' @c))
+        gput cfg $ unM1 x
 
 ---
 
