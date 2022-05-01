@@ -55,7 +55,7 @@ getCString = go mempty
               nonNull -> go $ buf <> B.word8 nonNull
 
 instance BLen (AsByteString 'C) where
-    blen cbs = naturalFromPosInt (B.length (unrefine cbs)) + 1
+    blen cbs = unsafePosIntToNat (B.length (unrefine cbs)) + 1
 
 instance Put (AsByteString 'C) where
     put cbs = do

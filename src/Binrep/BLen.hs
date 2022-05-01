@@ -35,7 +35,7 @@ instance (BLen a, BLen b) => BLen (a, b) where
     blen (a, b) = blen a + blen b
 
 instance BLen B.ByteString where
-    blen = naturalFromPosInt . B.length
+    blen = unsafePosIntToNat . B.length
 
 deriving anyclass instance BLen Word8
 deriving anyclass instance BLen  Int8

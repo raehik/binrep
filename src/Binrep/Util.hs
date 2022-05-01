@@ -14,5 +14,5 @@ tshow = Text.pack . show
 -- This is intended for wrapping the output of 'length' functions.
 --
 -- underflows if you call it with a negative 'Int' :)
-naturalFromPosInt :: Int -> Natural
-naturalFromPosInt (I# i#) = NS (int2Word# i#)
+unsafePosIntToNat :: Int -> Natural
+unsafePosIntToNat (I# i#) = NS (int2Word# i#)
