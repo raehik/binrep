@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module LawsSpec ( spec ) where
+module Binrep.LawsSpec ( spec ) where
 
 import Test.Hspec
 import Test.Hspec.QuickCheck
