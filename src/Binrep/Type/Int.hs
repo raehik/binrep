@@ -2,6 +2,7 @@ module Binrep.Type.Int where
 
 import Binrep
 import Binrep.Type.Common ( Endianness(..) )
+
 import Data.Word
 import Data.Int
 import Data.Aeson

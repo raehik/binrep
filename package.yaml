@@ -68,9 +68,10 @@ dependencies:
 - bytestring ^>= 0.11
 - cereal ^>= 0.5.8.1
 - refined ^>= 0.6.3
-- aeson ^>= 2.0 # only OK because we use refined, which uses aeson
+- aeson ^>= 2.0 # because we use refined which uses it (also for HexByteString)
 - text ^>= 1.2
 - either ^>= 5.0.1.1
+- megaparsec ^>= 9.2.0 # for HexByteString
 
 library:
   source-dirs: src
