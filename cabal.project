@@ -1,0 +1,7 @@
+packages: .
+
+-- currently depends on my predicate polykind fix
+source-repository-package
+  type: git
+  location: https://github.com/raehik/refined
+  tag: 952e0348348aaf11c8b93c6e1ac6d33a0cbbb6b1
