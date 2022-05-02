@@ -1,4 +1,7 @@
 # To-dos
+## Simple
+  * properly test the default `AsByteString 'C` sum tag handler (!)
+
 ## Generate (human-readable) schema from type
 I think I do this by writing yet another typeclass, filling it out for my
 primitives, then writing yet another generic typeclass. But I'd like to make
