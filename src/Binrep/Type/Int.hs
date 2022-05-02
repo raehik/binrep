@@ -41,13 +41,15 @@ deriving via (IRep sign size) instance Real     (IRep sign size) => Real     (I 
 deriving via (IRep sign size) instance Enum     (IRep sign size) => Enum     (I sign size e)
 deriving via (IRep sign size) instance Integral (IRep sign size) => Integral (I sign size e)
 
--- | Machine integer sign
+-- | Machine integer sign.
 data ISign
   = S -- ^   signed
   | U -- ^ unsigned
+    deriving stock (Generic, Typeable, Data, Show, Eq)
 
 -- | Machine integer size in number of bytes.
 data ISize = I1 | I2 | I4 | I8
+    deriving stock (Generic, Typeable, Data, Show, Eq)
 
 -- | Grouping for matching a signedness and size to a Haskell integer data type.
 type family IRep (sign :: ISign) (size :: ISize) where
