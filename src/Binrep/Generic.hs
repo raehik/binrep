@@ -1,12 +1,12 @@
 -- | Derive 'BLen', 'Put', 'Get' and 'CBLen' instances generically.
 
 module Binrep.Generic
-  ( Binrep.Generic.Internal.Cfg(..)
-  , cSumTagHex, cSumTagNullTerm
+  ( Cfg(..)
+  , cSumTagHex, cSumTagNullTerm, cDef
   , blenGeneric, putGeneric, getGeneric, CBLenGeneric
   ) where
 
-import Binrep.Generic.Internal qualified
+import Binrep.Generic.Internal
 import Binrep.Generic.BLen
 import Binrep.Generic.Put
 import Binrep.Generic.Get
@@ -44,3 +44,6 @@ forceRead = \case []        -> error "no parse"
 -- fairly certain.
 cSumTagNullTerm :: String -> AsByteString 'C
 cSumTagNullTerm = reallyUnsafeRefine . Text.encodeUtf8 . Text.pack
+
+cDef :: Cfg (AsByteString 'C)
+cDef = Cfg { cSumTag = cSumTagNullTerm }
