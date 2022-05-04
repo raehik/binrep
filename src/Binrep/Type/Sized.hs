@@ -1,7 +1,7 @@
 -- | Constant-size data.
 --
 -- This is a predicate and a type, but it's really intended for constant-size
--- bytestrings. It's just easier to define over more types.
+-- bytestrings. It's just easier to define over all types.
 
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -17,7 +17,6 @@ import GHC.TypeNats
 import Data.Typeable
 import GHC.Exts ( proxy#, Proxy# )
 import Data.Serialize qualified as Cereal
-import Data.ByteString qualified as B
 
 data Size (n :: Natural)
 
@@ -40,10 +39,11 @@ instance (BLen a, KnownNat n) => Predicate (Size n) a where
 instance Put a => Put (Sized n a) where
     put = put . unrefine
 
--- TODO explain safety
-instance KnownNat n => Get (Sized n B.ByteString) where
+-- | Safety: 'Cereal.isolate' requires that the parser consumes all bytes
+--   allocated, so if successful, we know size exactly
+instance (Get a, KnownNat n) => Get (Sized n a) where
     get = do
-        bs <- Cereal.getBytes $ fromIntegral n
-        return $ reallyUnsafeRefine bs
+        a <- Cereal.isolate (fromIntegral n) get
+        return $ reallyUnsafeRefine a
       where
         n = natVal' (proxy# :: Proxy# n)

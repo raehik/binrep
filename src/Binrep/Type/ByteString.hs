@@ -10,8 +10,12 @@ an orphan module, because we define byte length for *all length-prefixed types*
 in one fell swoop.
 -}
 
+-- TODO redocument. pretty all over the place. putting pascal-styles is defined
+-- for all @a@ via a helper typeclass PLen. getting can't be, so we just give
+-- for bytestrings and @[a]@. blen pascal is still for all @a@ (easy). and
+-- predicate also works for all @a@ via PLen. kinda complicated
+
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE AllowAmbiguousTypes #-}
 
 module Binrep.Type.ByteString where
 
@@ -29,8 +33,9 @@ import Data.ByteString.Builder qualified as B
 import Data.Serialize qualified as Cereal
 import Data.Word
 import Numeric.Natural
-import Data.Typeable ( typeRep, Proxy, typeOf )
+import Data.Typeable ( typeRep, typeOf )
 import GHC.TypeNats ( KnownNat )
+import Data.Foldable qualified as Foldable
 
 import Control.Monad ( replicateM )
 
@@ -76,22 +81,6 @@ instance (BLen a, itype ~ I 'U size end, KnownNat (CBLen itype))
       => BLen (LenPfx size end a) where
     blen rpa = cblen @itype + blen (unrefine rpa)
 
-instance Put (AsByteString ('Pascal 'I1 e)) where
-    put rpbs = do
-        put @(I 'U 'I1 e) $ fromIntegral $ B.length pbs
-        Cereal.putByteString pbs
-      where pbs = unrefine rpbs
-
--- | Safe: The number of bytes we get is limited by the prefix type.
-instance Get (AsByteString ('Pascal 'I1 e)) where
-    get = do
-        len <- get @(I 'U 'I1 e)
-        pbs <- Cereal.getByteString $ fromIntegral len
-        return $ reallyUnsafeRefine pbs
-
-deriving anyclass instance PutWith r (AsByteString ('Pascal 'I1 e))
-deriving anyclass instance GetWith r (AsByteString ('Pascal 'I1 e))
-
 -- TODO finish and explain why safe. actually should use singletons!
 instance PutWith Rep B.ByteString where
     putWith strRep bs =
@@ -120,47 +109,22 @@ instance Predicate 'C B.ByteString where
         "null byte not permitted in in C-style bytestring"
      | otherwise = success
 
--- | Is the given 'B.ByteString' short enough to allow placing its length in the
---   given size prefix?
 instance
     ( irep ~ IRep 'U size
     , Bounded irep, Integral irep
-    , Show irep, Typeable size, Typeable e
-    ) => Predicate ('Pascal size e) B.ByteString where
-    validate p = validateLengthPrefixed @size p (fromIntegral . B.length)
-
--- | Is the given list-like short enough to allow placing its length in the
---   given size prefix?
---
--- Note that we don't care about the elements inside or their size.
-instance
-    ( irep ~ IRep 'U size
-    , Bounded irep, Integral irep
-    , Foldable t
-    , Show irep, Typeable size, Typeable e, Typeable t, Typeable a
-    ) => Predicate ('Pascal size e) (t a) where
-    validate p = validateLengthPrefixed @size p (fromIntegral . length)
-
--- | Instance helper. We cheat with 'Typeable's to obtain type tags without
---   asking the user explicitly. It's good enough, and refined uses them anyway.
-validateLengthPrefixed
-    :: forall size irep p a
-    .  ( irep ~ IRep 'U size
-       , Bounded irep, Integral irep
-       , Show irep, Typeable size, Typeable p, Typeable a
-       )
-    => Proxy p
-    -> (a -> Natural) -> a -> Maybe RefineException
-validateLengthPrefixed p f a
- | len > fromIntegral max'
-    = throwRefineOtherException (typeRep p) $
-          tshow (typeOf a)
-        <>" too long for given length prefix type: "
-        <>tshow len<>" > "<>tshow max'
- | otherwise = success
-  where
-    len  = f a
-    max' = maxBound @irep
+    , PLen a
+    , Show irep, Typeable size, Typeable e, Typeable a
+    ) => Predicate ('Pascal size e) a where
+    validate p a
+     | len > fromIntegral max'
+        = throwRefineOtherException (typeRep p) $
+              tshow (typeOf a)
+            <>" too long for given length prefix type: "
+            <>tshow len<>" > "<>tshow max'
+     | otherwise = success
+      where
+        len  = plen a
+        max' = maxBound @irep
 
 --------------------------------------------------------------------------------
 
@@ -170,25 +134,41 @@ type LenPfx (size :: ISize) (end :: Endianness) a = Refined ('Pascal size end) a
 
 instance
     ( Put a
+    , PLen a
     , irep ~ IRep 'U size
-    , Num irep, Integral irep
+    , Integral irep
     , itype ~ I 'U size end
     , Put itype)
-      => Put (LenPfx size end [a]) where
-    put ras = do
-        put @itype $ fromIntegral $ length as
-        mapM_ (put @a) as
-      where as = unrefine ras
+      => Put (LenPfx size end a) where
+    put ra = do
+        put @itype $ fromIntegral $ plen a
+        put a
+      where a = unrefine ra
 
 -- TODO why safe
 instance
     ( Get a
     , irep ~ IRep 'U size
-    , Num irep, Integral irep
+    , Integral irep
     , itype ~ I 'U size end
     , Get itype)
       => Get (LenPfx size end [a]) where
     get = do
         len <- get @itype
-        as <- replicateM (fromIntegral len) (get @a)
+        as <- replicateM (fromIntegral len) get
         return $ reallyUnsafeRefine as
+
+instance (irep ~ IRep 'U size, Integral irep, itype ~ I 'U size end, Get itype) => Get (LenPfx size end B.ByteString) where
+    get = do
+        len <- get @itype
+        a <- Cereal.isolate (fromIntegral len) get
+        return $ reallyUnsafeRefine a
+
+-- | The "length" of a value for Pascal-style length prefixing.
+class PLen a where plen :: a -> Natural
+
+-- | Bytestrings are byte-wise.
+instance PLen B.ByteString where plen = blen
+
+-- | List-likes are element-wise.
+instance Foldable t => PLen (t a) where plen = unsafePosIntToNat . Foldable.length
