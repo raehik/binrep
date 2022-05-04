@@ -3,6 +3,10 @@
 -- This is primarily for aeson and when we want better 'show'ing of non-textual
 -- bytestrings. It's not really binrep-related, but it needs _somewhere_ to go
 -- and my projects that need it usually also touch binrep, so here it is.
+--
+-- Sadly, we can't use it to make aeson print integers as hex literals. It only
+-- deals in Scientifics, and if we tried printing them as strings, it would
+-- quote them. I need a YAML-like with better literals...
 
 module Binrep.Extra.HexByteString where
 
@@ -22,6 +26,8 @@ import Text.Megaparsec.Char qualified as MC
 import Data.Void
 
 import Data.Aeson
+
+-- TODO could add some integer instances to print them as hex too
 
 -- No harm in being polymorphic over the byte representation.
 newtype Hex a = Hex { unHex :: a }

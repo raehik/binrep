@@ -6,9 +6,9 @@ cabal-version: 1.12
 
 name:           binrep
 version:        0.2.0
-synopsis:       Encode precise binary representations directly in types.
+synopsis:       Encode precise binary representations directly in types
 description:    Please see README.md.
-category:       Data
+category:       Data, Serialization
 homepage:       https://github.com/raehik/binrep#readme
 bug-reports:    https://github.com/raehik/binrep/issues
 author:         Ben Orchard
@@ -50,6 +50,7 @@ library
       Binrep.Type.Int
       Binrep.Type.Magic
       Binrep.Type.Magic.UTF8
+      Binrep.Type.Sized
       Binrep.Type.Text
       Binrep.Util
   other-modules:

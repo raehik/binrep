@@ -2,10 +2,7 @@
 
 module Binrep.Predicate.NullPad where
 
-import Binrep.BLen
-import Binrep.CBLen
-import Binrep.Put
-import Binrep.Get
+import Binrep
 import Binrep.Util ( tshow )
 
 import Refined
