@@ -54,6 +54,40 @@ out of binrep's hands, but check out
 derivers for refining and unrefining a given data type. (You'll need my
 [refined](https://github.com/raehik/refined) fork too.)
 
+### Similar projects
+#### Kaitai Struct
+[Kaitai Struct](https://kaitai.io/) is a wonderful declarative parser generator
+project. They bolt an expression language and a whole lot of binary cleverness
+on top of a nice YAML schema. It comes with an IDE, a visualizer, and you can
+compile schemas down to parsers for various different languages (no Haskell...).
+
+Design principles like their fancy absolute offset handling and language
+neutrality have stunted serialization support. Though it's more like they have
+such powerful parsing that they can parse formats that can't be edited and
+re-serialized naively, like archives with file indexes. For proper handling, one
+should store a file table, and serialization generates the index. So in reverse,
+you would want to combine them. But it's a bit program-y. In binrep, you are in
+a programming language, so it's less of a problem... but I'm not sure if we can
+be very efficient at absolute offset stuff.
+
+Realistically, Kaitai Struct is the best decision for fast iteration on
+reversing unknown data. binrep is useful for loading data straight into Haskell
+for further processing, especially converting between simpler formats.
+
+#### Wuffs
+[Wuffs](https://github.com/google/wuffs) is a crazy exploration into safe
+low-level code via strong typing. You have to annotate every possibly dangerous
+statement with a proof of safety. It's a tedious, explicit, very safe and very
+fast imperative language for defining parsers and serializers.
+
+Wuffs is more a codec engineer's tool than a reverse engineer's one. binrep
+isn't really interested in speed, and being a Haskell library we get to focus on
+defining types and their composition in a declarative & functional manner. As
+such, we get to define more useful things quicker using binrep.
+
+Check out Wuffs if you need to write a bunch of codecs and they really, really
+need to be both fast and safe. The trade-off is, of course, your time.
+
 ## Generic binary representation
 binrep's generic deriving makes very few decisions:
 
