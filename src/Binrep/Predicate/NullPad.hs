@@ -13,6 +13,7 @@ import GHC.Natural ( minusNaturalMaybe )
 import GHC.Exts ( proxy#, Proxy# )
 import Data.Typeable
 import Data.Serialize qualified as Cereal
+import Mason.Builder qualified as Mason
 import Data.ByteString qualified as BS
 
 data NullPad (n :: Natural)
@@ -34,12 +35,12 @@ instance (BLen a, KnownNat n) => Predicate (NullPad n) a where
         n = natVal' (proxy# :: Proxy# n)
         len = blen a
 
+-- TODO cleanup
 instance (Put a, BLen a, KnownNat n) => Put (NullPadded n a) where
-    put wrnpa = do
+    put wrnpa =
         let npa = unrefine wrnpa
-        put npa
-        let paddingLength = n - blen npa
-        Cereal.putByteString $ BS.replicate (fromIntegral paddingLength) 0x00
+            paddingLength = n - blen npa
+         in put npa <> Mason.byteString (BS.replicate (fromIntegral paddingLength) 0x00)
       where
         n = natVal' (proxy# :: Proxy# n)
 

@@ -83,7 +83,8 @@ fast imperative language for defining parsers and serializers.
 Wuffs is more a codec engineer's tool than a reverse engineer's one. binrep
 isn't really interested in speed, and being a Haskell library we get to focus on
 defining types and their composition in a declarative & functional manner. As
-such, we get to define more useful things quicker using binrep.
+such, we get to define more useful things quicker using binrep. Though we share
+many core ideas, such as refinement types.
 
 Check out Wuffs if you need to write a bunch of codecs and they really, really
 need to be both fast and safe. The trade-off is, of course, your time.

@@ -72,6 +72,7 @@ dependencies:
 - text ^>= 1.2
 - either ^>= 5.0.1.1
 - megaparsec ^>= 9.2.0 # for HexByteString
+- mason ^>= 0.2.5
 
 library:
   source-dirs: src
