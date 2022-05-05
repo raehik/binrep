@@ -52,8 +52,7 @@ instance Get Tiff where
 
 instance Put Tiff where
     put (Tiff (body :: TiffBody end)) = do
-        put $ tiffHeader @end
-        put body
+        put (tiffHeader @end) <> put body
 
 class TiffHeader (end :: Endianness) where tiffHeader :: B.ByteString
 instance TiffHeader 'LE where tiffHeader = B.pack [0x49, 0x49]

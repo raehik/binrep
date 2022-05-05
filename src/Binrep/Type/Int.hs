@@ -7,6 +7,7 @@ import Data.Word
 import Data.Int
 import Data.Aeson
 import Data.Serialize qualified as Cereal
+import Mason.Builder qualified as Mason
 
 import GHC.Generics ( Generic )
 import Data.Data ( Typeable, Data )
@@ -75,29 +76,29 @@ instance Get (I 'U 'I1 e) where get = I <$> get
 instance Put (I 'S 'I1 e) where put = put . getI
 instance Get (I 'S 'I1 e) where get = I <$> get
 
-instance Put (I 'U 'I2 'BE) where put = Cereal.putWord16be . getI
+instance Put (I 'U 'I2 'BE) where put (I i) = Mason.word16BE i
 instance Get (I 'U 'I2 'BE) where get = I <$> Cereal.getWord16be
-instance Put (I 'U 'I2 'LE) where put = Cereal.putWord16le . getI
+instance Put (I 'U 'I2 'LE) where put (I i) = Mason.word16LE i
 instance Get (I 'U 'I2 'LE) where get = I <$> Cereal.getWord16le
-instance Put (I 'S 'I2 'BE) where put = Cereal.putInt16be . getI
+instance Put (I 'S 'I2 'BE) where put (I i) = Mason.int16BE i
 instance Get (I 'S 'I2 'BE) where get = I <$> Cereal.getInt16be
-instance Put (I 'S 'I2 'LE) where put = Cereal.putInt16le . getI
+instance Put (I 'S 'I2 'LE) where put (I i) = Mason.int16LE i
 instance Get (I 'S 'I2 'LE) where get = I <$> Cereal.getInt16le
 
-instance Put (I 'U 'I4 'BE) where put = Cereal.putWord32be . getI
+instance Put (I 'U 'I4 'BE) where put (I i) = Mason.word32BE i
 instance Get (I 'U 'I4 'BE) where get = I <$> Cereal.getWord32be
-instance Put (I 'U 'I4 'LE) where put = Cereal.putWord32le . getI
+instance Put (I 'U 'I4 'LE) where put (I i) = Mason.word32LE i
 instance Get (I 'U 'I4 'LE) where get = I <$> Cereal.getWord32le
-instance Put (I 'S 'I4 'BE) where put = Cereal.putInt32be . getI
+instance Put (I 'S 'I4 'BE) where put (I i) = Mason.int32BE i
 instance Get (I 'S 'I4 'BE) where get = I <$> Cereal.getInt32be
-instance Put (I 'S 'I4 'LE) where put = Cereal.putInt32le . getI
+instance Put (I 'S 'I4 'LE) where put (I i) = Mason.int32LE i
 instance Get (I 'S 'I4 'LE) where get = I <$> Cereal.getInt32le
 
-instance Put (I 'U 'I8 'BE) where put = Cereal.putWord64be . getI
+instance Put (I 'U 'I8 'BE) where put (I i) = Mason.word64BE i
 instance Get (I 'U 'I8 'BE) where get = I <$> Cereal.getWord64be
-instance Put (I 'U 'I8 'LE) where put = Cereal.putWord64le . getI
+instance Put (I 'U 'I8 'LE) where put (I i) = Mason.word64LE i
 instance Get (I 'U 'I8 'LE) where get = I <$> Cereal.getWord64le
-instance Put (I 'S 'I8 'BE) where put = Cereal.putInt64be . getI
+instance Put (I 'S 'I8 'BE) where put (I i) = Mason.int64BE i
 instance Get (I 'S 'I8 'BE) where get = I <$> Cereal.getInt64be
-instance Put (I 'S 'I8 'LE) where put = Cereal.putInt64le . getI
+instance Put (I 'S 'I8 'LE) where put (I i) = Mason.int64LE i
 instance Get (I 'S 'I8 'LE) where get = I <$> Cereal.getInt64le

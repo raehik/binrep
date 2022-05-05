@@ -31,7 +31,7 @@ import Data.ByteString qualified as B
 import Data.ByteString.Lazy qualified as BL
 import Data.ByteString.Builder qualified as B
 import Data.Serialize qualified as Cereal
-import Data.Word
+import Mason.Builder qualified as Mason
 import Numeric.Natural
 import Data.Typeable ( typeRep, typeOf )
 import GHC.TypeNats ( KnownNat )
@@ -67,9 +67,7 @@ instance BLen (AsByteString 'C) where
     blen cbs = unsafePosIntToNat (B.length (unrefine cbs)) + 1
 
 instance Put (AsByteString 'C) where
-    put cbs = do
-        Cereal.putByteString $ unrefine cbs
-        Cereal.putWord8 0x00
+    put cbs = Mason.byteString (unrefine cbs) <> Mason.word8 0x00
 
 -- | Total shite parsing efficiency. But, to be fair, that's why we don't
 --   serialize arbitrary-length C strings!
@@ -81,6 +79,7 @@ instance (BLen a, itype ~ I 'U size end, KnownNat (CBLen itype))
       => BLen (LenPfx size end a) where
     blen rpa = cblen @itype + blen (unrefine rpa)
 
+{-
 -- TODO finish and explain why safe. actually should use singletons!
 instance PutWith Rep B.ByteString where
     putWith strRep bs =
@@ -96,6 +95,7 @@ instance PutWith Rep B.ByteString where
                 else Right $ B.byteString bs
               _ -> undefined
       where len = B.length bs
+-}
 
 -- TODO finish and explain why safe. actually should use singletons!
 instance GetWith Rep B.ByteString where
@@ -140,9 +140,7 @@ instance
     , itype ~ I 'U size end
     , Put itype)
       => Put (LenPfx size end a) where
-    put ra = do
-        put @itype $ fromIntegral $ plen a
-        put a
+    put ra = put @itype (fromIntegral (plen a)) <> put a
       where a = unrefine ra
 
 -- TODO why safe
