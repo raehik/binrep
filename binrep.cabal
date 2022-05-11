@@ -45,12 +45,11 @@ library
       Binrep.Get
       Binrep.Predicate.NullPad
       Binrep.Put
+      Binrep.Type.AsciiNat
       Binrep.Type.Byte
       Binrep.Type.Byte.TypeLevel
       Binrep.Type.ByteString
       Binrep.Type.Common
-      Binrep.Type.Digit
-      Binrep.Type.Digit.Octal
       Binrep.Type.Int
       Binrep.Type.Magic
       Binrep.Type.Magic.UTF8

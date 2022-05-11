@@ -31,8 +31,8 @@ import Data.ByteString qualified as B
 import Data.ByteString.Lazy qualified as BL
 import Data.ByteString.Builder qualified as B
 import Data.Serialize qualified as Cereal
-import Mason.Builder qualified as Mason
 import Numeric.Natural
+import Data.Word ( Word8 )
 import Data.Typeable ( typeRep, typeOf )
 import GHC.TypeNats ( KnownNat )
 import Data.Foldable qualified as Foldable
@@ -59,7 +59,7 @@ type AsByteString (rep :: Rep) = Refined rep B.ByteString
 getCString :: Cereal.Get B.ByteString
 getCString = go mempty
   where go buf = do
-            Cereal.getWord8 >>= \case
+            get @Word8 >>= \case
               0x00    -> return $ BL.toStrict $ B.toLazyByteString buf
               nonNull -> go $ buf <> B.word8 nonNull
 
@@ -67,7 +67,7 @@ instance BLen (AsByteString 'C) where
     blen cbs = unsafePosIntToNat (B.length (unrefine cbs)) + 1
 
 instance Put (AsByteString 'C) where
-    put cbs = Mason.byteString (unrefine cbs) <> Mason.word8 0x00
+    put cbs = put (unrefine cbs) <> put @Word8 0x00
 
 -- | Total shite parsing efficiency. But, to be fair, that's why we don't
 --   serialize arbitrary-length C strings!
