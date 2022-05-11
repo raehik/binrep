@@ -41,10 +41,11 @@ import GHC.TypeLits
 import Data.ByteString qualified as B
 import Data.Serialize.Get qualified as Cereal
 
-data Magic (a :: k) = Magic deriving Show
+import GHC.Generics ( Generic )
+import Data.Data ( Typeable, Data )
 
---test :: KnownNat n => Magic n -> Integer
---test = natVal
+data Magic (a :: k) = Magic
+    deriving stock (Generic, Typeable, Data, Show, Eq)
 
 type instance CBLen (Magic a) = Length (MagicBytes a)
 deriving anyclass instance KnownNat (Length (MagicBytes a)) => BLen (Magic a)
