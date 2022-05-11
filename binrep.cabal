@@ -32,7 +32,9 @@ library
       Binrep.BLen
       Binrep.CBLen
       Binrep.Example
+      Binrep.Example.Tar
       Binrep.Example.Tiff
+      Binrep.Example.Wav
       Binrep.Extra.HexByteString
       Binrep.Generic
       Binrep.Generic.BLen
@@ -47,6 +49,8 @@ library
       Binrep.Type.Byte.TypeLevel
       Binrep.Type.ByteString
       Binrep.Type.Common
+      Binrep.Type.Digit
+      Binrep.Type.Digit.Octal
       Binrep.Type.Int
       Binrep.Type.Magic
       Binrep.Type.Magic.UTF8
