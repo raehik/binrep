@@ -134,9 +134,9 @@ instance
 -- | An "array" type prefixed with its length via an unsigned machine integer
 --   using the given size and endianness.
 --
--- This could be represented more accurately via an existential wrapper over
--- @Array n a@ where @n <= IMax 'U size@. But I'm having issues defining it. So
--- definitions here will be similar to @Array@'s.
+-- This could also be represented via an existential wrapper over @Array n a@
+-- where @n <= IMax 'U size@, and it would let us reuse definitions. But it's
+-- hard to use. So there will be some overlap with @Array@ definitions here!
 type LenPfx (size :: ISize) (end :: Endianness) a = Refined ('Pascal size end) a
 
 instance
@@ -166,8 +166,8 @@ instance
 instance (irep ~ IRep 'U size, Integral irep, itype ~ I 'U size end, Get itype) => Get (LenPfx size end B.ByteString) where
     get = do
         len <- get @itype
-        a <- Cereal.isolate (fromIntegral len) get
-        return $ reallyUnsafeRefine a
+        bs <- Cereal.getBytes (fromIntegral len)
+        return $ reallyUnsafeRefine bs
 
 --------------------------------------------------------------------------------
 
