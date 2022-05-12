@@ -102,3 +102,18 @@ instance Put (I 'S 'I8 'BE) where put (I i) = Mason.int64BE i
 instance Get (I 'S 'I8 'BE) where get = I <$> Cereal.getInt64be
 instance Put (I 'S 'I8 'LE) where put (I i) = Mason.int64LE i
 instance Get (I 'S 'I8 'LE) where get = I <$> Cereal.getInt64le
+
+-- | Shortcut.
+type family IMax (sign :: ISign) (size :: ISize) :: Natural where
+    IMax sign size = MaxBound (IRep sign size)
+
+-- | Restricted reflected version of @maxBound@.
+type family MaxBound w :: Natural where
+    MaxBound Word8  = 255
+    MaxBound  Int8  = 127
+    MaxBound Word16 = 65535
+    MaxBound  Int16 = 32767
+    MaxBound Word32 = 4294967295
+    MaxBound  Int32 = 2147483647
+    MaxBound Word64 = 18446744073709551615
+    MaxBound  Int64 = 9223372036854775807

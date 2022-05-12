@@ -45,6 +45,7 @@ library
       Binrep.Get
       Binrep.Predicate.NullPad
       Binrep.Put
+      Binrep.Type.Array
       Binrep.Type.AsciiNat
       Binrep.Type.Byte
       Binrep.Type.Byte.TypeLevel

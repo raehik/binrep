@@ -10,10 +10,7 @@ an orphan module, because we define byte length for *all length-prefixed types*
 in one fell swoop.
 -}
 
--- TODO redocument. pretty all over the place. putting pascal-styles is defined
--- for all @a@ via a helper typeclass PLen. getting can't be, so we just give
--- for bytestrings and @[a]@. blen pascal is still for all @a@ (easy). and
--- predicate also works for all @a@ via PLen. kinda complicated
+-- TODO redocument. pretty all over the place
 
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -22,6 +19,7 @@ module Binrep.Type.ByteString where
 import Binrep
 import Binrep.Type.Common ( Endianness )
 import Binrep.Type.Int
+import Binrep.Type.Array
 import Binrep.Util
 
 import Refined
@@ -31,11 +29,16 @@ import Data.ByteString qualified as B
 import Data.ByteString.Lazy qualified as BL
 import Data.ByteString.Builder qualified as B
 import Data.Serialize qualified as Cereal
-import Numeric.Natural
 import Data.Word ( Word8 )
 import Data.Typeable ( typeRep, typeOf )
 import GHC.TypeNats ( KnownNat )
-import Data.Foldable qualified as Foldable
+
+{-
+import GHC.TypeNats ( KnownNat, type (<=), cmpNat, natVal' )
+import GHC.TypeLits ( OrderingI(..) )
+import Data.Proxy ( Proxy(..) )
+import GHC.Exts ( proxy#, Proxy# )
+-}
 
 import Control.Monad ( replicateM )
 
@@ -112,7 +115,7 @@ instance Predicate 'C B.ByteString where
 instance
     ( irep ~ IRep 'U size
     , Bounded irep, Integral irep
-    , PLen a
+    , ALen a
     , Show irep, Typeable size, Typeable e, Typeable a
     ) => Predicate ('Pascal size e) a where
     validate p a
@@ -123,24 +126,28 @@ instance
             <>tshow len<>" > "<>tshow max'
      | otherwise = success
       where
-        len  = plen a
+        len  = alen a
         max' = maxBound @irep
 
 --------------------------------------------------------------------------------
 
--- | A value prefixed with its length via an unsigned machine integer using the
---   given size and endianness.
+-- | An "array" type prefixed with its length via an unsigned machine integer
+--   using the given size and endianness.
+--
+-- This could be represented more accurately via an existential wrapper over
+-- @Array n a@ where @n <= IMax 'U size@. But I'm having issues defining it. So
+-- definitions here will be similar to @Array@'s.
 type LenPfx (size :: ISize) (end :: Endianness) a = Refined ('Pascal size end) a
 
 instance
     ( Put a
-    , PLen a
+    , ALen a
     , irep ~ IRep 'U size
     , Integral irep
     , itype ~ I 'U size end
     , Put itype)
       => Put (LenPfx size end a) where
-    put ra = put @itype (fromIntegral (plen a)) <> put a
+    put ra = put @itype (fromIntegral (alen a)) <> put a
       where a = unrefine ra
 
 -- TODO why safe
@@ -162,11 +169,34 @@ instance (irep ~ IRep 'U size, Integral irep, itype ~ I 'U size end, Get itype) 
         a <- Cereal.isolate (fromIntegral len) get
         return $ reallyUnsafeRefine a
 
--- | The "length" of a value for Pascal-style length prefixing.
-class PLen a where plen :: a -> Natural
+--------------------------------------------------------------------------------
 
--- | Bytestrings are byte-wise.
-instance PLen B.ByteString where plen = blen
+{-
 
--- | List-likes are element-wise.
-instance Foldable t => PLen (t a) where plen = unsafePosIntToNat . Foldable.length
+-- | More accurate & safer representation, but harder to use.
+newtype LenPfx' (size :: ISize) (end :: Endianness) a =
+    --LenPfx' { unLenPfx' :: forall n. (n <= IMax 'U size, KnownNat n) => Array n a }
+    LenPfx' { unLenPfx' :: forall n. Array n a }
+
+validateLenPfx'
+    :: forall size end n a max
+    .  (KnownNat n, max ~ IMax 'U size, KnownNat max)
+    => Array n a
+    -> Maybe (LenPfx' size end a)
+validateLenPfx' a =
+    case cmpNat (Proxy :: Proxy n) (Proxy :: Proxy max) of
+      GTI -> Nothing
+      _   -> Just $ LenPfx' $ reallyUnsafeRefine $ unrefine a -- TODO
+
+instance (itype ~ I 'U size end, KnownNat (CBLen itype), BLen a)
+  => BLen (LenPfx' size end a) where
+    blen (LenPfx' x) = cblen @itype + blen x
+
+instance (itype ~ I 'U size end, Put itype) => Put (LenPfx' size end a) where
+    put (LenPfx' x) = put (f @itype x)
+
+f :: forall x n a. (KnownNat n, Integral x) => Array n a -> x
+f _ = fromIntegral n
+  where n = natVal' (proxy# :: Proxy# n)
+
+-}
