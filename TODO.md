@@ -1,9 +1,4 @@
 # To-dos
-## Refactoring
-  * define LenPfx using Sized??
-    * makes sense to me. maybe I need to hide a typenat in LenPfx, that you can
-      only get by opening it up?? (??? ?)
-
 ## Simple
   * properly test the default `AsByteString 'C` sum tag handler (!)
 
