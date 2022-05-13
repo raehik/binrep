@@ -15,6 +15,7 @@ solely at easing debugging.
 module Binrep.Type.AsciiNat where
 
 import Binrep
+import Binrep.Util ( natVal'' )
 
 import Data.Word ( Word8 )
 import Data.List.NonEmpty ( NonEmpty( (:|) ) )
@@ -22,8 +23,7 @@ import Mason.Builder qualified as Mason
 import Data.ByteString qualified as B
 import Data.Semigroup ( sconcat )
 
-import GHC.Exts ( proxy#, Proxy# )
-import GHC.TypeNats ( Natural, KnownNat, natVal' )
+import GHC.TypeNats ( Natural, KnownNat )
 import GHC.Num.Natural ( naturalSizeInBase#, naturalToWord#, Natural(NS) )
 
 import GHC.Generics ( Generic )
@@ -52,7 +52,7 @@ asciiNatCompare (AsciiNat n1) (AsciiNat n2) = compare n1 n2
 --   using GHC primitives.
 instance KnownNat n => BLen (AsciiNat n) where
     blen (AsciiNat n) = NS (naturalSizeInBase# (naturalToWord# base) n)
-      where base = natVal' (proxy# :: Proxy# n)
+      where base = natVal'' @n
 
 --------------------------------------------------------------------------------
 

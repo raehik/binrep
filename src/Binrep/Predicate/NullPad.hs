@@ -3,14 +3,13 @@
 module Binrep.Predicate.NullPad where
 
 import Binrep
-import Binrep.Util ( tshow )
+import Binrep.Util ( tshow, natVal'' )
 
 import Refined
 import Refined.Unsafe
 
 import GHC.TypeNats
 import GHC.Natural ( minusNaturalMaybe )
-import GHC.Exts ( proxy#, Proxy# )
 import Data.Typeable
 import Data.Serialize qualified as Cereal
 import Mason.Builder qualified as Mason
@@ -32,7 +31,7 @@ instance (BLen a, KnownNat n) => Predicate (NullPad n) a where
                    "too long: " <> tshow len <> " > " <> tshow n
       | otherwise = success
       where
-        n = natVal' (proxy# :: Proxy# n)
+        n = natVal'' @n
         len = blen a
 
 -- TODO cleanup
@@ -42,7 +41,7 @@ instance (Put a, BLen a, KnownNat n) => Put (NullPadded n a) where
             paddingLength = n - blen npa
          in put npa <> Mason.byteString (BS.replicate (fromIntegral paddingLength) 0x00)
       where
-        n = natVal' (proxy# :: Proxy# n)
+        n = natVal'' @n
 
 -- | Safety: we assert actual length is within expected length (in order to
 --   calculate how much padding to parse).
@@ -61,7 +60,7 @@ instance (Get a, BLen a, KnownNat n) => Get (NullPadded n a) where
             getNNulls nullstrLen
             return $ reallyUnsafeRefine a
       where
-        n = natVal' (proxy# :: Proxy# n)
+        n = natVal'' @n
 
 getNNulls :: Natural -> Cereal.Get ()
 getNNulls = \case 0 -> return ()

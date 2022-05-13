@@ -8,14 +8,13 @@
 module Binrep.Type.Sized where
 
 import Binrep
-import Binrep.Util ( tshow )
+import Binrep.Util ( tshow, natVal'' )
 
 import Refined
 import Refined.Unsafe
 
 import GHC.TypeNats
 import Data.Typeable
-import GHC.Exts ( proxy#, Proxy# )
 import Data.Serialize qualified as Cereal
 
 data Size (n :: Natural)
@@ -33,7 +32,7 @@ instance (BLen a, KnownNat n) => Predicate (Size n) a where
                    "not correctly sized: " <> tshow len <> " /= " <> tshow n
       | otherwise = success
       where
-        n = natVal' (proxy# :: Proxy# n)
+        n = natVal'' @n
         len = blen a
 
 instance Put a => Put (Sized n a) where
@@ -46,4 +45,4 @@ instance (Get a, KnownNat n) => Get (Sized n a) where
         a <- Cereal.isolate (fromIntegral n) get
         return $ reallyUnsafeRefine a
       where
-        n = natVal' (proxy# :: Proxy# n)
+        n = natVal'' @n

@@ -1,6 +1,7 @@
 module Binrep.Example.Tar where
 
 import Binrep
+import Binrep.Util ( natVal'' )
 import Binrep.Generic
 import Binrep.Generic qualified as BR
 import Binrep.Type.Common ( Endianness(..) )
@@ -14,7 +15,6 @@ import Data.Data ( Typeable )
 import Data.Word ( Word8 )
 
 import GHC.TypeNats
-import GHC.Exts ( proxy#, Proxy# )
 
 import Data.ByteString qualified as B
 
@@ -43,7 +43,7 @@ instance KnownNat n => Put (TarNat n) where
       where
         pfxNulls = B.replicate (fromIntegral pfxNullCount) 0x30
         pfxNullCount = n - blen an - 1
-        n = natVal' (proxy# :: Proxy# n)
+        n = natVal'' @n
 
 instance KnownNat n => Get (TarNat n) where
     get = do
@@ -52,7 +52,7 @@ instance KnownNat n => Get (TarNat n) where
           0x00 -> return $ TarNat an
           w    -> fail $ "TODO expected null byte, got " <> show w
       where
-        n = natVal' (proxy# :: Proxy# n)
+        n = natVal'' @n
 
 -- Partial header
 data Tar = Tar

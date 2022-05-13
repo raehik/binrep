@@ -7,10 +7,10 @@ Lol
 
 module Binrep.Type.Byte.TypeLevel where
 
+import Binrep.Util ( natVal'' )
 import Binrep.Type.Byte
 import GHC.TypeNats
 import GHC.TypeLits ( TypeError, ErrorMessage(Text) )
-import GHC.Exts ( proxy#, Proxy# )
 
 type family NatToByte (n :: Natural) :: Maybe Byte where
     NatToByte 0x00 = 'Just 'B00
@@ -531,7 +531,7 @@ type family ByteToNat (n :: Byte) :: Natural where
 
 -- | Inefficient reification via 'Natural'.
 byteVal' :: forall (b :: Byte) n. (n ~ ByteToNat b, KnownNat n) => Natural
-byteVal' = natVal' (proxy# :: Proxy# n)
+byteVal' = natVal'' @n
 
 -- | Converts a byte-encodable 'Natural' to a byte.
 --
