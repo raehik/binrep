@@ -19,7 +19,6 @@ module Binrep.Type.ByteString where
 import Binrep
 import Binrep.Type.Common ( Endianness )
 import Binrep.Type.Int
-import Binrep.Type.Array
 import Binrep.Util
 
 import Refined
@@ -30,17 +29,8 @@ import Data.ByteString.Lazy qualified as BL
 import Data.ByteString.Builder qualified as B
 import Data.Serialize qualified as Cereal
 import Data.Word ( Word8 )
-import Data.Typeable ( typeRep, typeOf )
+import Data.Typeable ( typeRep )
 import GHC.TypeNats ( KnownNat )
-
-{-
-import GHC.TypeNats ( KnownNat, type (<=), cmpNat, natVal' )
-import GHC.TypeLits ( OrderingI(..) )
-import Data.Proxy ( Proxy(..) )
-import GHC.Exts ( proxy#, Proxy# )
--}
-
-import Control.Monad ( replicateM )
 
 import GHC.Generics ( Generic )
 import Data.Data ( Typeable, Data )
@@ -77,10 +67,19 @@ instance Put (AsByteString 'C) where
 instance Get (AsByteString 'C) where
     get = reallyUnsafeRefine <$> getCString
 
--- | Look at this! Fully type safe!! Oh my god!!!!!!
-instance (BLen a, itype ~ I 'U size end, KnownNat (CBLen itype))
-      => BLen (LenPfx size end a) where
-    blen rpa = cblen @itype + blen (unrefine rpa)
+instance (itype ~ I 'U size end, irep ~ IRep 'U size, KnownNat (CBLen irep)) => BLen (AsByteString ('Pascal size end)) where
+    blen pbs = cblen @itype + blen (unrefine pbs)
+
+instance (itype ~ I 'U size end, irep ~ IRep 'U size, Put itype, Num irep) => Put (AsByteString ('Pascal size end)) where
+    put pbs = put @itype (fromIntegral (B.length bs)) <> put bs
+      where bs = unrefine pbs
+
+instance (itype ~ I 'U size end, irep ~ IRep 'U size, Integral irep, Get itype) => Get (AsByteString ('Pascal size end)) where
+    get = do
+        len <- get @itype
+        bs <- Cereal.getBytes (fromIntegral len)
+        return $ reallyUnsafeRefine bs
+
 
 {-
 -- TODO finish and explain why safe. actually should use singletons!
@@ -115,88 +114,14 @@ instance Predicate 'C B.ByteString where
 instance
     ( irep ~ IRep 'U size
     , Bounded irep, Integral irep
-    , ALen a
-    , Show irep, Typeable size, Typeable e, Typeable a
-    ) => Predicate ('Pascal size e) a where
-    validate p a
+    , Show irep, Typeable size, Typeable e
+    ) => Predicate ('Pascal size e) B.ByteString where
+    validate p bs
      | len > fromIntegral max'
         = throwRefineOtherException (typeRep p) $
-              tshow (typeOf a)
-            <>" too long for given length prefix type: "
+              "bytestring too long for given length prefix type: "
             <>tshow len<>" > "<>tshow max'
      | otherwise = success
       where
-        len  = alen a
+        len  = B.length bs
         max' = maxBound @irep
-
---------------------------------------------------------------------------------
-
--- | An "array" type prefixed with its length via an unsigned machine integer
---   using the given size and endianness.
---
--- This could also be represented via an existential wrapper over @Array n a@
--- where @n <= IMax 'U size@, and it would let us reuse definitions. But it's
--- hard to use. So there will be some overlap with @Array@ definitions here!
-type LenPfx (size :: ISize) (end :: Endianness) a = Refined ('Pascal size end) a
-
-instance
-    ( Put a
-    , ALen a
-    , irep ~ IRep 'U size
-    , Integral irep
-    , itype ~ I 'U size end
-    , Put itype)
-      => Put (LenPfx size end a) where
-    put ra = put @itype (fromIntegral (alen a)) <> put a
-      where a = unrefine ra
-
--- TODO why safe
-instance
-    ( Get a
-    , irep ~ IRep 'U size
-    , Integral irep
-    , itype ~ I 'U size end
-    , Get itype)
-      => Get (LenPfx size end [a]) where
-    get = do
-        len <- get @itype
-        as <- replicateM (fromIntegral len) get
-        return $ reallyUnsafeRefine as
-
-instance (irep ~ IRep 'U size, Integral irep, itype ~ I 'U size end, Get itype) => Get (LenPfx size end B.ByteString) where
-    get = do
-        len <- get @itype
-        bs <- Cereal.getBytes (fromIntegral len)
-        return $ reallyUnsafeRefine bs
-
---------------------------------------------------------------------------------
-
-{-
-
--- | More accurate & safer representation, but harder to use.
-newtype LenPfx' (size :: ISize) (end :: Endianness) a =
-    --LenPfx' { unLenPfx' :: forall n. (n <= IMax 'U size, KnownNat n) => Array n a }
-    LenPfx' { unLenPfx' :: forall n. Array n a }
-
-validateLenPfx'
-    :: forall size end n a max
-    .  (KnownNat n, max ~ IMax 'U size, KnownNat max)
-    => Array n a
-    -> Maybe (LenPfx' size end a)
-validateLenPfx' a =
-    case cmpNat (Proxy :: Proxy n) (Proxy :: Proxy max) of
-      GTI -> Nothing
-      _   -> Just $ LenPfx' $ reallyUnsafeRefine $ unrefine a -- TODO
-
-instance (itype ~ I 'U size end, KnownNat (CBLen itype), BLen a)
-  => BLen (LenPfx' size end a) where
-    blen (LenPfx' x) = cblen @itype + blen x
-
-instance (itype ~ I 'U size end, Put itype) => Put (LenPfx' size end a) where
-    put (LenPfx' x) = put (f @itype x)
-
-f :: forall x n a. (KnownNat n, Integral x) => Array n a -> x
-f _ = fromIntegral n
-  where n = natVal' (proxy# :: Proxy# n)
-
--}

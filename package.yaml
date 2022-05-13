@@ -73,6 +73,7 @@ dependencies:
 - either ^>= 5.0.1.1
 - megaparsec ^>= 9.2.0 # for HexByteString
 - mason ^>= 0.2.5
+- vector-sized ^>= 1.5.0
 
 library:
   source-dirs: src

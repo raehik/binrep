@@ -5,11 +5,6 @@ module Binrep.Generic.Internal where
 import GHC.TypeLits
 import GHC.Generics
 
--- | 'a' must be a static size. If it's not (if it must be inspected to know the
---   size), a runtime error will occur in the generic blen code.
---
--- Currently, this requirement isn't enforced via a fancier typeclass. But it
--- probably could be.
 data Cfg a = Cfg
   { cSumTag :: String -> a
   -- ^ How to turn a constructor name into a byte tag.

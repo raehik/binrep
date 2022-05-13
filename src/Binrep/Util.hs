@@ -1,10 +1,18 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+
 module Binrep.Util where
 
+-- tshow
 import Data.Text qualified as Text
 import Data.Text ( Text )
 
-import GHC.Exts
-import GHC.Num.Natural
+-- unsafePosIntToNat
+import GHC.Exts ( Int( I# ), int2Word# )
+import GHC.Num.Natural ( Natural( NS ) )
+
+-- natVal''
+import GHC.TypeNats ( KnownNat, natVal' )
+import GHC.Exts ( proxy#, Proxy# )
 
 tshow :: Show a => a -> Text
 tshow = Text.pack . show
@@ -16,3 +24,6 @@ tshow = Text.pack . show
 -- underflows if you call it with a negative 'Int' :)
 unsafePosIntToNat :: Int -> Natural
 unsafePosIntToNat (I# i#) = NS (int2Word# i#)
+
+natVal'' :: forall a. KnownNat a => Natural
+natVal'' = natVal' (proxy# :: Proxy# a)

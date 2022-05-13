@@ -7,36 +7,52 @@ import Binrep.Type.Common ( Endianness(..) )
 import Binrep.Type.Int
 import Binrep.Predicate.NullPad
 import Binrep.Type.AsciiNat
-import Binrep.Type.Sized
 
 import GHC.Generics ( Generic )
 import Data.Data ( Typeable )
 
 import Data.Word ( Word8 )
 
-import GHC.TypeLits
+import GHC.TypeNats
+import GHC.Exts ( proxy#, Proxy# )
 
 import Data.ByteString qualified as B
+
+import Data.Serialize.Get qualified as Cereal
 
 type BS = B.ByteString
 
 brCfgNoSum :: BR.Cfg (I 'U 'I1 'LE)
 brCfgNoSum = BR.Cfg { BR.cSumTag = undefined }
 
--- | The naturals in tars are octal ASCII digit strings, that end with a null
---   byte. What a farce.
-newtype TarNat n = TarNat { getTarNat :: Sized n (AsciiNat 8) }
-    deriving stock (Generic, Typeable)
-    deriving (Show, Eq) via Sized n (AsciiNat 8)
+-- | The naturals in tars are sized octal ASCII digit strings that end with a
+--   null byte (and may start with leading ASCII zeroes). The size includes the
+--   terminating null, so you get @n-1@ digits. What a farce.
+--
+-- Don't use this constructor directly! The size must be checked to ensure it
+-- fits.
+newtype TarNat n = TarNat { getTarNat :: AsciiNat 8 }
+    deriving stock (Generic, Typeable, Show, Eq)
 
-instance KnownNat n => BLen (TarNat n) where blen (TarNat n) = blen n + 1
-instance Put (TarNat n) where put (TarNat n) = put n <> put @Word8 0x00
+type instance CBLen (TarNat n) = n
+instance KnownNat n => BLen (TarNat n)
+
+-- | No need to check for underflow etc. as TarNat guarantees good sizing.
+instance KnownNat n => Put (TarNat n) where
+    put (TarNat an) = put pfxNulls <> put an <> put @Word8 0x00
+      where
+        pfxNulls = B.replicate (fromIntegral pfxNullCount) 0x30
+        pfxNullCount = n - blen an - 1
+        n = natVal' (proxy# :: Proxy# n)
+
 instance KnownNat n => Get (TarNat n) where
     get = do
-        n <- get
+        an <- Cereal.isolate (fromIntegral (n - 1)) get
         get @Word8 >>= \case
-          0x00 -> return $ TarNat n
+          0x00 -> return $ TarNat an
           w    -> fail $ "TODO expected null byte, got " <> show w
+      where
+        n = natVal' (proxy# :: Proxy# n)
 
 -- Partial header
 data Tar = Tar

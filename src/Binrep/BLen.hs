@@ -8,8 +8,8 @@ import Data.ByteString qualified as B
 import Data.Word
 import Data.Int
 
--- | The length in bytes of a value of the given type can be known, preferably
---   on the cheap e.g. reading a length field, or statically at compile time.
+-- | The length in bytes of a value of the given type can be known on the cheap
+--   e.g. by reading a length field, or using compile time information.
 --
 -- Concepts such as null padding require the notion of length in bytes in order
 -- to handle. In a hand-rolled parser, you may keep count of the current length
@@ -22,6 +22,11 @@ import Data.Int
 --
 -- We derive a default instance for constant-size types by throwing away the
 -- value and reifying the type level natural.
+--
+-- Note that one can derive a free 'BLen' instance for any type with a 'Put'
+-- instance via serializing it and checking the length. _Do not do this._ If you
+-- find you can't write a decent 'BLen' instance for a type, it may be that you
+-- need to rethink the representation.
 class BLen a where
     blen :: a -> Natural
     default blen :: KnownNat (CBLen a) => a -> Natural
