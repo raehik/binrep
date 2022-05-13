@@ -56,10 +56,7 @@ class Encode (enc :: Encoding) where
 
 instance Encode 'UTF8 where encode' = Text.encodeUtf8
 
--- | ASCII is a subset of UTF-8, so valid ASCII is valid UTF-8, thus this is
---   safe. Though if there was a special ASCII-only text type, we could use it
---   to be really efficient (I guess that's just bytestrings lol). Also would
---   way overcomplicate this setup for a smidge of performance x)
+-- | ASCII is a subset of UTF-8, so valid ASCII is valid UTF-8, so this is safe.
 instance Encode 'ASCII where encode' = encode' @'UTF8
 
 instance Encode ('UTF16 'BE) where encode' = Text.encodeUtf16BE

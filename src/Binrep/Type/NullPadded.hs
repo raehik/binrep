@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Binrep.Predicate.NullPad where
+module Binrep.Type.NullPadded where
 
 import Binrep
 import Binrep.Util ( tshow, natVal'' )
@@ -50,6 +50,8 @@ instance (Put a, BLen a, KnownNat n) => Put (NullPadded n a) where
 -- padding, just that the data is chunked correctly. I figure we care about
 -- correctness here, so it'd be nice to know about the padding well-formedness
 -- (i.e. that it's all nulls).
+--
+-- TODO maybe better definition via isolate
 instance (Get a, BLen a, KnownNat n) => Get (NullPadded n a) where
     get = do
         a <- get

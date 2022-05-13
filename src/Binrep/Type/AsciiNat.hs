@@ -34,7 +34,7 @@ import Numeric ( showOct, showHex, showBin, showInt )
 --   a is a digit in the given base (> 1).
 --
 -- 'Show' instances display the stored number in the given base, with 
-newtype AsciiNat (n :: Natural) = AsciiNat { getAsciiNat :: Natural }
+newtype AsciiNat (base :: Natural) = AsciiNat { getAsciiNat :: Natural }
     deriving stock (Generic, Typeable, Data)
     deriving (Eq, Ord) via Natural
 
@@ -50,9 +50,9 @@ asciiNatCompare (AsciiNat n1) (AsciiNat n2) = compare n1 n2
 -- | The bytelength of an 'AsciiNat' is the number of digits in the number in
 --   the given base. We can calculate this generically with great efficiency
 --   using GHC primitives.
-instance KnownNat n => BLen (AsciiNat n) where
+instance KnownNat base => BLen (AsciiNat base) where
     blen (AsciiNat n) = NS (naturalSizeInBase# (naturalToWord# base) n)
-      where base = natVal'' @n
+      where base = natVal'' @base
 
 --------------------------------------------------------------------------------
 

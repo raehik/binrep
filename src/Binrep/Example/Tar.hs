@@ -6,7 +6,7 @@ import Binrep.Generic
 import Binrep.Generic qualified as BR
 import Binrep.Type.Common ( Endianness(..) )
 import Binrep.Type.Int
-import Binrep.Predicate.NullPad
+import Binrep.Type.NullPadded
 import Binrep.Type.AsciiNat
 
 import GHC.Generics ( Generic )

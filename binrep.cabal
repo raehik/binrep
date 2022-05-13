@@ -43,7 +43,6 @@ library
       Binrep.Generic.Internal
       Binrep.Generic.Put
       Binrep.Get
-      Binrep.Predicate.NullPad
       Binrep.Put
       Binrep.Type.AsciiNat
       Binrep.Type.Byte
@@ -54,10 +53,12 @@ library
       Binrep.Type.LenPfx
       Binrep.Type.Magic
       Binrep.Type.Magic.UTF8
+      Binrep.Type.NullPadded
       Binrep.Type.Sized
       Binrep.Type.Text
       Binrep.Type.Vector
       Binrep.Util
+      Binrep.Wip.Strength
   other-modules:
       Paths_binrep
   hs-source-dirs:
