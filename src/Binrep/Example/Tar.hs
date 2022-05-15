@@ -10,7 +10,6 @@ import Binrep.Type.NullPadded
 import Binrep.Type.AsciiNat
 
 import GHC.Generics ( Generic )
-import Data.Data ( Typeable )
 
 import Data.Word ( Word8 )
 
@@ -32,7 +31,7 @@ brCfgNoSum = BR.Cfg { BR.cSumTag = undefined }
 -- Don't use this constructor directly! The size must be checked to ensure it
 -- fits.
 newtype TarNat n = TarNat { getTarNat :: AsciiNat 8 }
-    deriving stock (Generic, Typeable, Show, Eq)
+    deriving stock (Generic, Show, Eq)
 
 type instance CBLen (TarNat n) = n
 instance KnownNat n => BLen (TarNat n)
@@ -62,7 +61,7 @@ data Tar = Tar
   , tarFileUIDGroup :: TarNat 8
   , tarFileFileSize :: TarNat 12
   , tarFileLastMod :: TarNat 12
-  } deriving stock (Generic, Typeable, Show, Eq)
+  } deriving stock (Generic, Show, Eq)
 
 instance BLen Tar where blen = blenGeneric brCfgNoSum
 instance Put  Tar where put  = putGeneric  brCfgNoSum

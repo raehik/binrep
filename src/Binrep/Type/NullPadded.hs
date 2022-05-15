@@ -10,7 +10,7 @@ import Refined.Unsafe
 
 import GHC.TypeNats
 import GHC.Natural ( minusNaturalMaybe )
-import Data.Typeable
+import Data.Typeable ( typeRep )
 import Data.Serialize qualified as Cereal
 import Mason.Builder qualified as Mason
 import Data.ByteString qualified as BS

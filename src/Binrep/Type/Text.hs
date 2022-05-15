@@ -21,11 +21,12 @@ import Data.Text qualified as Text
 import Data.Text ( Text )
 import Data.Char qualified as Char
 import Data.Text.Encoding qualified as Text
-import Data.Typeable ( typeRep )
 import Data.Either.Combinators qualified as Either
 
 import GHC.Generics ( Generic )
-import Data.Data ( Typeable, Data )
+import Data.Data ( Data )
+
+import Data.Typeable ( Typeable, typeRep )
 
 import System.IO.Unsafe qualified
 import Control.Exception qualified
@@ -44,7 +45,7 @@ data Encoding
   | UTF32 Endianness
   | ASCII -- ^ 7-bit
   | SJIS
-    deriving stock (Generic, Typeable, Data, Show, Eq)
+    deriving stock (Generic, Data, Show, Eq)
 
 -- | A string of a given encoding, stored in the 'Text' type.
 type AsText (enc :: Encoding) = Refined enc Text

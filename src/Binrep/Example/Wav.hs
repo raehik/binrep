@@ -8,7 +8,7 @@ import Binrep.Type.Int
 import Binrep.Type.Magic
 
 import GHC.Generics ( Generic )
-import Data.Data ( Typeable, Data )
+import Data.Data ( Data )
 
 type E = 'LE
 type W32 = I 'U 'I4 E
@@ -24,7 +24,7 @@ data WavHeader = WavHeader
   , wavHeaderFmtChunkMarker :: Magic "fmt "
   , wavHeaderFmtType :: W16
   , wavHeaderChannels :: W16
-  } deriving stock (Generic, Typeable, Data, Show, Eq)
+  } deriving stock (Generic, Data, Show, Eq)
 
 instance BLen WavHeader where blen = blenGeneric brCfgNoSum
 instance Put  WavHeader where put  = putGeneric  brCfgNoSum

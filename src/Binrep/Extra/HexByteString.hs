@@ -11,7 +11,7 @@
 module Binrep.Extra.HexByteString where
 
 import GHC.Generics ( Generic )
-import Data.Data ( Typeable, Data )
+import Data.Data ( Data )
 
 import Data.ByteString qualified as B
 import Data.ByteString.Short qualified as B.Short
@@ -31,7 +31,7 @@ import Data.Aeson
 
 -- No harm in being polymorphic over the byte representation.
 newtype Hex a = Hex { unHex :: a }
-    deriving stock (Generic, Typeable, Data)
+    deriving stock (Generic, Data)
     deriving Eq via a
 
 -- But most users will probably just want this.

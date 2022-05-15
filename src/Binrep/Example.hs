@@ -7,13 +7,13 @@ import Binrep.Type.Common ( Endianness(..) )
 import Binrep.Type.Int
 
 import GHC.Generics ( Generic )
-import Data.Data ( Typeable, Data )
+import Data.Data ( Data )
 
 brCfgNoSum :: BR.Cfg (I 'U 'I1 'LE)
 brCfgNoSum = BR.Cfg { BR.cSumTag = undefined }
 
 data DV
-    deriving stock (Generic, Typeable, Data)
+    deriving stock (Generic, Data)
 
 -- Disallowed. No binrepping void datatypes.
 {-
@@ -23,7 +23,7 @@ instance Get  DV where get  = getGeneric  brCfgNoSum
 -}
 
 data DU = DU
-    deriving stock (Generic, Typeable, Data, Show, Eq)
+    deriving stock (Generic, Data, Show, Eq)
 
 instance BLen DU where blen = blenGeneric brCfgNoSum
 instance Put  DU where put  = putGeneric  brCfgNoSum
@@ -35,14 +35,14 @@ data DSS = DSS
   , dss3 :: I 'U 'I4 'LE
   , dss4 :: I 'U 'I8 'LE
   , dss5 :: I 'U 'I1 'LE
-  } deriving stock (Generic, Typeable, Data, Show, Eq)
+  } deriving stock (Generic, Data, Show, Eq)
 
 instance BLen DSS where blen = blenGeneric brCfgNoSum
 instance Put  DSS where put  = putGeneric  brCfgNoSum
 instance Get  DSS where get  = getGeneric  brCfgNoSum
 
 data DCS = DCS1 {- DSS -} | DCS2 | DCS3 | DCS4 | DCS5
-    deriving stock (Generic, Typeable, Data, Show, Eq)
+    deriving stock (Generic, Data, Show, Eq)
 
 brCfgDCS :: BR.Cfg (I 'U 'I1 'LE)
 brCfgDCS = BR.Cfg { BR.cSumTag = BR.cSumTagHex $ drop 3 }
@@ -53,7 +53,7 @@ instance Put  DCS where put  = putGeneric  brCfgDCS
 instance Get  DCS where get  = getGeneric  brCfgDCS
 
 data DX = DX DU
-    deriving stock (Generic, Typeable, Data, Show, Eq)
+    deriving stock (Generic, Data, Show, Eq)
 
 type instance CBLen DX  = CBLenGeneric (I 'U 'I1 'LE) DX
 type instance CBLen DU  = CBLenGeneric (I 'U 'I1 'LE) DU

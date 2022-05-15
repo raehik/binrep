@@ -58,7 +58,7 @@ library
       Binrep.Type.Text
       Binrep.Type.Vector
       Binrep.Util
-      Binrep.Wip.Strength
+      Raehik.Strength
   other-modules:
       Paths_binrep
   hs-source-dirs:

@@ -29,11 +29,12 @@ import Data.ByteString.Lazy qualified as BL
 import Data.ByteString.Builder qualified as B
 import Data.Serialize qualified as Cereal
 import Data.Word ( Word8 )
-import Data.Typeable ( typeRep )
 import GHC.TypeNats ( KnownNat )
 
 import GHC.Generics ( Generic )
-import Data.Data ( Typeable, Data )
+import Data.Data ( Data )
+
+import Data.Typeable ( Typeable, typeRep )
 
 -- | Bytestring representation.
 data Rep
@@ -44,7 +45,7 @@ data Rep
   | Pascal ISize Endianness
   -- ^ Pascal-style bytestring. Length defined in a prefixing integer of given
   --   size and endianness.
-    deriving stock (Generic, Typeable, Data, Show, Eq)
+    deriving stock (Generic, Data, Show, Eq)
 
 -- | A bytestring using the given representation, stored in the 'Text' type.
 type AsByteString (rep :: Rep) = Refined rep B.ByteString

@@ -12,7 +12,7 @@ import Binrep.Type.Byte
 import Control.Applicative ( (<|>) )
 
 import GHC.Generics ( Generic )
-import Data.Data ( Typeable, Data )
+import Data.Data ( Data, Typeable )
 import GHC.TypeLits
 
 import Data.ByteString qualified as B
@@ -24,7 +24,6 @@ brCfgNoSum = BR.Cfg { BR.cSumTag = undefined }
 
 data Tiff where
     Tiff :: (Put (I 'U 'I4 end), bs ~ MagicBytes (TiffMagic end), ByteVals bs, KnownNat (Length bs)) => TiffBody end -> Tiff
-    deriving stock (Typeable)
 
 instance Show Tiff where
     show (Tiff body) = "Tiff " <> show body
@@ -32,7 +31,7 @@ instance Show Tiff where
 data TiffBody (end :: Endianness) = TiffBody
   { tiffBodyMagic :: Magic (TiffMagic end)
   , tiffBodyExInt :: I 'U 'I4 end
-  } deriving stock (Generic, Typeable, Show, Eq)
+  } deriving stock (Generic, Show, Eq)
 deriving stock instance (KnownSymbol (TiffMagic end), Typeable end) => Data (TiffBody end)
 
 instance (bs ~ MagicBytes (TiffMagic end), KnownNat (Length bs)) => BLen (TiffBody end) where

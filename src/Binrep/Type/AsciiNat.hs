@@ -27,7 +27,7 @@ import GHC.TypeNats ( Natural, KnownNat )
 import GHC.Num.Natural ( naturalSizeInBase#, naturalToWord#, Natural(NS) )
 
 import GHC.Generics ( Generic )
-import Data.Data ( Typeable, Data )
+import Data.Data ( Data )
 import Numeric ( showOct, showHex, showBin, showInt )
 
 -- | A 'Natural' represented in binary as an ASCII string, where each character
@@ -35,7 +35,7 @@ import Numeric ( showOct, showHex, showBin, showInt )
 --
 -- 'Show' instances display the stored number in the given base, with 
 newtype AsciiNat (base :: Natural) = AsciiNat { getAsciiNat :: Natural }
-    deriving stock (Generic, Typeable, Data)
+    deriving stock (Generic, Data)
     deriving (Eq, Ord) via Natural
 
 instance Show (AsciiNat 2)  where showsPrec _ n = showString "0b" . showBin (getAsciiNat n)

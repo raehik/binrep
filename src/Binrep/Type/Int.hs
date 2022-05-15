@@ -28,7 +28,7 @@ import GHC.TypeNats
 -- 256
 newtype I (sign :: ISign) (size :: ISize) (e :: Endianness)
   = I { getI :: IRep sign size }
-    deriving stock (Generic, Typeable)
+    deriving stock (Generic)
 
 deriving instance (Data (IRep sign size), Typeable sign, Typeable size, Typeable e) => Data (I sign size e)
 deriving via (IRep sign size) instance Show     (IRep sign size) => Show     (I sign size e)
@@ -46,11 +46,11 @@ deriving via (IRep sign size) instance Integral (IRep sign size) => Integral (I 
 data ISign
   = S -- ^   signed
   | U -- ^ unsigned
-    deriving stock (Generic, Typeable, Data, Show, Eq)
+    deriving stock (Generic, Data, Show, Eq)
 
 -- | Machine integer size in number of bytes.
 data ISize = I1 | I2 | I4 | I8
-    deriving stock (Generic, Typeable, Data, Show, Eq)
+    deriving stock (Generic, Data, Show, Eq)
 
 -- | Grouping for matching a signedness and size to a Haskell integer data type.
 type family IRep (sign :: ISign) (size :: ISize) where

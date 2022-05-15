@@ -14,7 +14,7 @@ import Refined
 import Refined.Unsafe
 
 import GHC.TypeNats
-import Data.Typeable
+import Data.Typeable ( typeRep )
 import Data.Serialize qualified as Cereal
 
 data Size (n :: Natural)
@@ -27,10 +27,10 @@ deriving anyclass instance KnownNat n => BLen (Sized n a)
 
 instance (BLen a, KnownNat n) => Predicate (Size n) a where
     validate p a
-      | len > n
-          = throwRefineOtherException (typeRep p) $
-                   "not correctly sized: " <> tshow len <> " /= " <> tshow n
-      | otherwise = success
+     | len > n
+        = throwRefineOtherException (typeRep p) $
+            "not correctly sized: "<>tshow len<>" /= "<>tshow n
+     | otherwise = success
       where
         n = natVal'' @n
         len = blen a
