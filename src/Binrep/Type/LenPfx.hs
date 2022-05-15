@@ -11,6 +11,7 @@ import Binrep.Type.Common ( Endianness )
 import Binrep.Type.Int
 import Binrep.Util ( natVal'' )
 import Data.Vector.Sized ( Vector )
+import Data.Vector.Sized qualified as V
 import GHC.TypeNats
 import GHC.TypeLits ( OrderingI(..) )
 import Data.Proxy ( Proxy(..) )
@@ -19,6 +20,15 @@ import Data.Proxy ( Proxy(..) )
 --   instantiate invalid values of this type!
 data LenPfx (size :: ISize) (end :: Endianness) a =
     forall n. (KnownNat n, n <= IMax 'U size) => LenPfx { unLenPfx :: Vector n a }
+
+instance Eq a => Eq (LenPfx size end a) where
+    (LenPfx a) == (LenPfx b) = vsEq a b
+
+vsEq :: forall a n m. (Eq a, KnownNat n, KnownNat m) => Vector n a -> Vector m a -> Bool
+vsEq vn vm =
+    if   natVal'' @n == natVal'' @m
+    then V.toList vn == V.toList vm
+    else False
 
 type instance Weak (LenPfx size end a) = [a]
 
