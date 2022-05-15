@@ -5,6 +5,7 @@
 module Binrep.Type.LenPfx where
 
 import Binrep
+import Raehik.Validate ( Weak )
 import Binrep.Type.Vector()
 import Binrep.Type.Common ( Endianness )
 import Binrep.Type.Int
@@ -18,6 +19,8 @@ import Data.Proxy ( Proxy(..) )
 --   instantiate invalid values of this type!
 data LenPfx (size :: ISize) (end :: Endianness) a =
     forall n. (KnownNat n, n <= IMax 'U size) => LenPfx { unLenPfx :: Vector n a }
+
+type instance Weak (LenPfx size end a) = [a]
 
 asLenPfx
     :: forall size end n a irep

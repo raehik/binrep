@@ -2,6 +2,8 @@ module Binrep.Type.Int where
 
 import Binrep
 import Binrep.Type.Common ( Endianness(..) )
+import Raehik.Validate ( Weak, Weaken(..), Strengthen(..) )
+import Util ( coerceBounded )
 
 import Data.Word
 import Data.Int
@@ -41,6 +43,28 @@ deriving via (IRep sign size) instance Num      (IRep sign size) => Num      (I 
 deriving via (IRep sign size) instance Real     (IRep sign size) => Real     (I sign size e)
 deriving via (IRep sign size) instance Enum     (IRep sign size) => Enum     (I sign size e)
 deriving via (IRep sign size) instance Integral (IRep sign size) => Integral (I sign size e)
+
+-- | Unsigned machine integers can be idealized as naturals.
+type instance Weak (I 'U size end) = Natural
+
+-- | Signed machine integers can be idealized as integers.
+type instance Weak (I 'S size end) = Integer
+
+instance (irep ~ IRep 'U size, Integral irep) => Weaken (I 'U size end) Natural where
+    weaken = fromIntegral
+
+instance (irep ~ IRep 'S size, Integral irep) => Weaken (I 'S size end) Integer where
+    weaken = fromIntegral
+
+-- | A natural can be wrapped into a machine integer by asserting
+--   well-boundedness.
+instance (irep ~ IRep 'U size, Integral irep, Bounded irep, Show irep, Typeable size, Typeable end) => Strengthen Natural (I 'U size end) where
+    strengthen = coerceBounded
+
+-- | An integer can be wrapped into a machine integer by asserting
+--   well-boundedness.
+instance (irep ~ IRep 'S size, Integral irep, Bounded irep, Show irep, Typeable size, Typeable end) => Strengthen Integer (I 'S size end) where
+    strengthen = coerceBounded
 
 -- | Machine integer sign.
 data ISign
