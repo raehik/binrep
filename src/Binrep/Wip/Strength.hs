@@ -49,7 +49,7 @@ data Both (s :: Strength) a = Both
   { bothList  :: Switch s (Vector 1 a)
   , bothWord8 :: Switch s Word8
   }
-deriving stock instance Show (Weaken a) => Show (Both 'Weak a)
+deriving stock instance Show a => Show (Both 'Weak a)
 deriving stock instance Show a => Show (Both 'Strong a)
 
 -- Annoying that I have to make this closed, because I need the final catch-all.
@@ -58,11 +58,11 @@ deriving stock instance Show a => Show (Both 'Strong a)
 type family Weaken (a :: Type) :: Type
 
 -- recursive cases
-type instance Weaken (LenPfx size end a) = [Weaken a]
-type instance Weaken (Vector n a) = [Weaken a]
-type instance Weaken (Refined p a) = Weaken a
-type instance Weaken [a] = [Weaken a]
-type instance Weaken (Both 'Strong a) = Both 'Weak (Weaken a)
+type instance Weaken (LenPfx size end a) = [a]
+type instance Weaken (Vector n a) = [a]
+type instance Weaken (Refined p a) = a
+type instance Weaken [a] = [a]
+type instance Weaken (Both 'Strong a) = Both 'Weak a
 
 -- primitives
 type instance Weaken Word8 = Natural
@@ -87,8 +87,10 @@ bothWeakStr = Both ["hi"] 255
 class StrongToWeak s w where
     strongToWeak :: s -> w
 
+{-
 instance {-# OVERLAPPABLE #-} StrongToWeak a a where
     strongToWeak = id
+-}
 
 instance StrongToWeak Word8 Natural where
     strongToWeak = fromIntegral
@@ -108,8 +110,10 @@ instance StrongToWeak (Refined p a) a where
 class WeakToStrong w s where
     weakToStrong :: w -> Either String s
 
+{-
 instance {-# OVERLAPPABLE #-} WeakToStrong a a where
     weakToStrong = Right
+-}
 
 instance WeakToStrong Natural Word8 where
     weakToStrong = natToBounded
@@ -136,17 +140,16 @@ natToBounded n =
 intToBounded :: forall i. (Integral i, Bounded i) => Integer -> Either String i
 intToBounded n = error "TODO"
 
-instance StrongToWeak a (Weaken a) => StrongToWeak (Both 'Strong a) (Both 'Weak a) where
+instance StrongToWeak (Both 'Strong a) (Both 'Weak a) where
     strongToWeak (Both l w) = Both l' w'
       where
-        l' = map strongToWeak $ strongToWeak @_ @[a] l
+        l' = strongToWeak @_ @[a] l
         w' = strongToWeak w
 
-instance WeakToStrong (Weaken a) a => WeakToStrong (Both 'Weak a) (Both 'Strong a) where
+instance WeakToStrong (Both 'Weak a) (Both 'Strong a) where
     weakToStrong (Both l w) = do
         w' <- weakToStrong w
-        l'' <- traverse (weakToStrong @_ @a) l
-        l' <- weakToStrong l''
+        l' <- weakToStrong l
         return $ Both l' w'
 
 data ExEnum
@@ -167,35 +170,30 @@ data ExProd (s :: Strength) a = ExProd
 deriving stock instance Show a => Show (ExProd 'Strong a)
 deriving stock instance Eq   a => Eq   (ExProd 'Strong a)
 
-deriving stock instance (Typeable a, Data (Weaken a)) => Data (ExProd 'Weak a)
-deriving stock instance Show (Weaken a) => Show (ExProd 'Weak a)
-deriving stock instance Eq   (Weaken a) => Eq   (ExProd 'Weak a)
+deriving stock instance (Typeable a, Data a) => Data (ExProd 'Weak a)
+deriving stock instance Show a => Show (ExProd 'Weak a)
+deriving stock instance Eq a => Eq (ExProd 'Weak a)
+
+instance Functor (ExProd 'Weak) where
+    fmap f (ExProd i e s1 s2) = ExProd i e (f s1) (f s2)
 
 instance BLen a => BLen (ExProd 'Strong a) where blen = blenGeneric cDef
 instance (Put a, BLen a) => Put (ExProd 'Strong a) where put = putGeneric cDef
 instance (Get a, BLen a) => Get (ExProd 'Strong a) where get = getGeneric  cDef
 
-instance StrongToWeak a (Weaken a) => StrongToWeak (ExProd 'Strong a) (ExProd 'Weak a) where
+instance StrongToWeak (ExProd 'Strong a) (ExProd 'Weak a) where
     strongToWeak (ExProd i e s1 s2) = ExProd i' e s1' s2'
       where
         i'  = strongToWeak i
-        s1' = strongToWeak @a @(Weaken a) $ strongToWeak s1
-        s2' = strongToWeak @a @(Weaken a) $ strongToWeak s2
+        s1' = strongToWeak s1
+        s2' = strongToWeak s2
 
-instance (WeakToStrong (Weaken a) a, BLen a) => WeakToStrong (ExProd 'Weak a) (ExProd 'Strong a) where
+instance BLen a => WeakToStrong (ExProd 'Weak a) (ExProd 'Strong a) where
     weakToStrong (ExProd i e s1 s2) = do
         i' <- weakToStrong i
-        s1Tmp <- weakToStrong @(Weaken a) @a s1
-        s1' <- weakToStrong s1Tmp
-        s2Tmp <- weakToStrong @(Weaken a) @a s2
-        s2' <- weakToStrong s2Tmp
+        s1' <- weakToStrong s1
+        s2' <- weakToStrong s2
         return $ ExProd i' e s1' s2'
 
 exProdWeak :: ExProd 'Weak Text
 exProdWeak = ExProd 0 ExEnum1This "hello" "hiaa"
-
-class WeakFunctor f where
-    wfmap :: (Weaken a -> Weaken b) -> f a -> f b
-
-instance WeakFunctor (ExProd 'Weak) where
-    wfmap f (ExProd i e s1 s2) = ExProd i e (f s1) (f s2)
