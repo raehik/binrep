@@ -16,13 +16,27 @@ import GHC.TypeNats
 import GHC.TypeLits ( OrderingI(..) )
 import Data.Proxy ( Proxy(..) )
 
+import GHC.Generics ( Generic )
+
+import GHC.Generics
+
 -- | Holy shit - no need to do a smart constructor, it's simply impossible to
 --   instantiate invalid values of this type!
 data LenPfx (size :: ISize) (end :: Endianness) a =
     forall n. (KnownNat n, n <= IMax 'U size) => LenPfx { unLenPfx :: Vector n a }
 
+-- uhhhhhhhhhh i dunno. TODO
+instance Generic (LenPfx size end a) where
+    type Rep (LenPfx size end a) = Rec0 (LenPfx size end a)
+    from = K1
+    to = unK1
+
 instance Eq a => Eq (LenPfx size end a) where
     (LenPfx a) == (LenPfx b) = vsEq a b
+
+-- TODO
+instance Show a => Show (LenPfx size end a) where
+    show (LenPfx a) = "LenPfx ("<>show a<>")"
 
 vsEq :: forall a n m. (Eq a, KnownNat n, KnownNat m) => Vector n a -> Vector m a -> Bool
 vsEq vn vm =
