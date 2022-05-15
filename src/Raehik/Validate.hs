@@ -12,6 +12,8 @@ TODO
     the typevars for better visible type application
 -}
 
+{-# LANGUAGE FunctionalDependencies #-}
+
 module Raehik.Validate where
 
 import Refined hiding ( strengthen, Weaken(..) )
@@ -59,7 +61,7 @@ type family Switch (v :: Validation) a :: Type where
     Switch 'Validated   a = a
     Switch 'Unvalidated a = Weak a
 
-class Weaken s w where
+class Weaken s w | s -> w where
     weaken :: s -> w
 
 instance Weaken Word8  Natural where weaken = fromIntegral
@@ -77,7 +79,7 @@ instance Weaken (Vector n a) [a] where
 instance Weaken (Refined p a) a where
     weaken = unrefine
 
-class Strengthen w s where
+class Strengthen w s | s -> w where
     strengthen :: w -> Either String s
 
 instance Strengthen Natural Word8  where strengthen = coerceBounded

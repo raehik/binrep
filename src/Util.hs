@@ -1,6 +1,5 @@
 module Util where
 
-import Numeric.Natural ( Natural )
 import Type.Reflection ( typeRep, Typeable )
 
 coerceBounded :: forall b n. (Integral b, Bounded b, Show b, Typeable b, Integral n, Show n, Typeable n) => n -> Either String b
