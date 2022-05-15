@@ -16,14 +16,25 @@ import GHC.TypeNats
 import GHC.TypeLits ( OrderingI(..) )
 import Data.Proxy ( Proxy(..) )
 
-import GHC.Generics ( Generic )
-
 import GHC.Generics
+
+import Data.Aeson.Extra.SizedVector()
+import Data.Aeson
 
 -- | Holy shit - no need to do a smart constructor, it's simply impossible to
 --   instantiate invalid values of this type!
 data LenPfx (size :: ISize) (end :: Endianness) a =
     forall n. (KnownNat n, n <= IMax 'U size) => LenPfx { unLenPfx :: Vector n a }
+
+instance ToJSON a => ToJSON (LenPfx size end a) where
+    toJSON     (LenPfx v) = toJSON     v
+    toEncoding (LenPfx v) = toEncoding v
+instance (FromJSON a, KnownNat (MaxBound (IRep 'U size))) => FromJSON (LenPfx size end a) where
+    parseJSON j = do
+        l <- parseJSON j
+        case lenPfxFromList l of
+          Nothing -> fail "TODO doesn't fit"
+          Just v  -> return v
 
 -- uhhhhhhhhhh i dunno. TODO
 instance Generic (LenPfx size end a) where
@@ -55,6 +66,12 @@ asLenPfx v =
       LTI -> Just $ LenPfx v
       EQI -> Just $ LenPfx v
       GTI -> Nothing
+
+lenPfxFromList
+    :: forall size end a irep
+    .  (irep ~ IRep 'U size, KnownNat (MaxBound irep))
+    => [a] -> Maybe (LenPfx size end a)
+lenPfxFromList l = V.withSizedList l asLenPfx
 
 instance (BLen a, itype ~ I 'U size end, KnownNat (CBLen itype))
   => BLen (LenPfx size end a) where
