@@ -5,6 +5,11 @@ on definitions.
 
 I might like to use fundeps? But I can't with the overlappable base instance.
 
+I need the overlappables to end the recursive constraint chains. They are a part
+of the composability. But they also prevent me doing some things, like I can't
+use refineds in `a` any more. That makes it seem like I'm doing the wrong thing
+here.
+
 TODO
 
   * typeclass methods should be internal, user should use methods that reorder
@@ -82,10 +87,8 @@ bothWeakStr = Both ["hi"] 255
 class StrongToWeak s w where
     strongToWeak :: s -> w
 
-{-
 instance {-# OVERLAPPABLE #-} StrongToWeak a a where
     strongToWeak = id
--}
 
 instance StrongToWeak Word8 Natural where
     strongToWeak = fromIntegral
@@ -105,10 +108,8 @@ instance StrongToWeak (Refined p a) a where
 class WeakToStrong w s where
     weakToStrong :: w -> Either String s
 
-{-
 instance {-# OVERLAPPABLE #-} WeakToStrong a a where
     weakToStrong = Right
--}
 
 instance WeakToStrong Natural Word8 where
     weakToStrong = natToBounded
@@ -174,9 +175,6 @@ instance BLen a => BLen (ExProd 'Strong a) where blen = blenGeneric cDef
 instance (Put a, BLen a) => Put (ExProd 'Strong a) where put = putGeneric cDef
 instance (Get a, BLen a) => Get (ExProd 'Strong a) where get = getGeneric  cDef
 
-fmapExProdWeak :: forall b a. (Weaken a -> Weaken b) -> ExProd 'Weak a -> ExProd 'Weak b
-fmapExProdWeak f (ExProd i e s1 s2) = ExProd i e (f s1) (f s2)
-
 instance StrongToWeak a (Weaken a) => StrongToWeak (ExProd 'Strong a) (ExProd 'Weak a) where
     strongToWeak (ExProd i e s1 s2) = ExProd i' e s1' s2'
       where
@@ -195,3 +193,9 @@ instance (WeakToStrong (Weaken a) a, BLen a) => WeakToStrong (ExProd 'Weak a) (E
 
 exProdWeak :: ExProd 'Weak Text
 exProdWeak = ExProd 0 ExEnum1This "hello" "hiaa"
+
+class WeakFunctor f where
+    wfmap :: (Weaken a -> Weaken b) -> f a -> f b
+
+instance WeakFunctor (ExProd 'Weak) where
+    wfmap f (ExProd i e s1 s2) = ExProd i e (f s1) (f s2)
