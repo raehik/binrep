@@ -5,7 +5,7 @@
 module Binrep.Type.LenPfx where
 
 import Binrep
-import Raehik.Validate ( Weak )
+import Raehik.Validate ( Weak, Weaken(..), Strengthen(..) )
 import Binrep.Type.Vector()
 import Binrep.Type.Common ( Endianness )
 import Binrep.Type.Int
@@ -32,9 +32,9 @@ instance ToJSON a => ToJSON (LenPfx size end a) where
 instance (FromJSON a, KnownNat (MaxBound (IRep 'U size))) => FromJSON (LenPfx size end a) where
     parseJSON j = do
         l <- parseJSON j
-        case lenPfxFromList l of
-          Nothing -> fail "TODO doesn't fit"
-          Just v  -> return v
+        case strengthen l of
+          Left  e -> fail e
+          Right v -> return v
 
 -- uhhhhhhhhhh i dunno. TODO
 instance Generic (LenPfx size end a) where
@@ -56,6 +56,14 @@ vsEq vn vm =
     else False
 
 type instance Weak (LenPfx size end a) = [a]
+
+instance Weaken (LenPfx size end a) [a] where
+    weaken (LenPfx v) = V.toList v
+
+instance KnownNat (MaxBound (IRep 'U size)) => Strengthen [a] (LenPfx size end a) where
+    strengthen l = case lenPfxFromList l of
+                     Nothing -> Left "TODO doesn't fit"
+                     Just v  -> Right v
 
 asLenPfx
     :: forall size end n a irep

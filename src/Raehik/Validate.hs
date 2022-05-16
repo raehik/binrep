@@ -92,7 +92,7 @@ instance Strengthen Integer Int32  where strengthen = coerceBounded
 instance Strengthen Integer Int64  where strengthen = coerceBounded
 
 instance KnownNat n => Strengthen [a] (Vector n a) where
-    strengthen w = case V.fromList w of Nothing -> Left "TODO nope"
+    strengthen w = case V.fromList w of Nothing -> Left "TODO bad size vector"
                                         Just s  -> Right s
 
 instance Predicate p a => Strengthen a (Refined p a) where
