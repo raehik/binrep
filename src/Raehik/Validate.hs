@@ -64,6 +64,9 @@ type family Switch (v :: Validation) a :: Type where
 class Weaken s w | s -> w where
     weaken :: s -> w
 
+instance Weaken s w => Weaken [s] [w] where
+    weaken = map weaken
+
 instance Weaken Word8  Natural where weaken = fromIntegral
 instance Weaken Word16 Natural where weaken = fromIntegral
 instance Weaken Word32 Natural where weaken = fromIntegral
@@ -81,6 +84,9 @@ instance Weaken (Refined p a) a where
 
 class Strengthen w s | s -> w where
     strengthen :: w -> Either String s
+
+instance Strengthen w s => Strengthen [w] [s] where
+    strengthen = traverse strengthen
 
 instance Strengthen Natural Word8  where strengthen = coerceBounded
 instance Strengthen Natural Word16 where strengthen = coerceBounded
