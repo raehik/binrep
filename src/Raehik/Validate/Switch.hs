@@ -30,8 +30,10 @@ data Validation = Validated | Unvalidated
 -- | Obtain the weak representation of the given type.
 type family Weak (a :: Type) :: Type
 
+{-
 -- primitives
 type instance Weak [a] = [a]
+-}
 
 -- machine integers
 type instance Weak Word8  = Natural
