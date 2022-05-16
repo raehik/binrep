@@ -27,6 +27,7 @@ import Data.ByteString qualified as B
 
 data Validation = Validated | Unvalidated
 
+-- | Obtain the weak representation of the given type.
 type family Weak (a :: Type) :: Type
 
 -- primitives
@@ -46,10 +47,12 @@ type instance Weak Int64  = Integer
 type instance Weak (Vector n a) = [a]
 type instance Weak (Refined p a) = a
 
+{-
 -- base types
 type instance Weak Text = Text
 type instance Weak Char = Char
 type instance Weak B.ByteString = B.ByteString
+-}
 
 type family Switch (v :: Validation) a :: Type where
     Switch 'Validated   a = a
