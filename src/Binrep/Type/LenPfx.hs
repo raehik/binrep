@@ -5,7 +5,8 @@
 module Binrep.Type.LenPfx where
 
 import Binrep
-import Raehik.Validate
+import Strongweak
+import Data.Validation
 import Binrep.Type.Vector()
 import Binrep.Type.Common ( Endianness )
 import Binrep.Type.Int
@@ -17,24 +18,12 @@ import GHC.TypeLits ( OrderingI(..) )
 import Data.Proxy ( Proxy(..) )
 
 import GHC.Generics
-
-import Data.Aeson.Extra.SizedVector()
-import Data.Aeson
+import Data.Typeable ( Typeable )
 
 -- | Holy shit - no need to do a smart constructor, it's simply impossible to
 --   instantiate invalid values of this type!
 data LenPfx (size :: ISize) (end :: Endianness) a =
     forall n. (KnownNat n, n <= IMax 'U size) => LenPfx { unLenPfx :: Vector n a }
-
-instance ToJSON a => ToJSON (LenPfx size end a) where
-    toJSON     (LenPfx v) = toJSON     v
-    toEncoding (LenPfx v) = toEncoding v
-instance (FromJSON a, KnownNat (MaxBound (IRep 'U size))) => FromJSON (LenPfx size end a) where
-    parseJSON j = do
-        l <- parseJSON j
-        case strengthen l of
-          Left  e -> fail e
-          Right v -> return v
 
 -- uhhhhhhhhhh i dunno. TODO
 instance Generic (LenPfx size end a) where
@@ -60,10 +49,10 @@ type instance Weak (LenPfx size end a) = [a]
 instance Weaken (LenPfx size end a) [a] where
     weaken (LenPfx v) = V.toList v
 
-instance KnownNat (MaxBound (IRep 'U size)) => Strengthen [a] (LenPfx size end a) where
+instance (KnownNat (MaxBound (IRep 'U size)), Show a, Typeable a, Typeable size, Typeable end) => Strengthen [a] (LenPfx size end a) where
     strengthen l = case lenPfxFromList l of
-                     Nothing -> Left "TODO doesn't fit"
-                     Just v  -> Right v
+                     Nothing -> strengthenErrorBase l "TODO doesn't fit"
+                     Just v  -> Success v
 
 asLenPfx
     :: forall size end n a irep
