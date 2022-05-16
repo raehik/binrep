@@ -49,12 +49,13 @@ type instance Weak (I 'U size end) = Natural
 -- | Signed machine integers can be idealized as integers.
 type instance Weak (I 'S size end) = Integer
 
--- TODO write these out explicitly, because derivingvia should get the
--- 'Typeable's wrong
-deriving via Natural instance Weaken (I 'U size end) Natural
-deriving via Integer instance Weaken (I 'S size end) Integer
-deriving via (IRep 'U size) instance Strengthen Natural (IRep 'U size) => Strengthen Natural (I 'U size end)
-deriving via (IRep 'S size) instance Strengthen Integer (IRep 'S size) => Strengthen Integer (I 'S size end)
+instance (irep ~ IRep 'U size, Integral irep) => Weaken (I 'U size end) Natural where weaken = fromIntegral
+instance (irep ~ IRep 'S size, Integral irep) => Weaken (I 'S size end) Integer where weaken = fromIntegral
+
+instance (irep ~ IRep 'U size, Integral irep, Bounded irep, Show irep, Typeable size, Typeable end)
+  => Strengthen Natural (I 'U size end) where strengthen = strengthenBounded
+instance (irep ~ IRep 'S size, Integral irep, Bounded irep, Show irep, Typeable size, Typeable end)
+  => Strengthen Integer (I 'S size end) where strengthen = strengthenBounded
 
 -- | Machine integer sign.
 data ISign
