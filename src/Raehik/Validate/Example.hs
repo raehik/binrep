@@ -3,6 +3,7 @@
 module Raehik.Validate.Example where
 
 import Raehik.Validate
+import Raehik.Validate.Generic
 import Binrep
 import Binrep.Generic
 import Binrep.Type.NullPadded
@@ -55,22 +56,11 @@ instance BLen a => BLen (ExProd V a) where blen = blenGeneric cDef
 instance (Put a, BLen a) => Put (ExProd V a) where put = putGeneric cDef
 instance (Get a, BLen a) => Get (ExProd V a) where get = getGeneric  cDef
 
-instance Weaken (ExProd V a) (ExProd UV a) where
-    weaken (ExProd i e s1 s2) = ExProd i' e s1' s2'
-      where
-        i'  = weaken i
-        s1' = weaken s1
-        s2' = weaken s2
-
-instance BLen a => Strengthen (ExProd UV a) (ExProd V a) where
-    strengthen (ExProd i e s1 s2) = do
-        i'  <- strengthen i
-        s1' <- strengthen s1
-        s2' <- strengthen s2
-        return $ ExProd i' e s1' s2'
+instance           Weaken     (ExProd V  a) (ExProd UV a) where weaken     = weakenGeneric
+instance BLen a => Strengthen (ExProd UV a) (ExProd V  a) where strengthen = strengthenGeneric
 
 exProdUV :: ExProd UV Text
-exProdUV = ExProd 256 ExEnum1This "hello" "hiaa"
+exProdUV = ExProd (-129) ExEnum1This "hello" "hiaa"
 
 exProdV :: Either String (ExProd V B.ByteString)
 exProdV = strengthen $ fmap Text.encodeUtf8 exProdUV
@@ -78,19 +68,25 @@ exProdV = strengthen $ fmap Text.encodeUtf8 exProdUV
 data Both (v :: Validation) a = Both
   { bothList  :: Switch v (Vector 1 a)
   , bothWord8 :: Switch v Word8
-  }
+  } deriving (Generic)
 deriving stock instance Show a => Show (Both UV a)
 deriving stock instance Show a => Show (Both V  a)
 type instance Weak (Both V a) = Both UV a
 
+{-
 instance Weaken (Both V a) (Both UV a) where
     weaken (Both l w) = Both l' w'
       where
         l' = weaken l
         w' = weaken w
+-}
+instance Weaken     (Both V  a) (Both UV a) where weaken     = weakenGeneric
+instance Strengthen (Both UV a) (Both V  a) where strengthen = strengthenGeneric
 
+{-
 instance Strengthen (Both UV a) (Both V a) where
     strengthen (Both l w) = do
         l' <- strengthen l
         w' <- strengthen w
         return $ Both l' w'
+-}

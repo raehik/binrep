@@ -2,7 +2,7 @@ module Binrep.Type.Int where
 
 import Binrep
 import Binrep.Type.Common ( Endianness(..) )
-import Raehik.Validate ( Weak, Weaken(..), Strengthen(..) )
+import Raehik.Validate
 import Util ( coerceBounded )
 
 import Data.Word

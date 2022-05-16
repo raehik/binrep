@@ -61,6 +61,12 @@ library
       Data.Aeson.Extra.SizedVector
       Raehik.Validate
       Raehik.Validate.Example
+      Raehik.Validate.Generic
+      Raehik.Validate.Generic.Strengthen
+      Raehik.Validate.Generic.Weaken
+      Raehik.Validate.Strengthen
+      Raehik.Validate.Switch
+      Raehik.Validate.Weaken
       Util
   other-modules:
       Paths_binrep

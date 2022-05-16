@@ -5,7 +5,7 @@
 module Binrep.Type.LenPfx where
 
 import Binrep
-import Raehik.Validate ( Weak, Weaken(..), Strengthen(..) )
+import Raehik.Validate
 import Binrep.Type.Vector()
 import Binrep.Type.Common ( Endianness )
 import Binrep.Type.Int
