@@ -33,6 +33,13 @@ packages:
   original:
     git: https://github.com/raehik/strongweak
     commit: cb1e4219296efd84e18b8a8b1117e3a410d21c4d
+- completed:
+    hackage: text-icu-0.8.0.1@sha256:22d21c91e7a81f1ee5766b3406f4fe9df0ff8cc426581a861de3f6f2fa413449,4624
+    pantry-tree:
+      size: 3223
+      sha256: 71ed32ecdce71adba6df6220e717b8ec4bd252cc403714c5c4ba70cf6d1aa1e4
+  original:
+    hackage: text-icu-0.8.0.1@sha256:22d21c91e7a81f1ee5766b3406f4fe9df0ff8cc426581a861de3f6f2fa413449,4624
 snapshots:
 - completed:
     size: 539378

@@ -8,6 +8,7 @@ module Binrep.Type.Text
   , Encode, encode
   , Decode(..)
   , encodeToRep
+  , decodeViaTextICU
   ) where
 
 import Binrep.Type.Common ( Endianness(..) )
@@ -31,6 +32,8 @@ import Data.Typeable ( Typeable, typeRep )
 import System.IO.Unsafe qualified
 import Control.Exception qualified
 import Data.Text.Encoding.Error qualified
+
+import Data.Text.ICU.Convert qualified as ICU
 
 type Bytes = B.ByteString
 
@@ -65,6 +68,8 @@ instance Encode ('UTF16 'LE) where encode' = Text.encodeUtf16LE
 instance Encode ('UTF32 'BE) where encode' = Text.encodeUtf32BE
 instance Encode ('UTF32 'LE) where encode' = Text.encodeUtf32LE
 
+instance Encode 'SJIS where encode' = encodeViaTextICU' "Shift-JIS"
+
 -- | Encode some validated text.
 encode :: forall enc. Encode enc => AsText enc -> Bytes
 encode = encode' @enc . unrefine
@@ -78,11 +83,14 @@ instance Typeable e => Predicate ('UTF16 e) Text where validate _ _ = success
 -- | Any 'Text' value is always valid UTF-32.
 instance Typeable e => Predicate ('UTF32 e) Text where validate _ _ = success
 
--- | 'Text' must be validated if you want to permit ASCII only.
+-- | 'Text' must be validated if you want to permit 7-bit ASCII only.
 instance Predicate 'ASCII Text where
     validate p t = if   Text.all Char.isAscii t
                    then success
-                   else throwRefineOtherException (typeRep p) "non-ASCII text"
+                   else throwRefineOtherException (typeRep p) "not valid 7-bit ASCII"
+
+-- | TODO Unsafely assume all 'Text's are valid Shift-JIS.
+instance Predicate 'SJIS Text where validate _ _ = success
 
 class Decode (enc :: Encoding) where
     -- | Decode a 'ByteString' to 'Text' with an explicit encoding.
@@ -90,16 +98,18 @@ class Decode (enc :: Encoding) where
     -- This is intended to be used with visible type applications.
     decode :: Bytes -> Either String (AsText enc)
 
-instance Decode 'UTF8  where decode = decodeText Text.decodeUtf8'
-instance Decode ('UTF16 'BE) where decode = decodeText $ wrapUnsafeDecoder Text.decodeUtf16BE
-instance Decode ('UTF16 'LE) where decode = decodeText $ wrapUnsafeDecoder Text.decodeUtf16LE
-instance Decode ('UTF32 'BE) where decode = decodeText $ wrapUnsafeDecoder Text.decodeUtf32BE
-instance Decode ('UTF32 'LE) where decode = decodeText $ wrapUnsafeDecoder Text.decodeUtf32LE
+instance Decode 'UTF8  where decode = decodeText show Text.decodeUtf8'
+instance Decode ('UTF16 'BE) where decode = decodeText show $ wrapUnsafeDecoder Text.decodeUtf16BE
+instance Decode ('UTF16 'LE) where decode = decodeText show $ wrapUnsafeDecoder Text.decodeUtf16LE
+instance Decode ('UTF32 'BE) where decode = decodeText show $ wrapUnsafeDecoder Text.decodeUtf32BE
+instance Decode ('UTF32 'LE) where decode = decodeText show $ wrapUnsafeDecoder Text.decodeUtf32LE
 
 -- Pre-@text-2.0@, @decodeASCII@ generated a warning and ran @decodeUtf8@.
 #if MIN_VERSION_text(2,0,0)
 instance Decode 'ASCII where decode = decodeText $ wrapUnsafeDecoder Text.decodeASCII
 #endif
+
+instance Decode 'SJIS where decode = decodeText id $ decodeViaTextICU' "Shift-JIS"
 
 --------------------------------------------------------------------------------
 -- Helpers
@@ -127,10 +137,10 @@ encodeToRep = refine . encode
 
 -- | Helper for decoding a 'Bytes' to a 'Text' tagged with its encoding.
 decodeText
-    :: forall enc e. Show e
-    => (Bytes -> Either e Text) -> Bytes
+    :: forall enc e
+    .  (e -> String) -> (Bytes -> Either e Text) -> Bytes
     -> Either String (AsText enc)
-decodeText f = Either.mapBoth show reallyUnsafeRefine . f
+decodeText g f = Either.mapBoth g reallyUnsafeRefine . f
 
 -- | Run an unsafe decoder safely.
 --
@@ -143,3 +153,32 @@ wrapUnsafeDecoder f =
     . Control.Exception.try
     . Control.Exception.evaluate
     . f
+
+-- | Encode some 'Text' to the given character set using text-icu.
+--
+-- No guarantees about correctness. Encodings are weird. e.g. Shift JIS's
+-- yen/backslash problem is apparently to do with OSs treating it differently.
+--
+-- Expects a 'Text' that is confirmed valid for converting to the character set.
+--
+-- The charset must be valid, or it's exception time. See text-icu.
+encodeViaTextICU :: String -> Text -> IO B.ByteString
+encodeViaTextICU charset t = do
+    conv <- ICU.open charset Nothing
+    return $ ICU.fromUnicode conv t
+
+encodeViaTextICU' :: String -> Text -> B.ByteString
+encodeViaTextICU' charset t =
+    System.IO.Unsafe.unsafeDupablePerformIO $ encodeViaTextICU charset t
+
+-- TODO Shitty library doesn't let us say how to handle errors. Apparently, the
+-- only solution is to scan through the resulting 'Text' to look for @\SUB@
+-- characters, or lie about correctness. Sigh.
+decodeViaTextICU :: String -> B.ByteString -> IO (Either String Text)
+decodeViaTextICU charset t = do
+    conv <- ICU.open charset Nothing
+    return $ Right $ ICU.toUnicode conv t
+
+decodeViaTextICU' :: String -> B.ByteString -> Either String Text
+decodeViaTextICU' charset t = do
+    System.IO.Unsafe.unsafeDupablePerformIO $ decodeViaTextICU charset t
