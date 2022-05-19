@@ -46,11 +46,11 @@ packages:
     git: https://github.com/raehik/flatparse
     pantry-tree:
       size: 1434
-      sha256: 33f720c04f78976a914d4c8f599f339dbb2a1f7adf58e9900107e5f2f729c2c9
-    commit: 596dcecda4ed58a74dfae9cf115ec339b4fce73f
+      sha256: e433f1760b7261f8f3f01222d3bd5b911348106b93c37a4f64e1b7fafb929977
+    commit: 3d71cc39f4f81cd5e6b0b3eb82e31dc249a2e91e
   original:
     git: https://github.com/raehik/flatparse
-    commit: 596dcecda4ed58a74dfae9cf115ec339b4fce73f
+    commit: 3d71cc39f4f81cd5e6b0b3eb82e31dc249a2e91e
 snapshots:
 - completed:
     size: 539378
