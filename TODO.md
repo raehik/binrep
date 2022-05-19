@@ -1,9 +1,8 @@
 # To-dos
 ## Refactor
-  * make `LenPfx` its own thing based on `Vector`; Pascal-style bytestrings must
-    be their own thing to avoid `Vector Word8`
-    * potentially a cooler way to do this (type family?), but for now I can only
-      think of bytestrings being unusual in this way, so
+  * use flatparse for parsing -- super fast
+    * but it's missing tons of primitives...
+    * but I'm adding those primitives!
 
 ## Testing
   * properly test the default `AsByteString 'C` sum tag handler (!)

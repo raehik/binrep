@@ -17,7 +17,7 @@ import GHC.TypeNats
 
 import Data.ByteString qualified as B
 
-import Data.Serialize.Get qualified as Cereal
+import FlatParse.Basic qualified as FP
 
 type BS = B.ByteString
 
@@ -46,10 +46,10 @@ instance KnownNat n => Put (TarNat n) where
 
 instance KnownNat n => Get (TarNat n) where
     get = do
-        an <- Cereal.isolate (fromIntegral (n - 1)) get
+        an <- FP.isolate (fromIntegral (n - 1)) get
         get @Word8 >>= \case
           0x00 -> return $ TarNat an
-          w    -> fail $ "TODO expected null byte, got " <> show w
+          w    -> FP.err $ "TODO expected null byte, got " <> show w
       where
         n = natVal'' @n
 

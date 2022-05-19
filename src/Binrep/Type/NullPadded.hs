@@ -11,7 +11,8 @@ import Refined.Unsafe
 import GHC.TypeNats
 import GHC.Natural ( minusNaturalMaybe )
 import Data.Typeable ( typeRep )
-import Data.Serialize qualified as Cereal
+import FlatParse.Basic qualified as FP
+import FlatParse.Basic ( Parser )
 import Mason.Builder qualified as Mason
 import Data.ByteString qualified as BS
 
@@ -57,19 +58,15 @@ instance (Get a, BLen a, KnownNat n) => Get (NullPadded n a) where
         a <- get
         let len = blen a
         case minusNaturalMaybe n len of
-          Nothing -> fail $ "too long: " <> show len <> " > " <> show n
+          Nothing -> FP.err $ "too long: " <> show len <> " > " <> show n
           Just nullstrLen -> do
             getNNulls nullstrLen
             return $ reallyUnsafeRefine a
       where
         n = natVal'' @n
 
-getNNulls :: Natural -> Cereal.Get ()
+getNNulls :: Natural -> Parser String ()
 getNNulls = \case 0 -> return ()
-                  n -> Cereal.getWord8 >>= \case
+                  n -> FP.anyWord8 >>= \case
                          0x00    -> getNNulls $ n-1
-                         nonNull -> do
-                           offset <- Cereal.bytesRead
-                           fail $  "expected null, found: "<> show nonNull
-                                <> " at offset " <> show offset
-                                <> ", " <> show n <> " more nulls to go"
+                         nonNull -> FP.err "TODO expected null, wasn't"

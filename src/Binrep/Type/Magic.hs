@@ -39,7 +39,7 @@ import Binrep.Type.Byte.TypeLevel
 
 import GHC.TypeLits
 import Data.ByteString qualified as B
-import Data.Serialize.Get qualified as Cereal
+import FlatParse.Basic qualified as FP
 
 import GHC.Generics ( Generic )
 import Data.Data ( Data )
@@ -57,10 +57,10 @@ instance (bs ~ MagicBytes a, ByteVals bs) => Put (Magic a) where
 instance (bs ~ MagicBytes a, ByteVals bs) => Get (Magic a) where
     get = do
         let expected = byteVals @bs
-        actual <- Cereal.getBytes $ B.length expected
+        actual <- FP.take $ B.length expected
         if   actual == expected
         then return Magic
-        else fail $ "bad magic: expected "<>show expected<>", got "<>show actual
+        else FP.err $ "bad magic: expected "<>show expected<>", got "<>show actual
 
 {-
 I do lots of functions on lists, because they're structurally simple. But you
