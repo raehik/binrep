@@ -1,8 +1,7 @@
 # To-dos
-## Refactor
-  * use flatparse for parsing -- super fast
-    * but it's missing tons of primitives...
-    * but I'm adding those primitives!
+## Meta
+  * improve readme: binrep wants to be used with strongweak for fantastic
+    explicit validation. focus on explicitness, validation, performance
 
 ## Testing
   * properly test the default `AsByteString 'C` sum tag handler (!)

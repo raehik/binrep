@@ -1,10 +1,10 @@
 # binrep
 tl;dr aeson for binary
 
-binrep is a library for defining **precise binary representations** of Haskell
-data types. We define a set of binary representation primitives such as
+binrep is a library for defining **precise binary representations** using
+Haskell data types. We define a set of binary representation primitives such as
 endianness, machine integers and null-padding, then provide generic derivers for
-efficiently (maybe) parsing & serializing types made out of these primitives.
+efficiently parsing & serializing types made out of these primitives.
 
 See [Generic binary representation](#generic-binary-representation) for details
 on what decisions the generic deriver makes.
@@ -54,11 +54,15 @@ out of binrep's hands, but check out
 derivers for refining and unrefining a given data type. (You'll need my
 [refined](https://github.com/raehik/refined) fork too.)
 
-### OK performance
-We use cereal for parsing (probably quite slow) and mason for serializing
-(blazingly fast). We only define serializers for validated types, meaning we can
-skip safety checks - though they are of course still done, just before
-serialization.
+### Performant primitives
+Parsing uses András Kovács' extremely fast
+[flatparse](https://github.com/AndrasKovacs/flatparse) library. Serializing is
+via Fumiaki Kinoshita's [mason](https://github.com/fumieval/mason) library.
+These are about as fast as you can get in 2022.
+
+We only define serializers for validated types, meaning we can potentially skip
+safety checks, that other serializers would do. Except we still do them, but
+validation is an explicitly required step before serialization.
 
 *This might change if we start to support weirder binary representations,
 specifically offset-based data.*

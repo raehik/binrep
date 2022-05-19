@@ -35,7 +35,8 @@ import FlatParse.Basic qualified as FP
 -- | A 'Natural' represented in binary as an ASCII string, where each character
 --   a is a digit in the given base (> 1).
 --
--- 'Show' instances display the stored number in the given base, with 
+-- 'Show' instances display the stored number in the given base. If the base has
+-- a common prefix (e.g. @0x@ for hex), it is used.
 newtype AsciiNat (base :: Natural) = AsciiNat { getAsciiNat :: Natural }
     deriving stock (Generic, Data)
     deriving (Eq, Ord) via Natural
