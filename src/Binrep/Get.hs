@@ -27,7 +27,13 @@ runFlatParser p bs = case FP.runParser p bs of
 --   succeeds by reaching EOF. Probably not what you usually want, but sometimes
 --   used at the "top" of binary formats.
 instance Get a => Get [a] where
-    get = error "TODO"
+    get = go []
+      where
+        go as = do
+            a <- get
+            FP.isEof >>= \case
+              True  -> return $ reverse $ a : as
+              False -> go $ a : as
 
 instance (Get a, Get b) => Get (a, b) where
     get = do
