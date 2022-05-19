@@ -15,7 +15,7 @@ import Refined.Unsafe
 
 import GHC.TypeNats
 import Data.Typeable ( typeRep )
-import Data.Serialize qualified as Cereal
+import FlatParse.Basic qualified as FP
 
 data Size (n :: Natural)
 
@@ -38,11 +38,10 @@ instance (BLen a, KnownNat n) => Predicate (Size n) a where
 instance Put a => Put (Sized n a) where
     put = put . unrefine
 
--- | Safety: 'Cereal.isolate' requires that the parser consumes all bytes
---   allocated, so if successful, we know size exactly
+-- TODO safety: isolate consumes all bytes if succeeds
 instance (Get a, KnownNat n) => Get (Sized n a) where
     get = do
-        a <- Cereal.isolate (fromIntegral n) get
+        a <- FP.isolate (fromIntegral n) get
         return $ reallyUnsafeRefine a
       where
         n = natVal'' @n

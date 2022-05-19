@@ -20,14 +20,11 @@ import GHC.Generics ( Generic )
 spec :: Spec
 spec = do
     prop "put is identity on ByteString" $ do
-      \(bs :: B.ByteString) -> do
-        runPut bs  `shouldBe` bs
+      \(bs :: B.ByteString) -> runPut bs  `shouldBe` bs
     prop "parse-print roundtrip isomorphism (ByteString)" $ do
-      \(bs :: B.ByteString) -> do
-        runGet (runPut bs) `shouldBe` Right (bs, "")
+      \(bs :: B.ByteString) -> runGet (runPut bs) `shouldBe` Right (bs, "")
     prop "parse-print roundtrip isomorphism (generic)" $ do
-      \(d :: D) -> do
-        runGet (runPut d) `shouldBe` Right (d, "")
+      \(d :: D) -> runGet (runPut d) `shouldBe` Right (d, "")
 
 --------------------------------------------------------------------------------
 

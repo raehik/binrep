@@ -54,6 +54,15 @@ out of binrep's hands, but check out
 derivers for refining and unrefining a given data type. (You'll need my
 [refined](https://github.com/raehik/refined) fork too.)
 
+### OK performance
+We use cereal for parsing (probably quite slow) and mason for serializing
+(blazingly fast). We only define serializers for validated types, meaning we can
+skip safety checks - though they are of course still done, just before
+serialization.
+
+*This might change if we start to support weirder binary representations,
+specifically offset-based data.*
+
 ### Similar projects
 #### Kaitai Struct
 [Kaitai Struct](https://kaitai.io/) is a wonderful declarative parser generator

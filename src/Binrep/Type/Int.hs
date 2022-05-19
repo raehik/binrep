@@ -7,7 +7,7 @@ import Strongweak
 import Data.Word
 import Data.Int
 import Data.Aeson
-import Data.Serialize qualified as Cereal
+import FlatParse.Basic.Int qualified as FP
 import Mason.Builder qualified as Mason
 
 import GHC.Generics ( Generic )
@@ -92,31 +92,31 @@ instance Put (I 'S 'I1 e) where put = put . getI
 instance Get (I 'S 'I1 e) where get = I <$> get
 
 instance Put (I 'U 'I2 'BE) where put (I i) = Mason.word16BE i
-instance Get (I 'U 'I2 'BE) where get = I <$> Cereal.getWord16be
+instance Get (I 'U 'I2 'BE) where get = I <$> FP.anyWord16be
 instance Put (I 'U 'I2 'LE) where put (I i) = Mason.word16LE i
-instance Get (I 'U 'I2 'LE) where get = I <$> Cereal.getWord16le
+instance Get (I 'U 'I2 'LE) where get = I <$> FP.anyWord16le
 instance Put (I 'S 'I2 'BE) where put (I i) = Mason.int16BE i
-instance Get (I 'S 'I2 'BE) where get = I <$> Cereal.getInt16be
+instance Get (I 'S 'I2 'BE) where get = I <$> FP.anyInt16be
 instance Put (I 'S 'I2 'LE) where put (I i) = Mason.int16LE i
-instance Get (I 'S 'I2 'LE) where get = I <$> Cereal.getInt16le
+instance Get (I 'S 'I2 'LE) where get = I <$> FP.anyInt16le
 
 instance Put (I 'U 'I4 'BE) where put (I i) = Mason.word32BE i
-instance Get (I 'U 'I4 'BE) where get = I <$> Cereal.getWord32be
+instance Get (I 'U 'I4 'BE) where get = I <$> FP.anyWord32be
 instance Put (I 'U 'I4 'LE) where put (I i) = Mason.word32LE i
-instance Get (I 'U 'I4 'LE) where get = I <$> Cereal.getWord32le
+instance Get (I 'U 'I4 'LE) where get = I <$> FP.anyWord32le
 instance Put (I 'S 'I4 'BE) where put (I i) = Mason.int32BE i
-instance Get (I 'S 'I4 'BE) where get = I <$> Cereal.getInt32be
+instance Get (I 'S 'I4 'BE) where get = I <$> FP.anyInt32be
 instance Put (I 'S 'I4 'LE) where put (I i) = Mason.int32LE i
-instance Get (I 'S 'I4 'LE) where get = I <$> Cereal.getInt32le
+instance Get (I 'S 'I4 'LE) where get = I <$> FP.anyInt32le
 
 instance Put (I 'U 'I8 'BE) where put (I i) = Mason.word64BE i
-instance Get (I 'U 'I8 'BE) where get = I <$> Cereal.getWord64be
+instance Get (I 'U 'I8 'BE) where get = I <$> FP.anyWord64be
 instance Put (I 'U 'I8 'LE) where put (I i) = Mason.word64LE i
-instance Get (I 'U 'I8 'LE) where get = I <$> Cereal.getWord64le
+instance Get (I 'U 'I8 'LE) where get = I <$> FP.anyWord64le
 instance Put (I 'S 'I8 'BE) where put (I i) = Mason.int64BE i
-instance Get (I 'S 'I8 'BE) where get = I <$> Cereal.getInt64be
+instance Get (I 'S 'I8 'BE) where get = I <$> FP.anyInt64be
 instance Put (I 'S 'I8 'LE) where put (I i) = Mason.int64LE i
-instance Get (I 'S 'I8 'LE) where get = I <$> Cereal.getInt64le
+instance Get (I 'S 'I8 'LE) where get = I <$> FP.anyInt64le
 
 -- | Shortcut.
 type family IMax (sign :: ISign) (size :: ISize) :: Natural where

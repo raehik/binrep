@@ -23,7 +23,7 @@ import GHC.Exts ( proxy#, Proxy# )
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as Text
 import Data.ByteString qualified as B
-import Data.Serialize.Get qualified as Cereal
+import FlatParse.Basic qualified as FP
 
 data MagicUTF8 (str :: Symbol) = MagicUTF8 deriving Show
 
@@ -39,10 +39,10 @@ instance KnownSymbol str => Put  (MagicUTF8 str) where
 instance KnownSymbol str => Get  (MagicUTF8 str) where
     get = do
         let expected = encodeStringUtf8 $ symVal @str
-        actual <- Cereal.getBytes $ B.length expected
+        actual <- FP.take $ B.length expected
         if   actual == expected
         then return MagicUTF8
-        else fail $ "bad magic: expected "<>show expected<>", got "<>show actual
+        else FP.err $ "bad magic: expected "<>show expected<>", got "<>show actual
 
 encodeStringUtf8 :: String -> B.ByteString
 encodeStringUtf8 = Text.encodeUtf8 . Text.pack

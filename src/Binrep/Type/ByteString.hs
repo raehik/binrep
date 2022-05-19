@@ -27,7 +27,8 @@ import Refined.Unsafe
 import Data.ByteString qualified as B
 import Data.ByteString.Lazy qualified as BL
 import Data.ByteString.Builder qualified as B
-import Data.Serialize qualified as Cereal
+import FlatParse.Basic qualified as FP
+import FlatParse.Basic ( Parser )
 import Data.Word ( Word8 )
 import GHC.TypeNats ( KnownNat )
 
@@ -50,7 +51,7 @@ data Rep
 -- | A bytestring using the given representation, stored in the 'Text' type.
 type AsByteString (rep :: Rep) = Refined rep B.ByteString
 
-getCString :: Cereal.Get B.ByteString
+getCString :: Parser String B.ByteString
 getCString = go mempty
   where go buf = do
             get @Word8 >>= \case
@@ -78,7 +79,7 @@ instance (itype ~ I 'U size end, irep ~ IRep 'U size, Put itype, Num irep) => Pu
 instance (itype ~ I 'U size end, irep ~ IRep 'U size, Integral irep, Get itype) => Get (AsByteString ('Pascal size end)) where
     get = do
         len <- get @itype
-        bs <- Cereal.getBytes (fromIntegral len)
+        bs <- FP.take $ fromIntegral len
         return $ reallyUnsafeRefine bs
 
 

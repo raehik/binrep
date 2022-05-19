@@ -9,7 +9,7 @@ import Binrep.Type.Common ( Endianness(..) )
 import Binrep.Type.Int
 import Binrep.Type.Magic
 import Binrep.Type.Byte
-import Control.Applicative ( (<|>) )
+import FlatParse.Basic ( (<|>) )
 
 import GHC.Generics ( Generic )
 import Data.Data ( Data, Typeable )

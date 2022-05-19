@@ -6,14 +6,15 @@ import GHC.TypeLits ( TypeError )
 import Binrep.Get
 import Binrep.Generic.Internal
 
-import Data.Serialize.Get qualified as Cereal
+import FlatParse.Basic qualified as FP
+import FlatParse.Basic ( Parser )
 import Control.Applicative ( (<|>) )
 
-getGeneric :: (Generic a, GGet (Rep a), Get w, Eq w, Show w) => Cfg w -> Cereal.Get a
+getGeneric :: (Generic a, GGet (Rep a), Get w, Eq w, Show w) => Cfg w -> Parser String a
 getGeneric cfg = to <$> gget cfg
 
 class GGet f where
-    gget :: (Get w, Eq w, Show w) => Cfg w -> Cereal.Get (f a)
+    gget :: (Get w, Eq w, Show w) => Cfg w -> Parser String (f a)
 
 -- | Empty constructor.
 instance GGet U1 where
@@ -35,7 +36,7 @@ instance GGetSum (l :+: r) => GGet (l :+: r) where
         tag <- get
         case ggetsum cfg tag of
           Just parser -> parser
-          Nothing -> fail $ "invalid sum type tag: "<>show tag
+          Nothing -> FP.err $ "invalid sum type tag: "<>show tag
 
 -- | Refuse to derive instance for void datatype.
 instance TypeError GErrRefuseVoid => GGet V1 where
@@ -48,7 +49,7 @@ instance GGet f => GGet (M1 i d f) where
 --------------------------------------------------------------------------------
 
 class GGetSum f where
-    ggetsum :: (Get w, Eq w, Show w) => Cfg w -> w -> Maybe (Cereal.Get (f a))
+    ggetsum :: (Get w, Eq w, Show w) => Cfg w -> w -> Maybe (Parser String (f a))
 
 instance (GGetSum l, GGetSum r) => GGetSum (l :+: r) where
     ggetsum cfg tag = l <|> r
