@@ -21,4 +21,4 @@ extra-deps:
 
 # lol more forks
 - git: https://github.com/raehik/flatparse
-  commit: 3d71cc39f4f81cd5e6b0b3eb82e31dc249a2e91e
+  commit: fb61fab028945921a14e896563db622d1beb4930

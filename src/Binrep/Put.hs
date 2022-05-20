@@ -1,5 +1,3 @@
--- {-# LANGUAGE ImpredicativeTypes #-}
-
 module Binrep.Put where
 
 import Mason.Builder qualified as Mason

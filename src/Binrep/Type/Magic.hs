@@ -44,6 +44,8 @@ import FlatParse.Basic qualified as FP
 import GHC.Generics ( Generic )
 import Data.Data ( Data )
 
+import Mason.Builder qualified as Mason
+
 data Magic (a :: k) = Magic
     deriving stock (Generic, Data, Show, Eq)
 
@@ -51,12 +53,12 @@ type instance CBLen (Magic a) = Length (MagicBytes a)
 deriving anyclass instance KnownNat (Length (MagicBytes a)) => BLen (Magic a)
 
 instance (bs ~ MagicBytes a, ByteVals bs) => Put (Magic a) where
-    put Magic = put $ byteVals @bs
+    put Magic = byteVals @bs
 
 -- TODO improve show - maybe hexbytestring goes here? lol
 instance (bs ~ MagicBytes a, ByteVals bs) => Get (Magic a) where
     get = do
-        let expected = byteVals @bs
+        let expected = Mason.toStrictByteString $ byteVals @bs
         actual <- FP.take $ B.length expected
         if   actual == expected
         then return Magic
@@ -74,10 +76,6 @@ out the function applications or something. Essentially, you can't do this:
 
 So you have to write that out for every concrete function over lists.
 -}
-
-type family Length (a :: [k]) :: Natural where
-    Length '[]       = 0
-    Length (a ': as) = 1 + Length as
 
 type family SymbolAsCharList (a :: Symbol) :: [Char] where
     SymbolAsCharList a = SymbolAsCharList' (UnconsSymbol a)

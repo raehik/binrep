@@ -25,8 +25,6 @@ import Refined
 import Refined.Unsafe
 
 import Data.ByteString qualified as B
-import Data.ByteString.Lazy qualified as BL
-import Data.ByteString.Builder qualified as B
 import FlatParse.Basic qualified as FP
 import FlatParse.Basic ( Parser )
 import Data.Word ( Word8 )
@@ -52,11 +50,7 @@ data Rep
 type AsByteString (rep :: Rep) = Refined rep B.ByteString
 
 getCString :: Parser String B.ByteString
-getCString = go mempty
-  where go buf = do
-            get @Word8 >>= \case
-              0x00    -> return $ BL.toStrict $ B.toLazyByteString buf
-              nonNull -> go $ buf <> B.word8 nonNull
+getCString = FP.anyCString
 
 instance BLen (AsByteString 'C) where
     blen cbs = unsafePosIntToNat (B.length (unrefine cbs)) + 1
@@ -64,8 +58,6 @@ instance BLen (AsByteString 'C) where
 instance Put (AsByteString 'C) where
     put cbs = put (unrefine cbs) <> put @Word8 0x00
 
--- | Total shite parsing efficiency. But, to be fair, that's why we don't
---   serialize arbitrary-length C strings!
 instance Get (AsByteString 'C) where
     get = reallyUnsafeRefine <$> getCString
 
@@ -81,30 +73,6 @@ instance (itype ~ I 'U size end, irep ~ IRep 'U size, Integral irep, Get itype) 
         len <- get @itype
         bs <- FP.take $ fromIntegral len
         return $ reallyUnsafeRefine bs
-
-
-{-
--- TODO finish and explain why safe. actually should use singletons!
-instance PutWith Rep B.ByteString where
-    putWith strRep bs =
-        case strRep of
-          C -> case refine @'C bs of
-                 Left  e   -> Left $ show e
-                 Right rbs -> putWithout rbs
-          Pascal size _e -> do
-            case size of
-              I1 -> do
-                if   len > fromIntegral (maxBound @Word8)
-                then Left "bytestring too long for configured static-size length prefix"
-                else Right $ B.byteString bs
-              _ -> undefined
-      where len = B.length bs
--}
-
--- TODO finish and explain why safe. actually should use singletons!
-instance GetWith Rep B.ByteString where
-    getWith = \case C -> getCString
-                    Pascal _size _e -> undefined
 
 -- | A C-style bytestring must not contain any null bytes.
 instance Predicate 'C B.ByteString where
