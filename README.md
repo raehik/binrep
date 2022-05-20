@@ -1,64 +1,66 @@
+[gh-strongweak]: https://github.com/raehik/strongweak
+[gh-flatparse]:  https://github.com/AndrasKovacs/flatparse
+[gh-mason]:      https://github.com/fumieval/mason
+[gh-refined]:    https://github.com/nikita-volkov/refined
+
 # binrep
-tl;dr aeson for binary
+binrep is a library for **precisely modelling binary schemas** and working with
+them effectively and efficiently in Haskell. Here's why it's useful:
 
-binrep is a library for defining **precise binary representations** using
-Haskell data types. We define a set of binary representation primitives such as
-endianness, machine integers and null-padding, then provide generic derivers for
-efficiently parsing & serializing types made out of these primitives.
+  * **Explicit:** Binary representation primitives such as C-style bytestrings
+    (null-terminated), sized explicit-endian machine integers, and null-padded
+    data enable defining Haskell data types with the binary schema "baked in".
+  * **Low boilerplate:** Generic parsers and serializers further reduce boilerplate for
+    straightforward schemas. (See [Generic binary
+    representation](#generic-binary-representation) for details.)
+  * **Easy validation:** Goes hand in hand with my [strongweak][gh-strongweak]
+    library to allow working with unwrapped data internally, and enforce all the
+    binary representation invariants before serializing - no extra definitions
+    required.
+  * **Performant:** Parsing and serialization is low-level and *extremely fast*,
+    using [flatparse][gh-flatparse] and [mason][gh-mason] respectively.
 
-See [Generic binary representation](#generic-binary-representation) for details
-on what decisions the generic deriver makes.
-
-## Representation, not serialization
-The binary and cereal libraries are **binary serialization** libraries.
-They are interested in defining efficient binary en/decoders for Haskell data.
-cereal in particular is wonderful, and forms the basis of this library. However,
-their typeclasses *hide representation decisions* from the user:
+## Philosophy
+### Modelling, not serializing
+binrep is good at modelling binary data formats. It is not a plain
+"serialization" library, where the actual binary representation is hidden from
+the user (intentionally, with good reason). The binary and cereal libraries are
+great choices for that. They are interested in defining efficient binary codecs
+for Haskell data. However, their codec typeclasses *hide representation
+decisions* from the user. In cereal,
 
   * machine integers are encoded with
     [big endian](https://hackage.haskell.org/package/cereal-0.5.8.2/docs/src/Data.Serialize.html#line-182)
   * bytestrings are written with an
     [8-byte length prefix](https://hackage.haskell.org/package/cereal-0.5.8.2/docs/src/Data.Serialize.html#line-498)
 
-These are all fine decisions. But they restrict the typeclasses to working with
-other cereal users. binrep is mainly interested in *precision* and *safety*.
+These are fine decisions. But they aren't accurate to the types. Endianness is
+an implementation decision.
 
-### Precision
-Rather than bytestrings, it prefers to talk about C-style (null-terminated)
-bytestrings and Pascal-style (length-prefixed) bytestrings. It doesn't like to
-talk about machine integers at all, unless you have an explicit endianness on
-the table.
+binrep refuses to work with a machine integer unless it knows the endianness.
+Bytestrings are split into C-style (null-terminated) and Pascal-style
+(length-prefixed). This enforces careful consideration for the binary data being
+modelled.
 
-These force verbosity and proper consideration for the target format. And by
-shifting such decisions to the type level, we can write code that flips between
-different representations with type safety guarantees: for example, a type
-parametrized by its endianness.
-
-### Safety
+### Validation without boilerplate
 A C-style bytestring must not contain any `0x00` null bytes. A Pascal-style
 bytestring must be short enough to be able to encode its length in the length
-prefix machine integer. As we all know, checking such invariants is tedious. Are
-you really going to wrap everything in a bunch of newtypes and force users to
-call a bunch of checker functions?
+prefix machine integer. But checking such invariants is tedious work. Am I
+really going to wrap everything in a bunch of newtypes and force users to call a
+bunch of checker functions every time?
 
-Yes and no. binrep builds on top of Nikita Volkov's wonderful
-[refined](https://hackage.haskell.org/package/refined) library, which lets us
-write such predicated types via type synonyms rather than newtype overload. You
-*can't get* a C-style bytestring without testing the above predicate.
-
-binrep types still necessitate a lot of wrapping. And if you want to transform a
-large type with lots of refined types inside, you either have to do lots of
-extremely tedious work, or convert between a "safe" and "unsafe" format. That's
-out of binrep's hands, but check out
-[refined-extra](https://github.com/raehik/refined-extra), which provides generic
-derivers for refining and unrefining a given data type. (You'll need my
-[refined](https://github.com/raehik/refined) fork too.)
+Yes and no. Yes, binrep uses newtypes extensively, though most are type synonyms
+over the `Refined` newtype from Nikita Volkov's wonderful [refined][gh-refined]
+library. No, binrep doesn't want you to wrangle with these day-to-day. One
+solution is to define a simplified "weak" type, and convert between it and the
+binary-safe "strong" type. My [strongweak][gh-strongweak] library provides
+supporting definitions for this pattern, and generic derivers which will work
+with binrep's binary representation primitives.
 
 ### Performant primitives
-Parsing uses András Kovács' extremely fast
-[flatparse](https://github.com/AndrasKovacs/flatparse) library. Serializing is
-via Fumiaki Kinoshita's [mason](https://github.com/fumieval/mason) library.
-These are about as fast as you can get in 2022.
+Parsing uses András Kovács' [flatparse][gh-flatparse] library. Serializing is
+via Fumiaki Kinoshita's [mason][gh-mason] library. These are about as fast as
+you can get in 2022.
 
 We only define serializers for validated types, meaning we can potentially skip
 safety checks, that other serializers would do. Except we still do them, but
@@ -67,8 +69,38 @@ validation is an explicitly required step before serialization.
 *This might change if we start to support weirder binary representations,
 specifically offset-based data.*
 
-### Similar projects
-#### Kaitai Struct
+## Generic binary representation
+binrep's generic deriving makes very few decisions:
+
+  * Constructors are encoded by sequentially encoding every enclosed field.
+    * Empty constructors thus serialize to 0 bytes.
+  * Sum types are encoded via a tag obtained from the constructor names.
+    * It's the same approach as aeson, with a bit more flexibility: see below.
+
+Sum types (data types with multiple constructors) are handled by first encoding
+a "tag field", the value of which then indicates which constructor to use. You
+must provide a function to convert from a constructor name to a (unique) tag.
+You could encode them as a null-terminated ASCII bytestring (this is the
+default), or as a single byte. To ease this, you may consider putting the tag
+value in constructor names:
+
+```haskell
+data BinarySumType = B1 | B2
+
+getConstructorTag :: String -> Word8
+getConstructorTag = read . drop 1
+
+-- >>> getConstructorTag "B1"
+-- 1
+
+-- Or use our generic helper, which takes hex values:
+--
+-- >>> cSumTagHex @Word8 (drop . 1) "BFF"
+-- 255
+```
+
+## Similar projects
+### Kaitai Struct
 [Kaitai Struct](https://kaitai.io/) is a wonderful declarative parser generator
 project. They bolt an expression language and a whole lot of binary cleverness
 on top of a nice YAML schema. It comes with an IDE, a visualizer, and you can
@@ -87,7 +119,7 @@ Realistically, Kaitai Struct is the best decision for fast iteration on
 reversing unknown data. binrep is useful for loading data straight into Haskell
 for further processing, especially converting between simpler formats.
 
-#### Wuffs
+### Wuffs
 [Wuffs](https://github.com/google/wuffs) is a crazy exploration into safe
 low-level code via strong typing. You have to annotate every possibly dangerous
 statement with a proof of safety. It's a tedious, explicit, very safe and very
@@ -101,42 +133,3 @@ many core ideas, such as refinement types.
 
 Check out Wuffs if you need to write a bunch of codecs and they really, really
 need to be both fast and safe. The trade-off is, of course, your time.
-
-## Generic binary representation
-binrep's generic deriving makes very few decisions:
-
-  * Constructors are encoded by sequentially encoding every enclosed field.
-    * Thus, empty constructors serialize to 0 bytes.
-  * Sum types are encoded via a tag obtained from the constructor names.
-    * It's the same approach as aeson, with a bit more flexibility: see below.
-
-Due to sum type handling (and so that classes can stay independent from their
-generic derivers), you must provide a deriver config.
-
-### Generic sum type encoding
-Data types with multiple constructors are handled by first encoding a "tag
-field", the value of which then indicates which constructor to use. Here's the
-trick -- you provide the type to use for the tag. You'll probably want to stick
-with machine integers, but you may choose the size and endianness (well, you
-have to).
-
-You must also provide a function to convert from constructor strings to your
-tag. We encourage the aeson approach of encoding tags in constructor names:
-
-```haskell
-data BinarySumType = B1 | B2
-
-getConstructorTag :: String -> Word8
-getConstructorTag = read . drop 1
-
--- >>> getConstructorTag "B1"
--- 1
-
--- Or use our generic helper, which takes hex values:
---
--- >>> cSumTagHex @Word8 (drop . 1) "BFF"
--- 255
-```
-
-This function must map valid each valid constructor name to a unique tag value.
-If it doesn't, you should hopefully get cool and fun errors.
