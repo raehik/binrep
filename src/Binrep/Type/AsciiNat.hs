@@ -24,7 +24,7 @@ import Data.ByteString qualified as B
 import Data.Semigroup ( sconcat )
 
 import GHC.TypeNats ( Natural, KnownNat )
-import GHC.Num.Natural ( naturalSizeInBase#, naturalToWord#, Natural(NS) )
+import GHC.Num.Natural ( naturalSizeInBase#, naturalToWord# )
 
 import GHC.Generics ( Generic )
 import Data.Data ( Data )
@@ -54,7 +54,7 @@ asciiNatCompare (AsciiNat n1) (AsciiNat n2) = compare n1 n2
 --   the given base. We can calculate this generically with great efficiency
 --   using GHC primitives.
 instance KnownNat base => BLen (AsciiNat base) where
-    blen (AsciiNat n) = NS (naturalSizeInBase# (naturalToWord# base) n)
+    blen (AsciiNat n) = wordToBLen# (naturalSizeInBase# (naturalToWord# base) n)
       where base = natVal'' @base
 
 --------------------------------------------------------------------------------

@@ -6,9 +6,9 @@ module Binrep.Util where
 import Data.Text qualified as Text
 import Data.Text ( Text )
 
--- unsafePosIntToNat
-import GHC.Exts ( Int( I# ), int2Word# )
-import GHC.Num.Natural ( Natural( NS ) )
+-- posIntToNat
+import GHC.Exts ( Int(..), int2Word# )
+import GHC.Num.Natural ( Natural(..) )
 
 -- natVal''
 import GHC.TypeNats ( KnownNat, natVal' )
@@ -22,8 +22,10 @@ tshow = Text.pack . show
 -- This is intended for wrapping the output of 'length' functions.
 --
 -- underflows if you call it with a negative 'Int' :)
-unsafePosIntToNat :: Int -> Natural
-unsafePosIntToNat (I# i#) = NS (int2Word# i#)
+posIntToNat :: Int -> Natural
+posIntToNat (I# i#) = NS (int2Word# i#)
+{-# INLINE posIntToNat #-}
 
 natVal'' :: forall a. KnownNat a => Natural
 natVal'' = natVal' (proxy# :: Proxy# a)
+{-# INLINE natVal'' #-}

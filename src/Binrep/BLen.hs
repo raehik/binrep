@@ -1,12 +1,20 @@
-module Binrep.BLen where
+{-# LANGUAGE AllowAmbiguousTypes #-}
 
+module Binrep.BLen
+  ( module Binrep.BLen
+  , module Binrep.BLen.Internal.AsBLen
+  ) where
+
+import Binrep.BLen.Internal.AsBLen
 import Binrep.CBLen
-import Binrep.Util
+import Binrep.Util ( natVal'' )
 
 import GHC.TypeNats
 import Data.ByteString qualified as B
 import Data.Word
 import Data.Int
+
+type BLenT = Int
 
 -- | The length in bytes of a value of the given type can be known on the cheap
 --   e.g. by reading a length field, or using compile time information.
@@ -28,9 +36,18 @@ import Data.Int
 -- find you can't write a decent 'BLen' instance for a type, it may be that you
 -- need to rethink the representation.
 class BLen a where
-    blen :: a -> Natural
-    default blen :: KnownNat (CBLen a) => a -> Natural
+    blen :: a -> BLenT
+    default blen :: KnownNat (CBLen a) => a -> BLenT
     blen _ = cblen @a
+
+typeNatToBLen :: forall n. KnownNat n => BLenT
+typeNatToBLen = natToBLen $ natVal'' @n
+{-# INLINE typeNatToBLen #-}
+
+-- | Reify a type's constant byte length to the term level.
+cblen :: forall a n. (n ~ CBLen a, KnownNat n) => BLenT
+cblen = typeNatToBLen @n
+{-# INLINE cblen #-}
 
 -- | @O(n)@
 instance BLen a => BLen [a] where
@@ -40,7 +57,7 @@ instance (BLen a, BLen b) => BLen (a, b) where
     blen (a, b) = blen a + blen b
 
 instance BLen B.ByteString where
-    blen = unsafePosIntToNat . B.length
+    blen = posIntToBLen . B.length
 
 deriving anyclass instance BLen Word8
 deriving anyclass instance BLen  Int8

@@ -3,13 +3,12 @@
 module Binrep.Type.NullPadded where
 
 import Binrep
-import Binrep.Util ( tshow, natVal'' )
+import Binrep.Util ( tshow )
 
 import Refined
 import Refined.Unsafe
 
 import GHC.TypeNats
-import GHC.Natural ( minusNaturalMaybe )
 import Data.Typeable ( typeRep )
 import FlatParse.Basic qualified as FP
 import FlatParse.Basic ( Parser )
@@ -32,7 +31,7 @@ instance (BLen a, KnownNat n) => Predicate (NullPad n) a where
                    "too long: " <> tshow len <> " > " <> tshow n
       | otherwise = success
       where
-        n = natVal'' @n
+        n = typeNatToBLen @n
         len = blen a
 
 -- TODO cleanup
@@ -42,7 +41,7 @@ instance (Put a, BLen a, KnownNat n) => Put (NullPadded n a) where
             paddingLength = n - blen npa
          in put npa <> Mason.byteString (BS.replicate (fromIntegral paddingLength) 0x00)
       where
-        n = natVal'' @n
+        n = typeNatToBLen @n
 
 -- | Safety: we assert actual length is within expected length (in order to
 --   calculate how much padding to parse).
@@ -57,15 +56,14 @@ instance (Get a, BLen a, KnownNat n) => Get (NullPadded n a) where
     get = do
         a <- get
         let len = blen a
-        case minusNaturalMaybe n len of
-          Nothing -> FP.err $ "too long: " <> show len <> " > " <> show n
-          Just nullstrLen -> do
-            getNNulls nullstrLen
-            return $ reallyUnsafeRefine a
+            nullStrLen = n - len
+        if   nullStrLen < 0
+        then FP.err $ "too long: " <> show len <> " > " <> show n
+        else getNNulls nullStrLen >> return (reallyUnsafeRefine a)
       where
-        n = natVal'' @n
+        n = typeNatToBLen @n
 
-getNNulls :: Natural -> Parser String ()
+getNNulls :: BLenT -> Parser String ()
 getNNulls = \case 0 -> return ()
                   n -> FP.anyWord8 >>= \case
                          0x00    -> getNNulls $ n-1

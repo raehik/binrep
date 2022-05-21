@@ -1,8 +1,4 @@
 # To-dos
-## Meta
-  * improve readme: binrep wants to be used with strongweak for fantastic
-    explicit validation. focus on explicitness, validation, performance
-
 ## Testing
   * properly test the default `AsByteString 'C` sum tag handler (!)
 
