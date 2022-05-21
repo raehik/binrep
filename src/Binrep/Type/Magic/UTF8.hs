@@ -16,7 +16,6 @@ handling, depending on how GHC optimizes its instances.
 module Binrep.Type.Magic.UTF8 where
 
 import Binrep
-import Binrep.Util ( unsafePosIntToNat )
 
 import GHC.TypeLits
 import GHC.Exts ( proxy#, Proxy# )
@@ -31,7 +30,7 @@ symVal :: forall str. KnownSymbol str => String
 symVal = symbolVal' (proxy# :: Proxy# str)
 
 instance KnownSymbol str => BLen (MagicUTF8 str) where
-    blen MagicUTF8 = unsafePosIntToNat $ B.length $ encodeStringUtf8 $ symVal @str
+    blen MagicUTF8 = posIntToBLen $ B.length $ encodeStringUtf8 $ symVal @str
 
 instance KnownSymbol str => Put  (MagicUTF8 str) where
     put  MagicUTF8 = put $ encodeStringUtf8 $ symVal @str

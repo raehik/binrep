@@ -30,6 +30,7 @@ library
   exposed-modules:
       Binrep
       Binrep.BLen
+      Binrep.BLen.Internal.AsBLen
       Binrep.CBLen
       Binrep.Example
       Binrep.Example.Tar

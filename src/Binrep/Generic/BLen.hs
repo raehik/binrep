@@ -2,16 +2,15 @@ module Binrep.Generic.BLen where
 
 import GHC.Generics
 import GHC.TypeLits ( TypeError )
-import GHC.TypeNats
 
 import Binrep.BLen
 import Binrep.Generic.Internal
 
-blenGeneric :: (Generic a, GBLen (Rep a), BLen w) => Cfg w -> a -> Natural
+blenGeneric :: (Generic a, GBLen (Rep a), BLen w) => Cfg w -> a -> BLenT
 blenGeneric cfg = gblen cfg . from
 
 class GBLen f where
-    gblen :: BLen w => Cfg w -> f p -> Natural
+    gblen :: BLen w => Cfg w -> f p -> BLenT
 
 -- | Empty constructor.
 instance GBLen U1 where
@@ -40,7 +39,7 @@ instance GBLen f => GBLen (M1 i d f) where
 --------------------------------------------------------------------------------
 
 class GBLenSum f where
-    gblensum :: BLen w => Cfg w -> f p -> Natural
+    gblensum :: BLen w => Cfg w -> f p -> BLenT
 
 instance (GBLenSum l, GBLenSum r) => GBLenSum (l :+: r) where
     gblensum cfg = \case L1 l -> gblensum cfg l

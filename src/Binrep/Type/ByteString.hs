@@ -53,7 +53,7 @@ getCString :: Parser String B.ByteString
 getCString = FP.anyCString
 
 instance BLen (AsByteString 'C) where
-    blen cbs = unsafePosIntToNat (B.length (unrefine cbs)) + 1
+    blen cbs = posIntToBLen $ B.length (unrefine cbs) + 1
 
 instance Put (AsByteString 'C) where
     put cbs = put (unrefine cbs) <> put @Word8 0x00

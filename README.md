@@ -14,9 +14,9 @@ them effectively and efficiently in Haskell. Here's why it's useful:
     straightforward schemas. (See [Generic binary
     representation](#generic-binary-representation) for details.)
   * **Easy validation:** Goes hand in hand with my [strongweak][gh-strongweak]
-    library to allow working with unwrapped data internally, and enforce all the
-    binary representation invariants before serializing - no extra definitions
-    required.
+    library to allow working with unwrapped data internally, and enforcing all
+    the binary representation invariants before serializing - no extra
+    definitions required.
   * **Performant:** Parsing and serialization is low-level and *extremely fast*,
     using [flatparse][gh-flatparse] and [mason][gh-mason] respectively.
 

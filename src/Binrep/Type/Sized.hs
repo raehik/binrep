@@ -8,7 +8,7 @@
 module Binrep.Type.Sized where
 
 import Binrep
-import Binrep.Util ( tshow, natVal'' )
+import Binrep.Util ( tshow )
 
 import Refined
 import Refined.Unsafe
@@ -32,7 +32,7 @@ instance (BLen a, KnownNat n) => Predicate (Size n) a where
             "not correctly sized: "<>tshow len<>" /= "<>tshow n
      | otherwise = success
       where
-        n = natVal'' @n
+        n = typeNatToBLen @n
         len = blen a
 
 instance Put a => Put (Sized n a) where
@@ -44,4 +44,4 @@ instance (Get a, KnownNat n) => Get (Sized n a) where
         a <- FP.isolate (fromIntegral n) get
         return $ reallyUnsafeRefine a
       where
-        n = natVal'' @n
+        n = typeNatToBLen @n
