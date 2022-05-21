@@ -27,12 +27,12 @@ packages:
     version: 0.1.0
     git: https://github.com/raehik/strongweak
     pantry-tree:
-      size: 1130
-      sha256: ba960e12b18775c5c645a1ce368fdcc955ce5aca65cd51d259054294e5c6a9b8
-    commit: cb1e4219296efd84e18b8a8b1117e3a410d21c4d
+      size: 1423
+      sha256: 00bfd7bfa507d1aaf8394f000ec85453d2b2323d55e9a2d5270b06781dae7754
+    commit: 70bdffa1010ebe517e3fe5a133dbfc81a2865f31
   original:
     git: https://github.com/raehik/strongweak
-    commit: cb1e4219296efd84e18b8a8b1117e3a410d21c4d
+    commit: 70bdffa1010ebe517e3fe5a133dbfc81a2865f31
 - completed:
     hackage: text-icu-0.8.0.1@sha256:22d21c91e7a81f1ee5766b3406f4fe9df0ff8cc426581a861de3f6f2fa413449,4624
     pantry-tree:
