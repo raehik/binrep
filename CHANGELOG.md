@@ -1,14 +1,14 @@
 ## 0.2.0 (Unreleased)
 Rewrite.
 
-  * BinaryCodec split into Get and Put, naming moved to cereal's convention
-  * CBLen for constant length types (!)
-  * generics (!!)
-  * tests (including for generic derivers)
-  * the fastest `Int {- positive -} -> Natural` you ever did see
-  * use my strongweak library alongside refined for things like numerics
-  * fumieval's mason for fast, monoidal serializing
-  * András Kovács' flatparse for ultra-fast parsing
+  * BinaryCodec split into Get and Put
+  * CBLen for constant length types
+  * generics
+  * tests
+  * integration with my strongweak library
+  * fast serializing via fumieval's mason
+  * fast parsing via András Kovács' flatparse
+  * plenty more
 
 ## 0.1.0 (2022-04-22)
 Initial release.

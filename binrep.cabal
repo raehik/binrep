@@ -101,7 +101,6 @@ library
       aeson ==2.0.*
     , base >=4.14 && <5
     , bytestring ==0.11.*
-    , cereal >=0.5.8.1 && <0.6
     , either >=5.0.1.1 && <5.1
     , flatparse
     , mason >=0.2.5 && <0.3
@@ -165,7 +164,6 @@ test-suite spec
     , base >=4.14 && <5
     , binrep
     , bytestring ==0.11.*
-    , cereal >=0.5.8.1 && <0.6
     , either >=5.0.1.1 && <5.1
     , flatparse
     , generic-random >=1.5.0.1 && <1.6
