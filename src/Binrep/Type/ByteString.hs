@@ -56,7 +56,10 @@ instance BLen (AsByteString 'C) where
     blen cbs = posIntToBLen $ B.length (unrefine cbs) + 1
 
 instance Put (AsByteString 'C) where
-    put cbs = put (unrefine cbs) <> put @Word8 0x00
+    put = putCString . unrefine
+
+putCString :: B.ByteString -> Builder
+putCString bs = put bs <> put @Word8 0x00
 
 instance Get (AsByteString 'C) where
     get = reallyUnsafeRefine <$> getCString

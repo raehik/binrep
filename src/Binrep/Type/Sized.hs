@@ -1,7 +1,4 @@
 -- | Constant-size data.
---
--- This is a predicate and a type, but it's really intended for constant-size
--- bytestrings. It's just easier to define over all types.
 
 {-# LANGUAGE OverloadedStrings #-}
 

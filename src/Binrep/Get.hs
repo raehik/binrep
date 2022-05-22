@@ -1,3 +1,5 @@
+{-# LANGUAGE FunctionalDependencies #-}
+
 module Binrep.Get
   ( Getter, Get(..), runGet, runGetter
   , GetWith(..), runGetWith
@@ -49,28 +51,22 @@ instance Get B.ByteString where
 instance Get Word8 where get = FP.anyWord8
 instance Get  Int8 where get = FP.anyInt8
 
--- | Types that can be coded between binary and a Haskell type given some
---   runtime information.
+-- | A type that can be parsed from binary given some environment.
 --
--- We can't prove something related to a value and pass that proof along without
--- dependent types, meaning we can't split validation from encoding like in
--- 'BinRep', so encoding can fail. However, by allowing an arbitrary
--- environment, we can define many more convenient instances.
---
--- For example, you can't write a 'BinRep' instance for 'Word16' because it
--- doesn't specify its endianness. But you can define 'BinRepWith Endianness
--- Word16'! This was, you can decide how much of the binary schema you want to
--- place directly in the types, and how much to configure dynamically.
---
--- This class defaults to the free implementation provided by 'BinRep', which
--- ignores the environment and wraps serializing with 'Right'.
-class GetWith r a where
+-- Making this levity polymorphic makes things pretty strange, but is useful.
+-- See @Binrep.Example.FileTable@.
+class GetWith (r :: TYPE rep) a | a -> r where
     -- | Parse from binary with the given environment.
     getWith :: r -> Getter a
-    default getWith :: Get a => r -> Getter a
-    getWith _ = get
+    -- can no longer provide default implementation due to levity polymorphism
+    --default getWith :: Get a => r -> Getter a
+    --getWith _ = get
 
-deriving anyclass instance Get a => GetWith r [a]
+--deriving anyclass instance Get a => GetWith r [a]
 
-runGetWith :: GetWith r a => r -> B.ByteString -> Either String (a, B.ByteString)
+-- Note that @r@ is not levity polymorphic, GHC forces it to be lifted. You
+-- can't bind (LHS) a levity polymorphic value.
+runGetWith
+    :: GetWith (r :: TYPE LiftedRep) a
+    => r -> B.ByteString -> Either String (a, B.ByteString)
 runGetWith r bs = runGetter (getWith r) bs

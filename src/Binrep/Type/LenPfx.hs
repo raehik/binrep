@@ -81,6 +81,12 @@ instance (itype ~ I 'U size end, irep ~ IRep 'U size, Put a, Put itype, Num irep
         vnatVal :: forall n x. KnownNat n => Vector n x -> Natural
         vnatVal _ = natVal'' @n
 
+lenPfxSize :: Num (IRep 'U size) => LenPfx size end a -> I 'U size end
+lenPfxSize (LenPfx v) = fromIntegral (vnatVal v)
+  where
+    vnatVal :: forall n x. KnownNat n => Vector n x -> Natural
+    vnatVal _ = natVal'' @n
+
 instance (itype ~ I 'U size end, irep ~ IRep 'U size, Get itype, Integral irep, Get a, KnownNat (MaxBound irep))
   => Get (LenPfx size end a) where
     get = getLenPfx get

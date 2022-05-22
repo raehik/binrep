@@ -14,7 +14,10 @@ class Put a where
 
 -- | Run the serializer.
 runPut :: Put a => a -> B.ByteString
-runPut = Mason.toStrictByteString . put
+runPut = runBuilder . put
+
+runBuilder :: Builder -> B.ByteString
+runBuilder = Mason.toStrictByteString
 
 -- | Serialize each element in order. No length indicator, so parse until either
 --   error or EOF. Usually not what you want, but sometimes used at the "top" of
@@ -55,9 +58,6 @@ putWithout = Right . put
 instance Put a => PutWith r [a]
 
 -- | Run the serializer with the given environment.
--- TODO reformat
 runPutWith :: PutWith r a => r -> a -> Either String B.ByteString
-runPutWith r a = do
-    case putWith r a of
-      Left e -> Left e
-      Right x -> Right $ Mason.toStrictByteString x
+runPutWith r a = case putWith r a of Left  e -> Left e
+                                     Right x -> Right $ runBuilder x
