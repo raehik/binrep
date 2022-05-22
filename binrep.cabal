@@ -33,6 +33,7 @@ library
       Binrep.BLen.Internal.AsBLen
       Binrep.CBLen
       Binrep.Example
+      Binrep.Example.FileTable
       Binrep.Example.Tar
       Binrep.Example.Tiff
       Binrep.Example.Wav

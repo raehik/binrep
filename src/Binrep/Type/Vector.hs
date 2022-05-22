@@ -19,4 +19,7 @@ instance Put a => Put (Vector n a) where
     put = mconcat . V.toList . V.map put
 
 instance (Get a, KnownNat n) => Get (Vector n a) where
-    get = V.replicateM get
+    get = getVector get
+
+getVector :: KnownNat n => Getter a -> Getter (Vector n a)
+getVector g = V.replicateM g

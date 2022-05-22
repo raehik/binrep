@@ -7,7 +7,7 @@ import Strongweak
 import Data.Word
 import Data.Int
 import Data.Aeson
-import FlatParse.Basic.Int qualified as FP
+import FlatParse.Basic qualified as FP
 import Mason.Builder qualified as Mason
 
 import GHC.Generics ( Generic )

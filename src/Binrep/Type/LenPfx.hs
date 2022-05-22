@@ -7,7 +7,7 @@ module Binrep.Type.LenPfx where
 import Binrep
 import Strongweak
 import Data.Validation
-import Binrep.Type.Vector()
+import Binrep.Type.Vector ( getVector )
 import Binrep.Type.Common ( Endianness )
 import Binrep.Type.Int
 import Binrep.Util ( natVal'' )
@@ -83,15 +83,21 @@ instance (itype ~ I 'U size end, irep ~ IRep 'U size, Put a, Put itype, Num irep
 
 instance (itype ~ I 'U size end, irep ~ IRep 'U size, Get itype, Integral irep, Get a, KnownNat (MaxBound irep))
   => Get (LenPfx size end a) where
-    get = do
-        len <- get @itype
-        case someNatVal (fromIntegral len) of
-          SomeNat (Proxy :: Proxy n) -> do
-            x <- get @(Vector n a)
-            -- TODO we actually know that @n <= MaxBound irep@ before doing this
-            -- because @len <= maxBound (_ :: irep)@ but that's hard to prove to
-            -- GHC without lots of refactoring. This is good enough.
-            case cmpNat (Proxy :: Proxy n) (Proxy :: Proxy (MaxBound irep)) of
-              GTI -> error "impossible"
-              LTI -> return $ LenPfx x
-              EQI -> return $ LenPfx x
+    get = getLenPfx get
+
+getLenPfx
+    :: forall size end a itype irep
+    .  (itype ~ I 'U size end, irep ~ IRep 'U size, Get itype, Integral irep, KnownNat (MaxBound irep))
+    => Getter a -> Getter (LenPfx size end a)
+getLenPfx g = do
+    len <- get @itype
+    case someNatVal (fromIntegral len) of
+      SomeNat (Proxy :: Proxy n) -> do
+        x <- getVector @n g
+        -- TODO we actually know that @n <= MaxBound irep@ before doing this
+        -- because @len <= maxBound (_ :: irep)@ but that's hard to prove to
+        -- GHC without lots of refactoring. This is good enough.
+        case cmpNat (Proxy :: Proxy n) (Proxy :: Proxy (MaxBound irep)) of
+          GTI -> error "impossible"
+          LTI -> return $ LenPfx x
+          EQI -> return $ LenPfx x

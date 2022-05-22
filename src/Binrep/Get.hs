@@ -1,27 +1,29 @@
 module Binrep.Get
-  ( Get(..), runGet
+  ( Getter, Get(..), runGet, runGetter
   , GetWith(..), runGetWith
   ) where
 
 import FlatParse.Basic qualified as FP
-import FlatParse.Basic.Int qualified as FP
 import FlatParse.Basic ( Parser )
 import Data.ByteString qualified as B
 import Data.Word
 import Data.Int
+import GHC.Exts
+
+type Getter a = Parser String a
 
 class Get a where
     -- | Parse from binary.
-    get :: Parser String a
+    get :: Getter a
 
 runGet :: Get a => B.ByteString -> Either String (a, B.ByteString)
-runGet bs = runFlatParser get bs
+runGet = runGetter get
 
-runFlatParser :: Parser String a -> B.ByteString -> Either String (a, B.ByteString)
-runFlatParser p bs = case FP.runParser p bs of
-                       FP.OK a bs' -> Right (a, bs')
-                       FP.Fail     -> Left "TODO fail"
-                       FP.Err e    -> Left e
+runGetter :: Getter a -> B.ByteString -> Either String (a, B.ByteString)
+runGetter g bs = case FP.runParser g bs of
+                   FP.OK a bs' -> Right (a, bs')
+                   FP.Fail     -> Left "TODO fail"
+                   FP.Err e    -> Left e
 
 -- | Parse heterogeneous lists in order. No length indicator, so either fails or
 --   succeeds by reaching EOF. Probably not what you usually want, but sometimes
@@ -64,11 +66,11 @@ instance Get  Int8 where get = FP.anyInt8
 -- ignores the environment and wraps serializing with 'Right'.
 class GetWith r a where
     -- | Parse from binary with the given environment.
-    getWith :: r -> Parser String a
-    default getWith :: Get a => r -> Parser String a
-    getWith = const get
+    getWith :: r -> Getter a
+    default getWith :: Get a => r -> Getter a
+    getWith _ = get
 
 deriving anyclass instance Get a => GetWith r [a]
 
 runGetWith :: GetWith r a => r -> B.ByteString -> Either String (a, B.ByteString)
-runGetWith r bs = runFlatParser (getWith r) bs
+runGetWith r bs = runGetter (getWith r) bs
