@@ -19,10 +19,12 @@ import Data.Word
 type BS = B.ByteString
 
 -- We're unable to put one invariant in the types: an entry can't be placed past
--- the maximum offset. The only way to check that is to lay out the table.
+-- the maximum offset. Validating that requires quite a lot of work: we have to
+-- do much of the layouting work, which will be repeated for serializing. This
+-- is a downside of phase separation, it crops up every now and then.
 --
--- This needs to be a newtype, because @Table 'Strong a@ means the above
--- invariant has been checked. That means we can't use the strongweak generics.
+-- The BLen instance will similarly be a bit complex, but it could probably be
+-- implemented with similar code to strengthening.
 newtype Table s a = Table { unTable :: SW s (LenPfx 'I1 'LE (Entry s a)) }
 
 instance (Put a, BLen a) => Put (Table 'Strong a) where put = putFileTable
