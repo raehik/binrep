@@ -1,7 +1,4 @@
 # To-dos
-## Testing
-  * properly test the default `AsByteString 'C` sum tag handler (!)
-
 ## More primitives
   * Varint
     * `newtype Varint sign end = Varint { unVarint :: VarintRep sign }`

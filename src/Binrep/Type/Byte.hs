@@ -24,816 +24,777 @@ import Binrep.Put ( Builder )
 import GHC.TypeNats
 import GHC.Exts
 
--- | A single byte, represented via a big ol' sum type.
---
--- Try adding two of these bad boys together! ...Actually, please don't write a
--- bounds-checked sum operator for this.
-data Byte
-  = B00 | B01 | B02 | B03 | B04 | B05 | B06 | B07
-  | B08 | B09 | B0A | B0B | B0C | B0D | B0E | B0F
-  | B10 | B11 | B12 | B13 | B14 | B15 | B16 | B17
-  | B18 | B19 | B1A | B1B | B1C | B1D | B1E | B1F
-  | B20 | B21 | B22 | B23 | B24 | B25 | B26 | B27
-  | B28 | B29 | B2A | B2B | B2C | B2D | B2E | B2F
-  | B30 | B31 | B32 | B33 | B34 | B35 | B36 | B37
-  | B38 | B39 | B3A | B3B | B3C | B3D | B3E | B3F
-  | B40 | B41 | B42 | B43 | B44 | B45 | B46 | B47
-  | B48 | B49 | B4A | B4B | B4C | B4D | B4E | B4F
-  | B50 | B51 | B52 | B53 | B54 | B55 | B56 | B57
-  | B58 | B59 | B5A | B5B | B5C | B5D | B5E | B5F
-  | B60 | B61 | B62 | B63 | B64 | B65 | B66 | B67
-  | B68 | B69 | B6A | B6B | B6C | B6D | B6E | B6F
-  | B70 | B71 | B72 | B73 | B74 | B75 | B76 | B77
-  | B78 | B79 | B7A | B7B | B7C | B7D | B7E | B7F
-  | B80 | B81 | B82 | B83 | B84 | B85 | B86 | B87
-  | B88 | B89 | B8A | B8B | B8C | B8D | B8E | B8F
-  | B90 | B91 | B92 | B93 | B94 | B95 | B96 | B97
-  | B98 | B99 | B9A | B9B | B9C | B9D | B9E | B9F
-  | BA0 | BA1 | BA2 | BA3 | BA4 | BA5 | BA6 | BA7
-  | BA8 | BA9 | BAA | BAB | BAC | BAD | BAE | BAF
-  | BB0 | BB1 | BB2 | BB3 | BB4 | BB5 | BB6 | BB7
-  | BB8 | BB9 | BBA | BBB | BBC | BBD | BBE | BBF
-  | BC0 | BC1 | BC2 | BC3 | BC4 | BC5 | BC6 | BC7
-  | BC8 | BC9 | BCA | BCB | BCC | BCD | BCE | BCF
-  | BD0 | BD1 | BD2 | BD3 | BD4 | BD5 | BD6 | BD7
-  | BD8 | BD9 | BDA | BDB | BDC | BDD | BDE | BDF
-  | BE0 | BE1 | BE2 | BE3 | BE4 | BE5 | BE6 | BE7
-  | BE8 | BE9 | BEA | BEB | BEC | BED | BEE | BEF
-  | BF0 | BF1 | BF2 | BF3 | BF4 | BF5 | BF6 | BF7
-  | BF8 | BF9 | BFA | BFB | BFC | BFD | BFE | BFF
-    -- no derive >:( no use term-level >:((
-
 -- Needs to be a function type to work. Interesting. It's perhaps not an
 -- improvement on regular boxed. But interesting idea, so sticking with it.
-class ByteVal (b :: Byte) where byteVal :: Proxy# b -> Word8#
+class ByteVal (n :: Natural) where byteVal :: Proxy# n -> Word8#
 
-instance ByteVal 'B00 where
+instance ByteVal 0x00 where
     byteVal _ = wordToWord8# 0x00##
     {-# INLINE byteVal #-}
-instance ByteVal 'B01 where
+instance ByteVal 0x01 where
     byteVal _ = wordToWord8# 0x01##
     {-# INLINE byteVal #-}
-instance ByteVal 'B02 where
+instance ByteVal 0x02 where
     byteVal _ = wordToWord8# 0x02##
     {-# INLINE byteVal #-}
-instance ByteVal 'B03 where
+instance ByteVal 0x03 where
     byteVal _ = wordToWord8# 0x03##
     {-# INLINE byteVal #-}
-instance ByteVal 'B04 where
+instance ByteVal 0x04 where
     byteVal _ = wordToWord8# 0x04##
     {-# INLINE byteVal #-}
-instance ByteVal 'B05 where
+instance ByteVal 0x05 where
     byteVal _ = wordToWord8# 0x05##
     {-# INLINE byteVal #-}
-instance ByteVal 'B06 where
+instance ByteVal 0x06 where
     byteVal _ = wordToWord8# 0x06##
     {-# INLINE byteVal #-}
-instance ByteVal 'B07 where
+instance ByteVal 0x07 where
     byteVal _ = wordToWord8# 0x07##
     {-# INLINE byteVal #-}
-instance ByteVal 'B08 where
+instance ByteVal 0x08 where
     byteVal _ = wordToWord8# 0x08##
     {-# INLINE byteVal #-}
-instance ByteVal 'B09 where
+instance ByteVal 0x09 where
     byteVal _ = wordToWord8# 0x09##
     {-# INLINE byteVal #-}
-instance ByteVal 'B0A where
-    byteVal _ = wordToWord8# 0x0A##
+instance ByteVal 0x0a where
+    byteVal _ = wordToWord8# 0x0a##
     {-# INLINE byteVal #-}
-instance ByteVal 'B0B where
-    byteVal _ = wordToWord8# 0x0B##
+instance ByteVal 0x0b where
+    byteVal _ = wordToWord8# 0x0b##
     {-# INLINE byteVal #-}
-instance ByteVal 'B0C where
-    byteVal _ = wordToWord8# 0x0C##
+instance ByteVal 0x0c where
+    byteVal _ = wordToWord8# 0x0c##
     {-# INLINE byteVal #-}
-instance ByteVal 'B0D where
-    byteVal _ = wordToWord8# 0x0D##
+instance ByteVal 0x0d where
+    byteVal _ = wordToWord8# 0x0d##
     {-# INLINE byteVal #-}
-instance ByteVal 'B0E where
-    byteVal _ = wordToWord8# 0x0E##
+instance ByteVal 0x0e where
+    byteVal _ = wordToWord8# 0x0e##
     {-# INLINE byteVal #-}
-instance ByteVal 'B0F where
-    byteVal _ = wordToWord8# 0x0F##
+instance ByteVal 0x0f where
+    byteVal _ = wordToWord8# 0x0f##
     {-# INLINE byteVal #-}
-instance ByteVal 'B10 where
+instance ByteVal 0x10 where
     byteVal _ = wordToWord8# 0x10##
     {-# INLINE byteVal #-}
-instance ByteVal 'B11 where
+instance ByteVal 0x11 where
     byteVal _ = wordToWord8# 0x11##
     {-# INLINE byteVal #-}
-instance ByteVal 'B12 where
+instance ByteVal 0x12 where
     byteVal _ = wordToWord8# 0x12##
     {-# INLINE byteVal #-}
-instance ByteVal 'B13 where
+instance ByteVal 0x13 where
     byteVal _ = wordToWord8# 0x13##
     {-# INLINE byteVal #-}
-instance ByteVal 'B14 where
+instance ByteVal 0x14 where
     byteVal _ = wordToWord8# 0x14##
     {-# INLINE byteVal #-}
-instance ByteVal 'B15 where
+instance ByteVal 0x15 where
     byteVal _ = wordToWord8# 0x15##
     {-# INLINE byteVal #-}
-instance ByteVal 'B16 where
+instance ByteVal 0x16 where
     byteVal _ = wordToWord8# 0x16##
     {-# INLINE byteVal #-}
-instance ByteVal 'B17 where
+instance ByteVal 0x17 where
     byteVal _ = wordToWord8# 0x17##
     {-# INLINE byteVal #-}
-instance ByteVal 'B18 where
+instance ByteVal 0x18 where
     byteVal _ = wordToWord8# 0x18##
     {-# INLINE byteVal #-}
-instance ByteVal 'B19 where
+instance ByteVal 0x19 where
     byteVal _ = wordToWord8# 0x19##
     {-# INLINE byteVal #-}
-instance ByteVal 'B1A where
-    byteVal _ = wordToWord8# 0x1A##
+instance ByteVal 0x1a where
+    byteVal _ = wordToWord8# 0x1a##
     {-# INLINE byteVal #-}
-instance ByteVal 'B1B where
-    byteVal _ = wordToWord8# 0x1B##
+instance ByteVal 0x1b where
+    byteVal _ = wordToWord8# 0x1b##
     {-# INLINE byteVal #-}
-instance ByteVal 'B1C where
-    byteVal _ = wordToWord8# 0x1C##
+instance ByteVal 0x1c where
+    byteVal _ = wordToWord8# 0x1c##
     {-# INLINE byteVal #-}
-instance ByteVal 'B1D where
-    byteVal _ = wordToWord8# 0x1D##
+instance ByteVal 0x1d where
+    byteVal _ = wordToWord8# 0x1d##
     {-# INLINE byteVal #-}
-instance ByteVal 'B1E where
-    byteVal _ = wordToWord8# 0x1E##
+instance ByteVal 0x1e where
+    byteVal _ = wordToWord8# 0x1e##
     {-# INLINE byteVal #-}
-instance ByteVal 'B1F where
-    byteVal _ = wordToWord8# 0x1F##
+instance ByteVal 0x1f where
+    byteVal _ = wordToWord8# 0x1f##
     {-# INLINE byteVal #-}
-instance ByteVal 'B20 where
+instance ByteVal 0x20 where
     byteVal _ = wordToWord8# 0x20##
     {-# INLINE byteVal #-}
-instance ByteVal 'B21 where
+instance ByteVal 0x21 where
     byteVal _ = wordToWord8# 0x21##
     {-# INLINE byteVal #-}
-instance ByteVal 'B22 where
+instance ByteVal 0x22 where
     byteVal _ = wordToWord8# 0x22##
     {-# INLINE byteVal #-}
-instance ByteVal 'B23 where
+instance ByteVal 0x23 where
     byteVal _ = wordToWord8# 0x23##
     {-# INLINE byteVal #-}
-instance ByteVal 'B24 where
+instance ByteVal 0x24 where
     byteVal _ = wordToWord8# 0x24##
     {-# INLINE byteVal #-}
-instance ByteVal 'B25 where
+instance ByteVal 0x25 where
     byteVal _ = wordToWord8# 0x25##
     {-# INLINE byteVal #-}
-instance ByteVal 'B26 where
+instance ByteVal 0x26 where
     byteVal _ = wordToWord8# 0x26##
     {-# INLINE byteVal #-}
-instance ByteVal 'B27 where
+instance ByteVal 0x27 where
     byteVal _ = wordToWord8# 0x27##
     {-# INLINE byteVal #-}
-instance ByteVal 'B28 where
+instance ByteVal 0x28 where
     byteVal _ = wordToWord8# 0x28##
     {-# INLINE byteVal #-}
-instance ByteVal 'B29 where
+instance ByteVal 0x29 where
     byteVal _ = wordToWord8# 0x29##
     {-# INLINE byteVal #-}
-instance ByteVal 'B2A where
-    byteVal _ = wordToWord8# 0x2A##
+instance ByteVal 0x2a where
+    byteVal _ = wordToWord8# 0x2a##
     {-# INLINE byteVal #-}
-instance ByteVal 'B2B where
-    byteVal _ = wordToWord8# 0x2B##
+instance ByteVal 0x2b where
+    byteVal _ = wordToWord8# 0x2b##
     {-# INLINE byteVal #-}
-instance ByteVal 'B2C where
-    byteVal _ = wordToWord8# 0x2C##
+instance ByteVal 0x2c where
+    byteVal _ = wordToWord8# 0x2c##
     {-# INLINE byteVal #-}
-instance ByteVal 'B2D where
-    byteVal _ = wordToWord8# 0x2D##
+instance ByteVal 0x2d where
+    byteVal _ = wordToWord8# 0x2d##
     {-# INLINE byteVal #-}
-instance ByteVal 'B2E where
-    byteVal _ = wordToWord8# 0x2E##
+instance ByteVal 0x2e where
+    byteVal _ = wordToWord8# 0x2e##
     {-# INLINE byteVal #-}
-instance ByteVal 'B2F where
-    byteVal _ = wordToWord8# 0x2F##
+instance ByteVal 0x2f where
+    byteVal _ = wordToWord8# 0x2f##
     {-# INLINE byteVal #-}
-instance ByteVal 'B30 where
+instance ByteVal 0x30 where
     byteVal _ = wordToWord8# 0x30##
     {-# INLINE byteVal #-}
-instance ByteVal 'B31 where
+instance ByteVal 0x31 where
     byteVal _ = wordToWord8# 0x31##
     {-# INLINE byteVal #-}
-instance ByteVal 'B32 where
+instance ByteVal 0x32 where
     byteVal _ = wordToWord8# 0x32##
     {-# INLINE byteVal #-}
-instance ByteVal 'B33 where
+instance ByteVal 0x33 where
     byteVal _ = wordToWord8# 0x33##
     {-# INLINE byteVal #-}
-instance ByteVal 'B34 where
+instance ByteVal 0x34 where
     byteVal _ = wordToWord8# 0x34##
     {-# INLINE byteVal #-}
-instance ByteVal 'B35 where
+instance ByteVal 0x35 where
     byteVal _ = wordToWord8# 0x35##
     {-# INLINE byteVal #-}
-instance ByteVal 'B36 where
+instance ByteVal 0x36 where
     byteVal _ = wordToWord8# 0x36##
     {-# INLINE byteVal #-}
-instance ByteVal 'B37 where
+instance ByteVal 0x37 where
     byteVal _ = wordToWord8# 0x37##
     {-# INLINE byteVal #-}
-instance ByteVal 'B38 where
+instance ByteVal 0x38 where
     byteVal _ = wordToWord8# 0x38##
     {-# INLINE byteVal #-}
-instance ByteVal 'B39 where
+instance ByteVal 0x39 where
     byteVal _ = wordToWord8# 0x39##
     {-# INLINE byteVal #-}
-instance ByteVal 'B3A where
-    byteVal _ = wordToWord8# 0x3A##
+instance ByteVal 0x3a where
+    byteVal _ = wordToWord8# 0x3a##
     {-# INLINE byteVal #-}
-instance ByteVal 'B3B where
-    byteVal _ = wordToWord8# 0x3B##
+instance ByteVal 0x3b where
+    byteVal _ = wordToWord8# 0x3b##
     {-# INLINE byteVal #-}
-instance ByteVal 'B3C where
-    byteVal _ = wordToWord8# 0x3C##
+instance ByteVal 0x3c where
+    byteVal _ = wordToWord8# 0x3c##
     {-# INLINE byteVal #-}
-instance ByteVal 'B3D where
-    byteVal _ = wordToWord8# 0x3D##
+instance ByteVal 0x3d where
+    byteVal _ = wordToWord8# 0x3d##
     {-# INLINE byteVal #-}
-instance ByteVal 'B3E where
-    byteVal _ = wordToWord8# 0x3E##
+instance ByteVal 0x3e where
+    byteVal _ = wordToWord8# 0x3e##
     {-# INLINE byteVal #-}
-instance ByteVal 'B3F where
-    byteVal _ = wordToWord8# 0x3F##
+instance ByteVal 0x3f where
+    byteVal _ = wordToWord8# 0x3f##
     {-# INLINE byteVal #-}
-instance ByteVal 'B40 where
+instance ByteVal 0x40 where
     byteVal _ = wordToWord8# 0x40##
     {-# INLINE byteVal #-}
-instance ByteVal 'B41 where
+instance ByteVal 0x41 where
     byteVal _ = wordToWord8# 0x41##
     {-# INLINE byteVal #-}
-instance ByteVal 'B42 where
+instance ByteVal 0x42 where
     byteVal _ = wordToWord8# 0x42##
     {-# INLINE byteVal #-}
-instance ByteVal 'B43 where
+instance ByteVal 0x43 where
     byteVal _ = wordToWord8# 0x43##
     {-# INLINE byteVal #-}
-instance ByteVal 'B44 where
+instance ByteVal 0x44 where
     byteVal _ = wordToWord8# 0x44##
     {-# INLINE byteVal #-}
-instance ByteVal 'B45 where
+instance ByteVal 0x45 where
     byteVal _ = wordToWord8# 0x45##
     {-# INLINE byteVal #-}
-instance ByteVal 'B46 where
+instance ByteVal 0x46 where
     byteVal _ = wordToWord8# 0x46##
     {-# INLINE byteVal #-}
-instance ByteVal 'B47 where
+instance ByteVal 0x47 where
     byteVal _ = wordToWord8# 0x47##
     {-# INLINE byteVal #-}
-instance ByteVal 'B48 where
+instance ByteVal 0x48 where
     byteVal _ = wordToWord8# 0x48##
     {-# INLINE byteVal #-}
-instance ByteVal 'B49 where
+instance ByteVal 0x49 where
     byteVal _ = wordToWord8# 0x49##
     {-# INLINE byteVal #-}
-instance ByteVal 'B4A where
-    byteVal _ = wordToWord8# 0x4A##
+instance ByteVal 0x4a where
+    byteVal _ = wordToWord8# 0x4a##
     {-# INLINE byteVal #-}
-instance ByteVal 'B4B where
-    byteVal _ = wordToWord8# 0x4B##
+instance ByteVal 0x4b where
+    byteVal _ = wordToWord8# 0x4b##
     {-# INLINE byteVal #-}
-instance ByteVal 'B4C where
-    byteVal _ = wordToWord8# 0x4C##
+instance ByteVal 0x4c where
+    byteVal _ = wordToWord8# 0x4c##
     {-# INLINE byteVal #-}
-instance ByteVal 'B4D where
-    byteVal _ = wordToWord8# 0x4D##
+instance ByteVal 0x4d where
+    byteVal _ = wordToWord8# 0x4d##
     {-# INLINE byteVal #-}
-instance ByteVal 'B4E where
-    byteVal _ = wordToWord8# 0x4E##
+instance ByteVal 0x4e where
+    byteVal _ = wordToWord8# 0x4e##
     {-# INLINE byteVal #-}
-instance ByteVal 'B4F where
-    byteVal _ = wordToWord8# 0x4F##
+instance ByteVal 0x4f where
+    byteVal _ = wordToWord8# 0x4f##
     {-# INLINE byteVal #-}
-instance ByteVal 'B50 where
+instance ByteVal 0x50 where
     byteVal _ = wordToWord8# 0x50##
     {-# INLINE byteVal #-}
-instance ByteVal 'B51 where
+instance ByteVal 0x51 where
     byteVal _ = wordToWord8# 0x51##
     {-# INLINE byteVal #-}
-instance ByteVal 'B52 where
+instance ByteVal 0x52 where
     byteVal _ = wordToWord8# 0x52##
     {-# INLINE byteVal #-}
-instance ByteVal 'B53 where
+instance ByteVal 0x53 where
     byteVal _ = wordToWord8# 0x53##
     {-# INLINE byteVal #-}
-instance ByteVal 'B54 where
+instance ByteVal 0x54 where
     byteVal _ = wordToWord8# 0x54##
     {-# INLINE byteVal #-}
-instance ByteVal 'B55 where
+instance ByteVal 0x55 where
     byteVal _ = wordToWord8# 0x55##
     {-# INLINE byteVal #-}
-instance ByteVal 'B56 where
+instance ByteVal 0x56 where
     byteVal _ = wordToWord8# 0x56##
     {-# INLINE byteVal #-}
-instance ByteVal 'B57 where
+instance ByteVal 0x57 where
     byteVal _ = wordToWord8# 0x57##
     {-# INLINE byteVal #-}
-instance ByteVal 'B58 where
+instance ByteVal 0x58 where
     byteVal _ = wordToWord8# 0x58##
     {-# INLINE byteVal #-}
-instance ByteVal 'B59 where
+instance ByteVal 0x59 where
     byteVal _ = wordToWord8# 0x59##
     {-# INLINE byteVal #-}
-instance ByteVal 'B5A where
-    byteVal _ = wordToWord8# 0x5A##
+instance ByteVal 0x5a where
+    byteVal _ = wordToWord8# 0x5a##
     {-# INLINE byteVal #-}
-instance ByteVal 'B5B where
-    byteVal _ = wordToWord8# 0x5B##
+instance ByteVal 0x5b where
+    byteVal _ = wordToWord8# 0x5b##
     {-# INLINE byteVal #-}
-instance ByteVal 'B5C where
-    byteVal _ = wordToWord8# 0x5C##
+instance ByteVal 0x5c where
+    byteVal _ = wordToWord8# 0x5c##
     {-# INLINE byteVal #-}
-instance ByteVal 'B5D where
-    byteVal _ = wordToWord8# 0x5D##
+instance ByteVal 0x5d where
+    byteVal _ = wordToWord8# 0x5d##
     {-# INLINE byteVal #-}
-instance ByteVal 'B5E where
-    byteVal _ = wordToWord8# 0x5E##
+instance ByteVal 0x5e where
+    byteVal _ = wordToWord8# 0x5e##
     {-# INLINE byteVal #-}
-instance ByteVal 'B5F where
-    byteVal _ = wordToWord8# 0x5F##
+instance ByteVal 0x5f where
+    byteVal _ = wordToWord8# 0x5f##
     {-# INLINE byteVal #-}
-instance ByteVal 'B60 where
+instance ByteVal 0x60 where
     byteVal _ = wordToWord8# 0x60##
     {-# INLINE byteVal #-}
-instance ByteVal 'B61 where
+instance ByteVal 0x61 where
     byteVal _ = wordToWord8# 0x61##
     {-# INLINE byteVal #-}
-instance ByteVal 'B62 where
+instance ByteVal 0x62 where
     byteVal _ = wordToWord8# 0x62##
     {-# INLINE byteVal #-}
-instance ByteVal 'B63 where
+instance ByteVal 0x63 where
     byteVal _ = wordToWord8# 0x63##
     {-# INLINE byteVal #-}
-instance ByteVal 'B64 where
+instance ByteVal 0x64 where
     byteVal _ = wordToWord8# 0x64##
     {-# INLINE byteVal #-}
-instance ByteVal 'B65 where
+instance ByteVal 0x65 where
     byteVal _ = wordToWord8# 0x65##
     {-# INLINE byteVal #-}
-instance ByteVal 'B66 where
+instance ByteVal 0x66 where
     byteVal _ = wordToWord8# 0x66##
     {-# INLINE byteVal #-}
-instance ByteVal 'B67 where
+instance ByteVal 0x67 where
     byteVal _ = wordToWord8# 0x67##
     {-# INLINE byteVal #-}
-instance ByteVal 'B68 where
+instance ByteVal 0x68 where
     byteVal _ = wordToWord8# 0x68##
     {-# INLINE byteVal #-}
-instance ByteVal 'B69 where
+instance ByteVal 0x69 where
     byteVal _ = wordToWord8# 0x69##
     {-# INLINE byteVal #-}
-instance ByteVal 'B6A where
-    byteVal _ = wordToWord8# 0x6A##
+instance ByteVal 0x6a where
+    byteVal _ = wordToWord8# 0x6a##
     {-# INLINE byteVal #-}
-instance ByteVal 'B6B where
-    byteVal _ = wordToWord8# 0x6B##
+instance ByteVal 0x6b where
+    byteVal _ = wordToWord8# 0x6b##
     {-# INLINE byteVal #-}
-instance ByteVal 'B6C where
-    byteVal _ = wordToWord8# 0x6C##
+instance ByteVal 0x6c where
+    byteVal _ = wordToWord8# 0x6c##
     {-# INLINE byteVal #-}
-instance ByteVal 'B6D where
-    byteVal _ = wordToWord8# 0x6D##
+instance ByteVal 0x6d where
+    byteVal _ = wordToWord8# 0x6d##
     {-# INLINE byteVal #-}
-instance ByteVal 'B6E where
-    byteVal _ = wordToWord8# 0x6E##
+instance ByteVal 0x6e where
+    byteVal _ = wordToWord8# 0x6e##
     {-# INLINE byteVal #-}
-instance ByteVal 'B6F where
-    byteVal _ = wordToWord8# 0x6F##
+instance ByteVal 0x6f where
+    byteVal _ = wordToWord8# 0x6f##
     {-# INLINE byteVal #-}
-instance ByteVal 'B70 where
+instance ByteVal 0x70 where
     byteVal _ = wordToWord8# 0x70##
     {-# INLINE byteVal #-}
-instance ByteVal 'B71 where
+instance ByteVal 0x71 where
     byteVal _ = wordToWord8# 0x71##
     {-# INLINE byteVal #-}
-instance ByteVal 'B72 where
+instance ByteVal 0x72 where
     byteVal _ = wordToWord8# 0x72##
     {-# INLINE byteVal #-}
-instance ByteVal 'B73 where
+instance ByteVal 0x73 where
     byteVal _ = wordToWord8# 0x73##
     {-# INLINE byteVal #-}
-instance ByteVal 'B74 where
+instance ByteVal 0x74 where
     byteVal _ = wordToWord8# 0x74##
     {-# INLINE byteVal #-}
-instance ByteVal 'B75 where
+instance ByteVal 0x75 where
     byteVal _ = wordToWord8# 0x75##
     {-# INLINE byteVal #-}
-instance ByteVal 'B76 where
+instance ByteVal 0x76 where
     byteVal _ = wordToWord8# 0x76##
     {-# INLINE byteVal #-}
-instance ByteVal 'B77 where
+instance ByteVal 0x77 where
     byteVal _ = wordToWord8# 0x77##
     {-# INLINE byteVal #-}
-instance ByteVal 'B78 where
+instance ByteVal 0x78 where
     byteVal _ = wordToWord8# 0x78##
     {-# INLINE byteVal #-}
-instance ByteVal 'B79 where
+instance ByteVal 0x79 where
     byteVal _ = wordToWord8# 0x79##
     {-# INLINE byteVal #-}
-instance ByteVal 'B7A where
-    byteVal _ = wordToWord8# 0x7A##
+instance ByteVal 0x7a where
+    byteVal _ = wordToWord8# 0x7a##
     {-# INLINE byteVal #-}
-instance ByteVal 'B7B where
-    byteVal _ = wordToWord8# 0x7B##
+instance ByteVal 0x7b where
+    byteVal _ = wordToWord8# 0x7b##
     {-# INLINE byteVal #-}
-instance ByteVal 'B7C where
-    byteVal _ = wordToWord8# 0x7C##
+instance ByteVal 0x7c where
+    byteVal _ = wordToWord8# 0x7c##
     {-# INLINE byteVal #-}
-instance ByteVal 'B7D where
-    byteVal _ = wordToWord8# 0x7D##
+instance ByteVal 0x7d where
+    byteVal _ = wordToWord8# 0x7d##
     {-# INLINE byteVal #-}
-instance ByteVal 'B7E where
-    byteVal _ = wordToWord8# 0x7E##
+instance ByteVal 0x7e where
+    byteVal _ = wordToWord8# 0x7e##
     {-# INLINE byteVal #-}
-instance ByteVal 'B7F where
-    byteVal _ = wordToWord8# 0x7F##
+instance ByteVal 0x7f where
+    byteVal _ = wordToWord8# 0x7f##
     {-# INLINE byteVal #-}
-instance ByteVal 'B80 where
+instance ByteVal 0x80 where
     byteVal _ = wordToWord8# 0x80##
     {-# INLINE byteVal #-}
-instance ByteVal 'B81 where
+instance ByteVal 0x81 where
     byteVal _ = wordToWord8# 0x81##
     {-# INLINE byteVal #-}
-instance ByteVal 'B82 where
+instance ByteVal 0x82 where
     byteVal _ = wordToWord8# 0x82##
     {-# INLINE byteVal #-}
-instance ByteVal 'B83 where
+instance ByteVal 0x83 where
     byteVal _ = wordToWord8# 0x83##
     {-# INLINE byteVal #-}
-instance ByteVal 'B84 where
+instance ByteVal 0x84 where
     byteVal _ = wordToWord8# 0x84##
     {-# INLINE byteVal #-}
-instance ByteVal 'B85 where
+instance ByteVal 0x85 where
     byteVal _ = wordToWord8# 0x85##
     {-# INLINE byteVal #-}
-instance ByteVal 'B86 where
+instance ByteVal 0x86 where
     byteVal _ = wordToWord8# 0x86##
     {-# INLINE byteVal #-}
-instance ByteVal 'B87 where
+instance ByteVal 0x87 where
     byteVal _ = wordToWord8# 0x87##
     {-# INLINE byteVal #-}
-instance ByteVal 'B88 where
+instance ByteVal 0x88 where
     byteVal _ = wordToWord8# 0x88##
     {-# INLINE byteVal #-}
-instance ByteVal 'B89 where
+instance ByteVal 0x89 where
     byteVal _ = wordToWord8# 0x89##
     {-# INLINE byteVal #-}
-instance ByteVal 'B8A where
-    byteVal _ = wordToWord8# 0x8A##
+instance ByteVal 0x8a where
+    byteVal _ = wordToWord8# 0x8a##
     {-# INLINE byteVal #-}
-instance ByteVal 'B8B where
-    byteVal _ = wordToWord8# 0x8B##
+instance ByteVal 0x8b where
+    byteVal _ = wordToWord8# 0x8b##
     {-# INLINE byteVal #-}
-instance ByteVal 'B8C where
-    byteVal _ = wordToWord8# 0x8C##
+instance ByteVal 0x8c where
+    byteVal _ = wordToWord8# 0x8c##
     {-# INLINE byteVal #-}
-instance ByteVal 'B8D where
-    byteVal _ = wordToWord8# 0x8D##
+instance ByteVal 0x8d where
+    byteVal _ = wordToWord8# 0x8d##
     {-# INLINE byteVal #-}
-instance ByteVal 'B8E where
-    byteVal _ = wordToWord8# 0x8E##
+instance ByteVal 0x8e where
+    byteVal _ = wordToWord8# 0x8e##
     {-# INLINE byteVal #-}
-instance ByteVal 'B8F where
-    byteVal _ = wordToWord8# 0x8F##
+instance ByteVal 0x8f where
+    byteVal _ = wordToWord8# 0x8f##
     {-# INLINE byteVal #-}
-instance ByteVal 'B90 where
+instance ByteVal 0x90 where
     byteVal _ = wordToWord8# 0x90##
     {-# INLINE byteVal #-}
-instance ByteVal 'B91 where
+instance ByteVal 0x91 where
     byteVal _ = wordToWord8# 0x91##
     {-# INLINE byteVal #-}
-instance ByteVal 'B92 where
+instance ByteVal 0x92 where
     byteVal _ = wordToWord8# 0x92##
     {-# INLINE byteVal #-}
-instance ByteVal 'B93 where
+instance ByteVal 0x93 where
     byteVal _ = wordToWord8# 0x93##
     {-# INLINE byteVal #-}
-instance ByteVal 'B94 where
+instance ByteVal 0x94 where
     byteVal _ = wordToWord8# 0x94##
     {-# INLINE byteVal #-}
-instance ByteVal 'B95 where
+instance ByteVal 0x95 where
     byteVal _ = wordToWord8# 0x95##
     {-# INLINE byteVal #-}
-instance ByteVal 'B96 where
+instance ByteVal 0x96 where
     byteVal _ = wordToWord8# 0x96##
     {-# INLINE byteVal #-}
-instance ByteVal 'B97 where
+instance ByteVal 0x97 where
     byteVal _ = wordToWord8# 0x97##
     {-# INLINE byteVal #-}
-instance ByteVal 'B98 where
+instance ByteVal 0x98 where
     byteVal _ = wordToWord8# 0x98##
     {-# INLINE byteVal #-}
-instance ByteVal 'B99 where
+instance ByteVal 0x99 where
     byteVal _ = wordToWord8# 0x99##
     {-# INLINE byteVal #-}
-instance ByteVal 'B9A where
-    byteVal _ = wordToWord8# 0x9A##
+instance ByteVal 0x9a where
+    byteVal _ = wordToWord8# 0x9a##
     {-# INLINE byteVal #-}
-instance ByteVal 'B9B where
-    byteVal _ = wordToWord8# 0x9B##
+instance ByteVal 0x9b where
+    byteVal _ = wordToWord8# 0x9b##
     {-# INLINE byteVal #-}
-instance ByteVal 'B9C where
-    byteVal _ = wordToWord8# 0x9C##
+instance ByteVal 0x9c where
+    byteVal _ = wordToWord8# 0x9c##
     {-# INLINE byteVal #-}
-instance ByteVal 'B9D where
-    byteVal _ = wordToWord8# 0x9D##
+instance ByteVal 0x9d where
+    byteVal _ = wordToWord8# 0x9d##
     {-# INLINE byteVal #-}
-instance ByteVal 'B9E where
-    byteVal _ = wordToWord8# 0x9E##
+instance ByteVal 0x9e where
+    byteVal _ = wordToWord8# 0x9e##
     {-# INLINE byteVal #-}
-instance ByteVal 'B9F where
-    byteVal _ = wordToWord8# 0x9F##
+instance ByteVal 0x9f where
+    byteVal _ = wordToWord8# 0x9f##
     {-# INLINE byteVal #-}
-instance ByteVal 'BA0 where
-    byteVal _ = wordToWord8# 0xA0##
+instance ByteVal 0xa0 where
+    byteVal _ = wordToWord8# 0xa0##
     {-# INLINE byteVal #-}
-instance ByteVal 'BA1 where
-    byteVal _ = wordToWord8# 0xA1##
+instance ByteVal 0xa1 where
+    byteVal _ = wordToWord8# 0xa1##
     {-# INLINE byteVal #-}
-instance ByteVal 'BA2 where
-    byteVal _ = wordToWord8# 0xA2##
+instance ByteVal 0xa2 where
+    byteVal _ = wordToWord8# 0xa2##
     {-# INLINE byteVal #-}
-instance ByteVal 'BA3 where
-    byteVal _ = wordToWord8# 0xA3##
+instance ByteVal 0xa3 where
+    byteVal _ = wordToWord8# 0xa3##
     {-# INLINE byteVal #-}
-instance ByteVal 'BA4 where
-    byteVal _ = wordToWord8# 0xA4##
+instance ByteVal 0xa4 where
+    byteVal _ = wordToWord8# 0xa4##
     {-# INLINE byteVal #-}
-instance ByteVal 'BA5 where
-    byteVal _ = wordToWord8# 0xA5##
+instance ByteVal 0xa5 where
+    byteVal _ = wordToWord8# 0xa5##
     {-# INLINE byteVal #-}
-instance ByteVal 'BA6 where
-    byteVal _ = wordToWord8# 0xA6##
+instance ByteVal 0xa6 where
+    byteVal _ = wordToWord8# 0xa6##
     {-# INLINE byteVal #-}
-instance ByteVal 'BA7 where
-    byteVal _ = wordToWord8# 0xA7##
+instance ByteVal 0xa7 where
+    byteVal _ = wordToWord8# 0xa7##
     {-# INLINE byteVal #-}
-instance ByteVal 'BA8 where
-    byteVal _ = wordToWord8# 0xA8##
+instance ByteVal 0xa8 where
+    byteVal _ = wordToWord8# 0xa8##
     {-# INLINE byteVal #-}
-instance ByteVal 'BA9 where
-    byteVal _ = wordToWord8# 0xA9##
+instance ByteVal 0xa9 where
+    byteVal _ = wordToWord8# 0xa9##
     {-# INLINE byteVal #-}
-instance ByteVal 'BAA where
-    byteVal _ = wordToWord8# 0xAA##
+instance ByteVal 0xaa where
+    byteVal _ = wordToWord8# 0xaa##
     {-# INLINE byteVal #-}
-instance ByteVal 'BAB where
-    byteVal _ = wordToWord8# 0xAB##
+instance ByteVal 0xab where
+    byteVal _ = wordToWord8# 0xab##
     {-# INLINE byteVal #-}
-instance ByteVal 'BAC where
-    byteVal _ = wordToWord8# 0xAC##
+instance ByteVal 0xac where
+    byteVal _ = wordToWord8# 0xac##
     {-# INLINE byteVal #-}
-instance ByteVal 'BAD where
-    byteVal _ = wordToWord8# 0xAD##
+instance ByteVal 0xad where
+    byteVal _ = wordToWord8# 0xad##
     {-# INLINE byteVal #-}
-instance ByteVal 'BAE where
-    byteVal _ = wordToWord8# 0xAE##
+instance ByteVal 0xae where
+    byteVal _ = wordToWord8# 0xae##
     {-# INLINE byteVal #-}
-instance ByteVal 'BAF where
-    byteVal _ = wordToWord8# 0xAF##
+instance ByteVal 0xaf where
+    byteVal _ = wordToWord8# 0xaf##
     {-# INLINE byteVal #-}
-instance ByteVal 'BB0 where
-    byteVal _ = wordToWord8# 0xB0##
+instance ByteVal 0xb0 where
+    byteVal _ = wordToWord8# 0xb0##
     {-# INLINE byteVal #-}
-instance ByteVal 'BB1 where
-    byteVal _ = wordToWord8# 0xB1##
+instance ByteVal 0xb1 where
+    byteVal _ = wordToWord8# 0xb1##
     {-# INLINE byteVal #-}
-instance ByteVal 'BB2 where
-    byteVal _ = wordToWord8# 0xB2##
+instance ByteVal 0xb2 where
+    byteVal _ = wordToWord8# 0xb2##
     {-# INLINE byteVal #-}
-instance ByteVal 'BB3 where
-    byteVal _ = wordToWord8# 0xB3##
+instance ByteVal 0xb3 where
+    byteVal _ = wordToWord8# 0xb3##
     {-# INLINE byteVal #-}
-instance ByteVal 'BB4 where
-    byteVal _ = wordToWord8# 0xB4##
+instance ByteVal 0xb4 where
+    byteVal _ = wordToWord8# 0xb4##
     {-# INLINE byteVal #-}
-instance ByteVal 'BB5 where
-    byteVal _ = wordToWord8# 0xB5##
+instance ByteVal 0xb5 where
+    byteVal _ = wordToWord8# 0xb5##
     {-# INLINE byteVal #-}
-instance ByteVal 'BB6 where
-    byteVal _ = wordToWord8# 0xB6##
+instance ByteVal 0xb6 where
+    byteVal _ = wordToWord8# 0xb6##
     {-# INLINE byteVal #-}
-instance ByteVal 'BB7 where
-    byteVal _ = wordToWord8# 0xB7##
+instance ByteVal 0xb7 where
+    byteVal _ = wordToWord8# 0xb7##
     {-# INLINE byteVal #-}
-instance ByteVal 'BB8 where
-    byteVal _ = wordToWord8# 0xB8##
+instance ByteVal 0xb8 where
+    byteVal _ = wordToWord8# 0xb8##
     {-# INLINE byteVal #-}
-instance ByteVal 'BB9 where
-    byteVal _ = wordToWord8# 0xB9##
+instance ByteVal 0xb9 where
+    byteVal _ = wordToWord8# 0xb9##
     {-# INLINE byteVal #-}
-instance ByteVal 'BBA where
-    byteVal _ = wordToWord8# 0xBA##
+instance ByteVal 0xba where
+    byteVal _ = wordToWord8# 0xba##
     {-# INLINE byteVal #-}
-instance ByteVal 'BBB where
-    byteVal _ = wordToWord8# 0xBB##
+instance ByteVal 0xbb where
+    byteVal _ = wordToWord8# 0xbb##
     {-# INLINE byteVal #-}
-instance ByteVal 'BBC where
-    byteVal _ = wordToWord8# 0xBC##
+instance ByteVal 0xbc where
+    byteVal _ = wordToWord8# 0xbc##
     {-# INLINE byteVal #-}
-instance ByteVal 'BBD where
-    byteVal _ = wordToWord8# 0xBD##
+instance ByteVal 0xbd where
+    byteVal _ = wordToWord8# 0xbd##
     {-# INLINE byteVal #-}
-instance ByteVal 'BBE where
-    byteVal _ = wordToWord8# 0xBE##
+instance ByteVal 0xbe where
+    byteVal _ = wordToWord8# 0xbe##
     {-# INLINE byteVal #-}
-instance ByteVal 'BBF where
-    byteVal _ = wordToWord8# 0xBF##
+instance ByteVal 0xbf where
+    byteVal _ = wordToWord8# 0xbf##
     {-# INLINE byteVal #-}
-instance ByteVal 'BC0 where
-    byteVal _ = wordToWord8# 0xC0##
+instance ByteVal 0xc0 where
+    byteVal _ = wordToWord8# 0xc0##
     {-# INLINE byteVal #-}
-instance ByteVal 'BC1 where
-    byteVal _ = wordToWord8# 0xC1##
+instance ByteVal 0xc1 where
+    byteVal _ = wordToWord8# 0xc1##
     {-# INLINE byteVal #-}
-instance ByteVal 'BC2 where
-    byteVal _ = wordToWord8# 0xC2##
+instance ByteVal 0xc2 where
+    byteVal _ = wordToWord8# 0xc2##
     {-# INLINE byteVal #-}
-instance ByteVal 'BC3 where
-    byteVal _ = wordToWord8# 0xC3##
+instance ByteVal 0xc3 where
+    byteVal _ = wordToWord8# 0xc3##
     {-# INLINE byteVal #-}
-instance ByteVal 'BC4 where
-    byteVal _ = wordToWord8# 0xC4##
+instance ByteVal 0xc4 where
+    byteVal _ = wordToWord8# 0xc4##
     {-# INLINE byteVal #-}
-instance ByteVal 'BC5 where
-    byteVal _ = wordToWord8# 0xC5##
+instance ByteVal 0xc5 where
+    byteVal _ = wordToWord8# 0xc5##
     {-# INLINE byteVal #-}
-instance ByteVal 'BC6 where
-    byteVal _ = wordToWord8# 0xC6##
+instance ByteVal 0xc6 where
+    byteVal _ = wordToWord8# 0xc6##
     {-# INLINE byteVal #-}
-instance ByteVal 'BC7 where
-    byteVal _ = wordToWord8# 0xC7##
+instance ByteVal 0xc7 where
+    byteVal _ = wordToWord8# 0xc7##
     {-# INLINE byteVal #-}
-instance ByteVal 'BC8 where
-    byteVal _ = wordToWord8# 0xC8##
+instance ByteVal 0xc8 where
+    byteVal _ = wordToWord8# 0xc8##
     {-# INLINE byteVal #-}
-instance ByteVal 'BC9 where
-    byteVal _ = wordToWord8# 0xC9##
+instance ByteVal 0xc9 where
+    byteVal _ = wordToWord8# 0xc9##
     {-# INLINE byteVal #-}
-instance ByteVal 'BCA where
-    byteVal _ = wordToWord8# 0xCA##
+instance ByteVal 0xca where
+    byteVal _ = wordToWord8# 0xca##
     {-# INLINE byteVal #-}
-instance ByteVal 'BCB where
-    byteVal _ = wordToWord8# 0xCB##
+instance ByteVal 0xcb where
+    byteVal _ = wordToWord8# 0xcb##
     {-# INLINE byteVal #-}
-instance ByteVal 'BCC where
-    byteVal _ = wordToWord8# 0xCC##
+instance ByteVal 0xcc where
+    byteVal _ = wordToWord8# 0xcc##
     {-# INLINE byteVal #-}
-instance ByteVal 'BCD where
-    byteVal _ = wordToWord8# 0xCD##
+instance ByteVal 0xcd where
+    byteVal _ = wordToWord8# 0xcd##
     {-# INLINE byteVal #-}
-instance ByteVal 'BCE where
-    byteVal _ = wordToWord8# 0xCE##
+instance ByteVal 0xce where
+    byteVal _ = wordToWord8# 0xce##
     {-# INLINE byteVal #-}
-instance ByteVal 'BCF where
-    byteVal _ = wordToWord8# 0xCF##
+instance ByteVal 0xcf where
+    byteVal _ = wordToWord8# 0xcf##
     {-# INLINE byteVal #-}
-instance ByteVal 'BD0 where
-    byteVal _ = wordToWord8# 0xD0##
+instance ByteVal 0xd0 where
+    byteVal _ = wordToWord8# 0xd0##
     {-# INLINE byteVal #-}
-instance ByteVal 'BD1 where
-    byteVal _ = wordToWord8# 0xD1##
+instance ByteVal 0xd1 where
+    byteVal _ = wordToWord8# 0xd1##
     {-# INLINE byteVal #-}
-instance ByteVal 'BD2 where
-    byteVal _ = wordToWord8# 0xD2##
+instance ByteVal 0xd2 where
+    byteVal _ = wordToWord8# 0xd2##
     {-# INLINE byteVal #-}
-instance ByteVal 'BD3 where
-    byteVal _ = wordToWord8# 0xD3##
+instance ByteVal 0xd3 where
+    byteVal _ = wordToWord8# 0xd3##
     {-# INLINE byteVal #-}
-instance ByteVal 'BD4 where
-    byteVal _ = wordToWord8# 0xD4##
+instance ByteVal 0xd4 where
+    byteVal _ = wordToWord8# 0xd4##
     {-# INLINE byteVal #-}
-instance ByteVal 'BD5 where
-    byteVal _ = wordToWord8# 0xD5##
+instance ByteVal 0xd5 where
+    byteVal _ = wordToWord8# 0xd5##
     {-# INLINE byteVal #-}
-instance ByteVal 'BD6 where
-    byteVal _ = wordToWord8# 0xD6##
+instance ByteVal 0xd6 where
+    byteVal _ = wordToWord8# 0xd6##
     {-# INLINE byteVal #-}
-instance ByteVal 'BD7 where
-    byteVal _ = wordToWord8# 0xD7##
+instance ByteVal 0xd7 where
+    byteVal _ = wordToWord8# 0xd7##
     {-# INLINE byteVal #-}
-instance ByteVal 'BD8 where
-    byteVal _ = wordToWord8# 0xD8##
+instance ByteVal 0xd8 where
+    byteVal _ = wordToWord8# 0xd8##
     {-# INLINE byteVal #-}
-instance ByteVal 'BD9 where
-    byteVal _ = wordToWord8# 0xD9##
+instance ByteVal 0xd9 where
+    byteVal _ = wordToWord8# 0xd9##
     {-# INLINE byteVal #-}
-instance ByteVal 'BDA where
-    byteVal _ = wordToWord8# 0xDA##
+instance ByteVal 0xda where
+    byteVal _ = wordToWord8# 0xda##
     {-# INLINE byteVal #-}
-instance ByteVal 'BDB where
-    byteVal _ = wordToWord8# 0xDB##
+instance ByteVal 0xdb where
+    byteVal _ = wordToWord8# 0xdb##
     {-# INLINE byteVal #-}
-instance ByteVal 'BDC where
-    byteVal _ = wordToWord8# 0xDC##
+instance ByteVal 0xdc where
+    byteVal _ = wordToWord8# 0xdc##
     {-# INLINE byteVal #-}
-instance ByteVal 'BDD where
-    byteVal _ = wordToWord8# 0xDD##
+instance ByteVal 0xdd where
+    byteVal _ = wordToWord8# 0xdd##
     {-# INLINE byteVal #-}
-instance ByteVal 'BDE where
-    byteVal _ = wordToWord8# 0xDE##
+instance ByteVal 0xde where
+    byteVal _ = wordToWord8# 0xde##
     {-# INLINE byteVal #-}
-instance ByteVal 'BDF where
-    byteVal _ = wordToWord8# 0xDF##
+instance ByteVal 0xdf where
+    byteVal _ = wordToWord8# 0xdf##
     {-# INLINE byteVal #-}
-instance ByteVal 'BE0 where
-    byteVal _ = wordToWord8# 0xE0##
+instance ByteVal 0xe0 where
+    byteVal _ = wordToWord8# 0xe0##
     {-# INLINE byteVal #-}
-instance ByteVal 'BE1 where
-    byteVal _ = wordToWord8# 0xE1##
+instance ByteVal 0xe1 where
+    byteVal _ = wordToWord8# 0xe1##
     {-# INLINE byteVal #-}
-instance ByteVal 'BE2 where
-    byteVal _ = wordToWord8# 0xE2##
+instance ByteVal 0xe2 where
+    byteVal _ = wordToWord8# 0xe2##
     {-# INLINE byteVal #-}
-instance ByteVal 'BE3 where
-    byteVal _ = wordToWord8# 0xE3##
+instance ByteVal 0xe3 where
+    byteVal _ = wordToWord8# 0xe3##
     {-# INLINE byteVal #-}
-instance ByteVal 'BE4 where
-    byteVal _ = wordToWord8# 0xE4##
+instance ByteVal 0xe4 where
+    byteVal _ = wordToWord8# 0xe4##
     {-# INLINE byteVal #-}
-instance ByteVal 'BE5 where
-    byteVal _ = wordToWord8# 0xE5##
+instance ByteVal 0xe5 where
+    byteVal _ = wordToWord8# 0xe5##
     {-# INLINE byteVal #-}
-instance ByteVal 'BE6 where
-    byteVal _ = wordToWord8# 0xE6##
+instance ByteVal 0xe6 where
+    byteVal _ = wordToWord8# 0xe6##
     {-# INLINE byteVal #-}
-instance ByteVal 'BE7 where
-    byteVal _ = wordToWord8# 0xE7##
+instance ByteVal 0xe7 where
+    byteVal _ = wordToWord8# 0xe7##
     {-# INLINE byteVal #-}
-instance ByteVal 'BE8 where
-    byteVal _ = wordToWord8# 0xE8##
+instance ByteVal 0xe8 where
+    byteVal _ = wordToWord8# 0xe8##
     {-# INLINE byteVal #-}
-instance ByteVal 'BE9 where
-    byteVal _ = wordToWord8# 0xE9##
+instance ByteVal 0xe9 where
+    byteVal _ = wordToWord8# 0xe9##
     {-# INLINE byteVal #-}
-instance ByteVal 'BEA where
-    byteVal _ = wordToWord8# 0xEA##
+instance ByteVal 0xea where
+    byteVal _ = wordToWord8# 0xea##
     {-# INLINE byteVal #-}
-instance ByteVal 'BEB where
-    byteVal _ = wordToWord8# 0xEB##
+instance ByteVal 0xeb where
+    byteVal _ = wordToWord8# 0xeb##
     {-# INLINE byteVal #-}
-instance ByteVal 'BEC where
-    byteVal _ = wordToWord8# 0xEC##
+instance ByteVal 0xec where
+    byteVal _ = wordToWord8# 0xec##
     {-# INLINE byteVal #-}
-instance ByteVal 'BED where
-    byteVal _ = wordToWord8# 0xED##
+instance ByteVal 0xed where
+    byteVal _ = wordToWord8# 0xed##
     {-# INLINE byteVal #-}
-instance ByteVal 'BEE where
-    byteVal _ = wordToWord8# 0xEE##
+instance ByteVal 0xee where
+    byteVal _ = wordToWord8# 0xee##
     {-# INLINE byteVal #-}
-instance ByteVal 'BEF where
-    byteVal _ = wordToWord8# 0xEF##
+instance ByteVal 0xef where
+    byteVal _ = wordToWord8# 0xef##
     {-# INLINE byteVal #-}
-instance ByteVal 'BF0 where
-    byteVal _ = wordToWord8# 0xF0##
+instance ByteVal 0xf0 where
+    byteVal _ = wordToWord8# 0xf0##
     {-# INLINE byteVal #-}
-instance ByteVal 'BF1 where
-    byteVal _ = wordToWord8# 0xF1##
+instance ByteVal 0xf1 where
+    byteVal _ = wordToWord8# 0xf1##
     {-# INLINE byteVal #-}
-instance ByteVal 'BF2 where
-    byteVal _ = wordToWord8# 0xF2##
+instance ByteVal 0xf2 where
+    byteVal _ = wordToWord8# 0xf2##
     {-# INLINE byteVal #-}
-instance ByteVal 'BF3 where
-    byteVal _ = wordToWord8# 0xF3##
+instance ByteVal 0xf3 where
+    byteVal _ = wordToWord8# 0xf3##
     {-# INLINE byteVal #-}
-instance ByteVal 'BF4 where
-    byteVal _ = wordToWord8# 0xF4##
+instance ByteVal 0xf4 where
+    byteVal _ = wordToWord8# 0xf4##
     {-# INLINE byteVal #-}
-instance ByteVal 'BF5 where
-    byteVal _ = wordToWord8# 0xF5##
+instance ByteVal 0xf5 where
+    byteVal _ = wordToWord8# 0xf5##
     {-# INLINE byteVal #-}
-instance ByteVal 'BF6 where
-    byteVal _ = wordToWord8# 0xF6##
+instance ByteVal 0xf6 where
+    byteVal _ = wordToWord8# 0xf6##
     {-# INLINE byteVal #-}
-instance ByteVal 'BF7 where
-    byteVal _ = wordToWord8# 0xF7##
+instance ByteVal 0xf7 where
+    byteVal _ = wordToWord8# 0xf7##
     {-# INLINE byteVal #-}
-instance ByteVal 'BF8 where
-    byteVal _ = wordToWord8# 0xF8##
+instance ByteVal 0xf8 where
+    byteVal _ = wordToWord8# 0xf8##
     {-# INLINE byteVal #-}
-instance ByteVal 'BF9 where
-    byteVal _ = wordToWord8# 0xF9##
+instance ByteVal 0xf9 where
+    byteVal _ = wordToWord8# 0xf9##
     {-# INLINE byteVal #-}
-instance ByteVal 'BFA where
-    byteVal _ = wordToWord8# 0xFA##
+instance ByteVal 0xfa where
+    byteVal _ = wordToWord8# 0xfa##
     {-# INLINE byteVal #-}
-instance ByteVal 'BFB where
-    byteVal _ = wordToWord8# 0xFB##
+instance ByteVal 0xfb where
+    byteVal _ = wordToWord8# 0xfb##
     {-# INLINE byteVal #-}
-instance ByteVal 'BFC where
-    byteVal _ = wordToWord8# 0xFC##
+instance ByteVal 0xfc where
+    byteVal _ = wordToWord8# 0xfc##
     {-# INLINE byteVal #-}
-instance ByteVal 'BFD where
-    byteVal _ = wordToWord8# 0xFD##
+instance ByteVal 0xfd where
+    byteVal _ = wordToWord8# 0xfd##
     {-# INLINE byteVal #-}
-instance ByteVal 'BFE where
-    byteVal _ = wordToWord8# 0xFE##
+instance ByteVal 0xfe where
+    byteVal _ = wordToWord8# 0xfe##
     {-# INLINE byteVal #-}
-instance ByteVal 'BFF where
-    byteVal _ = wordToWord8# 0xFF##
+instance ByteVal 0xff where
+    byteVal _ = wordToWord8# 0xff##
     {-# INLINE byteVal #-}
 
 type family Length (a :: [k]) :: Natural where
@@ -844,17 +805,17 @@ type family Length (a :: [k]) :: Natural where
 --
 -- This is about as far as one should go for pointless performance here, I
 -- should think.
-class ByteVals (bs :: [Byte]) where byteVals :: Builder
-instance (n ~ Length bs, KnownNat n, WriteByteVals bs) => ByteVals bs where
+class ByteVals (ns :: [Natural]) where byteVals :: Builder
+instance (n ~ Length ns, KnownNat n, WriteByteVals ns) => ByteVals ns where
     byteVals = Mason.primFixed (BI.fixedPrim (fromIntegral n) go) ()
       where
         n = natVal'' @n
-        go = \() (Ptr p#) -> writeByteVals @bs p#
+        go = \() (Ptr p#) -> writeByteVals @ns p#
 
-class WriteByteVals (bs :: [Byte]) where writeByteVals :: Addr# -> IO ()
+class WriteByteVals (ns :: [Natural]) where writeByteVals :: Addr# -> IO ()
 instance WriteByteVals '[] where writeByteVals _ = pure ()
-instance (ByteVal b, WriteByteVals bs) => WriteByteVals (b ': bs) where
+instance (ByteVal n, WriteByteVals ns) => WriteByteVals (n ': ns) where
     writeByteVals p# =
         case runRW# (writeWord8OffAddr# p# 0# w#) of
-          _ -> writeByteVals @bs (plusAddr# p# 1#)
-      where w# = byteVal @b proxy#
+          _ -> writeByteVals @ns (plusAddr# p# 1#)
+      where w# = byteVal @n proxy#

@@ -48,7 +48,6 @@ library
       Binrep.Put
       Binrep.Type.AsciiNat
       Binrep.Type.Byte
-      Binrep.Type.Byte.TypeLevel
       Binrep.Type.ByteString
       Binrep.Type.Common
       Binrep.Type.Int

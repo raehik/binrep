@@ -1,41 +1,31 @@
 {- | Magic numbers (also just magic): short constant bytestrings usually
      found at the top of a file, included as a safety check for parsing.
 
+TODO rename: MagicBytes -> MagicVals, and have ByteVal be a "consumer" of
+MagicVals where each value must be a byte. (It's conceivable that we have
+another consumer which makes each value into a non-empty list of bytes, LE/BE.)
+
 There are two main flavors of magics:
 
   * "random" bytes e.g. Zstandard: @28 B5 2F FD@
   * printable ASCII bytes e.g. Ogg: @4F 67 67 53@ -> OggS
 
-We allow both. Here is how to use them.
+For bytewise magics, use type-level 'Natural' lists.
+For ASCII magics, use 'Symbol's (type-level strings).
 
-For bytewise magics, use type-level 'Natural' lists:
+Previously, I squashed these into a representationally-safe type. Now the check
+only occurs during reification. So you are able to define invalid magics now
+(bytes over 255, non-ASCII characters), and potentially use them, but you'll get
+a clear type error like "no instance for ByteVal 256" when attempting to reify.
 
->>> :k! MagicBytes '[0x4F, 0x67, 0x67, 0x53]
-MagicBytes '[0x4F, 0x67, 0x67, 0x53] :: [Byte]
-= '[ 'B4F, 'B67, 'B67, 'B53]
-
-You will get a type error if you try to use a natural larger than @0xFF@.
-Alternatively, you may use the representationally-safe 'Byte' kind:
-
->>> :k! MagicBytes '[ 'B4F]
-MagicBytes '[ 'B4F] :: [Byte]
-= '[ 'B4F]
-
-For ASCII magics, use 'Symbol's (type-level strings):
-
->>> :k! MagicBytes "OggS"
-MagicBytes "OggS" :: [Byte]
-= '[ 'B4F, 'B67, 'B67, 'B53]
-
-String magics are restricted to ASCII, and will type error if not. If you really
-want them, please read 'Binrep.Type.Magic.UTF8'.
+String magics are restricted to ASCII, and will type error during reification
+otherwise. If you really want UTF-8, please read 'Binrep.Type.Magic.UTF8'.
 -}
 
 module Binrep.Type.Magic where
 
 import Binrep
 import Binrep.Type.Byte
-import Binrep.Type.Byte.TypeLevel
 
 import GHC.TypeLits
 import Data.ByteString qualified as B
@@ -49,14 +39,20 @@ import Mason.Builder qualified as Mason
 data Magic (a :: k) = Magic
     deriving stock (Generic, Data, Show, Eq)
 
-type instance CBLen (Magic a) = Length (MagicBytes a)
-deriving anyclass instance KnownNat (Length (MagicBytes a)) => BLen (Magic a)
+-- | Assumes magic values are individual bytes.
+type instance CBLen (Magic a) = Length (MagicVals a)
 
-instance (bs ~ MagicBytes a, ByteVals bs) => Put (Magic a) where
+-- | Assumes magic values are individual bytes.
+deriving anyclass instance KnownNat (Length (MagicVals a)) => BLen (Magic a)
+
+-- | Forces magic values to be individual bytes.
+instance (bs ~ MagicVals a, ByteVals bs) => Put (Magic a) where
     put Magic = byteVals @bs
 
+-- | Forces magic values to be individual bytes.
+--
 -- TODO improve show - maybe hexbytestring goes here? lol
-instance (bs ~ MagicBytes a, ByteVals bs) => Get (Magic a) where
+instance (bs ~ MagicVals a, ByteVals bs) => Get (Magic a) where
     get = do
         let expected = Mason.toStrictByteString $ byteVals @bs
         actual <- FP.take $ B.length expected
@@ -77,12 +73,9 @@ out the function applications or something. Essentially, you can't do this:
 So you have to write that out for every concrete function over lists.
 -}
 
-type family SymbolAsCharList (a :: Symbol) :: [Char] where
-    SymbolAsCharList a = SymbolAsCharList' (UnconsSymbol a)
-
-type family SymbolAsCharList' (a :: Maybe (Char, Symbol)) :: [Char] where
-    SymbolAsCharList' 'Nothing = '[]
-    SymbolAsCharList' ('Just '(c, s)) = c ': SymbolAsCharList' (UnconsSymbol s)
+type family MagicVals (a :: k) :: [Natural]
+type instance MagicVals (a :: Symbol)    = SymbolUnicodeCodepoints a
+type instance MagicVals (a :: [Natural]) = a
 
 type family SymbolUnicodeCodepoints (a :: Symbol) :: [Natural] where
     SymbolUnicodeCodepoints a = CharListUnicodeCodepoints (SymbolAsCharList a)
@@ -91,16 +84,9 @@ type family CharListUnicodeCodepoints (a :: [Char]) :: [Natural] where
     CharListUnicodeCodepoints '[]       = '[]
     CharListUnicodeCodepoints (c ': cs) = CharToNat c ': CharListUnicodeCodepoints cs
 
-type family NatsToBytes (a :: [Natural]) :: [Byte] where
-    NatsToBytes '[]       = '[]
-    NatsToBytes (n ': ns) = NatToByte' n ': NatsToBytes ns
+type family SymbolAsCharList (a :: Symbol) :: [Char] where
+    SymbolAsCharList a = SymbolAsCharList' (UnconsSymbol a)
 
-type family MagicBytes (a :: k) :: [Byte]
-
-type instance MagicBytes (a :: [Byte]) = a
-
--- | Only permits ASCII.
-type instance MagicBytes (a :: Symbol) = NatsToBytes (SymbolUnicodeCodepoints a)
-
--- | Only permits values between 0-255 (0x00-0xFF).
-type instance MagicBytes (a :: [Natural]) = NatsToBytes a
+type family SymbolAsCharList' (a :: Maybe (Char, Symbol)) :: [Char] where
+    SymbolAsCharList' 'Nothing = '[]
+    SymbolAsCharList' ('Just '(c, s)) = c ': SymbolAsCharList' (UnconsSymbol s)
