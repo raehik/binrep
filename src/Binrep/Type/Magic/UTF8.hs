@@ -38,7 +38,7 @@ instance KnownSymbol str => Put  (MagicUTF8 str) where
 instance KnownSymbol str => Get  (MagicUTF8 str) where
     get = do
         let expected = encodeStringUtf8 $ symVal @str
-        actual <- FP.take $ B.length expected
+        actual <- FP.takeBs $ B.length expected
         if   actual == expected
         then return MagicUTF8
         else FP.err $ "bad magic: expected "<>show expected<>", got "<>show actual

@@ -5,6 +5,9 @@ TODO rename: MagicBytes -> MagicVals, and have ByteVal be a "consumer" of
 MagicVals where each value must be a byte. (It's conceivable that we have
 another consumer which makes each value into a non-empty list of bytes, LE/BE.)
 
+TODO unassociated type fams bad (maybe). turn into class -- and turn the reifier
+into a default method! (TODO think about this)
+
 There are two main flavors of magics:
 
   * "random" bytes e.g. Zstandard: @28 B5 2F FD@
@@ -55,7 +58,7 @@ instance (bs ~ MagicVals a, ByteVals bs) => Put (Magic a) where
 instance (bs ~ MagicVals a, ByteVals bs) => Get (Magic a) where
     get = do
         let expected = Mason.toStrictByteString $ byteVals @bs
-        actual <- FP.take $ B.length expected
+        actual <- FP.takeBs $ B.length expected
         if   actual == expected
         then return Magic
         else FP.err $ "bad magic: expected "<>show expected<>", got "<>show actual

@@ -74,10 +74,10 @@ dependencies:
 - mason ^>= 0.2.5
 - vector-sized ^>= 1.5.0
 - vector ^>= 0.12.3.1
-- strongweak ^>= 0.1.0
-- validation ^>= 1.1.2
+- strongweak ^>= 0.2.0
+- either ^>= 5.0.1.1
 - text-icu ^>= 0.8.0.1
-- flatparse # TODO
+- flatparse ^>= 0.3.4.0
 
 library:
   source-dirs: src

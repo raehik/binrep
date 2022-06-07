@@ -74,7 +74,7 @@ instance (itype ~ I 'U size end, irep ~ IRep 'U size, Put itype, Num irep) => Pu
 instance (itype ~ I 'U size end, irep ~ IRep 'U size, Integral irep, Get itype) => Get (AsByteString ('Pascal size end)) where
     get = do
         len <- get @itype
-        bs <- FP.take $ fromIntegral len
+        bs <- FP.takeBs $ fromIntegral len
         return $ reallyUnsafeRefine bs
 
 -- | A C-style bytestring must not contain any null bytes.

@@ -1,7 +1,16 @@
 packages: .
 
--- currently depends on my predicate polykind fix
+-- not yet released :<
 source-repository-package
   type: git
-  location: https://github.com/raehik/refined
-  tag: 952e0348348aaf11c8b93c6e1ac6d33a0cbbb6b1
+  location: https://github.com/nikita-volkov/refined
+  tag: 91566f4e313937b7315a401fd116fa0aa2a15f06
+
+-- final set of new binary primitives (address/location) are yet to be released
+source-repository-package
+  type: git
+  location: https://github.com/AndrasKovacs/flatparse
+  tag: c4b5dd8d4378377993697dac61ce1716e0ef19ea
+
+package strongweak
+    flags: +refined-polykind

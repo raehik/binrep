@@ -32,9 +32,8 @@ runGetter g bs = case FP.runParser g bs of
 --   used at the "top" of binary formats.
 instance Get a => Get [a] where
     get = do as <- FP.many get
-             FP.isEof >>= \case
-               True  -> return as
-               False -> error "TODO fail"
+             FP.eof
+             return as
 
 instance (Get a, Get b) => Get (a, b) where
     get = do
@@ -43,7 +42,7 @@ instance (Get a, Get b) => Get (a, b) where
         return (a, b)
 
 instance Get B.ByteString where
-    get = FP.takeRest
+    get = FP.takeRestBs
 
 instance Get Word8 where get = FP.anyWord8
 instance Get  Int8 where get = FP.anyInt8

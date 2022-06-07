@@ -6,7 +6,7 @@ module Binrep.Type.LenPfx where
 
 import Binrep
 import Strongweak
-import Data.Validation
+import Data.Either.Validation
 import Binrep.Type.Vector ( getVector )
 import Binrep.Type.Common ( Endianness )
 import Binrep.Type.Int

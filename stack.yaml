@@ -2,19 +2,18 @@ resolver: nightly-2022-03-30
 packages: [.]
 
 extra-deps:
-# currently depends on my predicate polykind fix
-- git: https://github.com/raehik/refined
-  commit: 952e0348348aaf11c8b93c6e1ac6d33a0cbbb6b1
+# not yet released :<
+- git: https://github.com/nikita-volkov/refined
+  commit: 91566f4e313937b7315a401fd116fa0aa2a15f06
 
-# super fast bytestring serializer
+# final set of new binary primitives (address/location) are yet to be released
+- git: https://github.com/AndrasKovacs/flatparse
+  commit: c4b5dd8d4378377993697dac61ce1716e0ef19ea
+
 - mason-0.2.5@sha256:44ead52c404f49006e4759d746b9008f8a6b2c642cbb27d26e7e25e7ba9a6f71,1221
-
-# need because of my predicate polykind change >:(
-- git: https://github.com/raehik/strongweak
-  commit: 70bdffa1010ebe517e3fe5a133dbfc81a2865f31
-
 - text-icu-0.8.0.1@sha256:22d21c91e7a81f1ee5766b3406f4fe9df0ff8cc426581a861de3f6f2fa413449,4624
+- strongweak-0.2.0@sha256:cce3ac14ba42b7d004c4511d4787375b127f890cd3085e539ce1328eda309520,3633
 
-# lol more forks
-- git: https://github.com/raehik/flatparse
-  commit: c1c36a0c17ed5932082c11cef495c2b2727558db
+flags:
+  strongweak:
+    refined-polykind: true
