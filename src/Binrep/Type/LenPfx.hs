@@ -44,14 +44,14 @@ vsEq vn vm =
     then V.toList vn == V.toList vm
     else False
 
-type instance Weak (LenPfx size end a) = [a]
-
-instance Weaken (LenPfx size end a) [a] where
+instance Weaken (LenPfx size end a) where
+    type Weak (LenPfx size end a) = [a]
     weaken (LenPfx v) = V.toList v
 
-instance (KnownNat (MaxBound (IRep 'U size)), Show a, Typeable a, Typeable size, Typeable end) => Strengthen [a] (LenPfx size end a) where
+instance (KnownNat (MaxBound (IRep 'U size)), Show a, Typeable a, Typeable size, Typeable end)
+  => Strengthen (LenPfx size end a) where
     strengthen l = case lenPfxFromList l of
-                     Nothing -> strengthenErrorBase l "TODO doesn't fit"
+                     Nothing -> strengthenFailBase l "TODO doesn't fit"
                      Just v  -> Success v
 
 asLenPfx

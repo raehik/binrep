@@ -73,8 +73,11 @@ deriving stock instance Show a => Show (Entry 'Weak   a)
 deriving stock instance Eq   a => Eq   (Entry 'Weak   a)
 deriving stock instance Show a => Show (Entry 'Strong a)
 deriving stock instance Eq   a => Eq   (Entry 'Strong a)
-instance Weaken     (Entry 'Strong a) (Entry 'Weak   a) where weaken     = weakenGeneric
-instance Strengthen (Entry 'Weak   a) (Entry 'Strong a) where strengthen = strengthenGeneric
+instance Weaken (Entry 'Strong a) where
+    type Weak (Entry 'Strong a) = Entry 'Weak a
+    weaken = weakenGeneric
+instance Strengthen (Entry 'Strong a) where
+    strengthen = strengthenGeneric
 
 instance Get a => GetWith Addr# (Entry 'Strong a) where getWith = getEntry
 

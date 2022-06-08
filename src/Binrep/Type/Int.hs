@@ -1,3 +1,7 @@
+{- TODO can I replace this with a closed newtype family?? idk if I even want to
+    it's just this is clumsy to use sometimes
+-}
+
 module Binrep.Type.Int where
 
 import Binrep
@@ -44,18 +48,20 @@ deriving via (IRep sign size) instance Enum     (IRep sign size) => Enum     (I 
 deriving via (IRep sign size) instance Integral (IRep sign size) => Integral (I sign size e)
 
 -- | Unsigned machine integers can be idealized as naturals.
-type instance Weak (I 'U size end) = Natural
+instance (irep ~ IRep 'U size, Integral irep) => Weaken (I 'U size end) where
+    type Weak (I 'U size end) = Natural
+    weaken = fromIntegral
+instance (irep ~ IRep 'U size, Integral irep, Bounded irep, Show irep, Typeable size, Typeable end)
+  => Strengthen (I 'U size end) where
+      strengthen = strengthenBounded
 
 -- | Signed machine integers can be idealized as integers.
-type instance Weak (I 'S size end) = Integer
-
-instance (irep ~ IRep 'U size, Integral irep) => Weaken (I 'U size end) Natural where weaken = fromIntegral
-instance (irep ~ IRep 'S size, Integral irep) => Weaken (I 'S size end) Integer where weaken = fromIntegral
-
-instance (irep ~ IRep 'U size, Integral irep, Bounded irep, Show irep, Typeable size, Typeable end)
-  => Strengthen Natural (I 'U size end) where strengthen = strengthenBounded
+instance (irep ~ IRep 'S size, Integral irep) => Weaken (I 'S size end) where
+    type Weak (I 'S size end) = Integer
+    weaken = fromIntegral
 instance (irep ~ IRep 'S size, Integral irep, Bounded irep, Show irep, Typeable size, Typeable end)
-  => Strengthen Integer (I 'S size end) where strengthen = strengthenBounded
+  => Strengthen (I 'S size end) where
+      strengthen = strengthenBounded
 
 -- | Machine integer sign.
 data ISign
