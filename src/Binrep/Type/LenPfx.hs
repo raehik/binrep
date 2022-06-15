@@ -1,6 +1,7 @@
 -- TODO cleanup proxy usage (can we be faster via unboxed @Proxy#@ s ?)
 
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Binrep.Type.LenPfx where
 

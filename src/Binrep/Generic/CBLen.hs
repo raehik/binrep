@@ -1,3 +1,5 @@
+{-# LANGUAGE UndecidableInstances #-}
+
 {- | Generically derive 'CBLen' type family instances.
 
 This is mostly playing around -- I've only just learned regular GHC generics,

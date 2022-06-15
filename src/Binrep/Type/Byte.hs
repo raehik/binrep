@@ -13,7 +13,7 @@ definitions are even sillier than the ones here.
 Do not use this on the term level. That would be _extremely_ silly.
 -}
 
-{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE AllowAmbiguousTypes, UndecidableInstances #-}
 
 module Binrep.Type.Byte where
 

@@ -1,6 +1,7 @@
 -- | Sized vectors.
 
 {-# LANGUAGE NoStarIsType #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Binrep.Type.Vector where

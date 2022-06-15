@@ -1,3 +1,5 @@
+{-# LANGUAGE UndecidableInstances #-}
+
 {- TODO can I replace this with a closed newtype family?? idk if I even want to
     it's just this is clumsy to use sometimes
 -}

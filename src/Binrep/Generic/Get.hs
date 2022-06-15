@@ -1,3 +1,5 @@
+{-# LANGUAGE UndecidableInstances #-} -- required for TypeError >:(
+
 module Binrep.Generic.Get where
 
 import GHC.Generics

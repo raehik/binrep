@@ -1,3 +1,5 @@
+{-# LANGUAGE UndecidableInstances #-}
+
 {- | Magic numbers (also just magic): short constant bytestrings usually
      found at the top of a file, included as a safety check for parsing.
 

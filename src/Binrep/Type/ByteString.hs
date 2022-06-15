@@ -12,6 +12,7 @@ in one fell swoop.
 
 -- TODO redocument. pretty all over the place
 
+{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Binrep.Type.ByteString where
