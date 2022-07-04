@@ -70,7 +70,7 @@ default-extensions:
 dependencies:
 - base >= 4.14 && < 5
 - bytestring ^>= 0.11
-- refined ^>= 0.6.3
+- refined ^>= 0.7
 - aeson ^>= 2.0 # because we use refined which uses it (also for HexByteString)
 - text ^>= 1.2
 - either ^>= 5.0.1.1
@@ -78,15 +78,16 @@ dependencies:
 - mason ^>= 0.2.5
 - vector-sized ^>= 1.5.0
 - vector ^>= 0.12.3.1
-- strongweak ^>= 0.3.0
+- strongweak ^>= 0.3.1
 - either ^>= 5.0.1.1
 - text-icu ^>= 0.8.0.1
 - flatparse ^>= 0.3.4.0
 
+ghc-options:
+- -Wall
+
 library:
   source-dirs: src
-  ghc-options:
-  - -Wall
 
 tests:
   spec:
