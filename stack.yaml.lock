@@ -5,23 +5,12 @@
 
 packages:
 - completed:
-    name: flatparse
-    version: 0.3.4.0
-    git: https://github.com/AndrasKovacs/flatparse
+    hackage: flatparse-0.3.5.0@sha256:ed98a973cb958555924a4bd9862480e4b7632ec7495abcc0bee1d10fad476a42,3936
     pantry-tree:
-      size: 1505
-      sha256: b9bfdd389cc5f39058d4cd0c31393f0ede214025bba5c0f997daa95239cc207b
-    commit: c4b5dd8d4378377993697dac61ce1716e0ef19ea
+      size: 1062
+      sha256: deb8fd3167f3b8ec2f67be2e8c5efeb4f78240b3a91127b7416d2ac0790db31e
   original:
-    git: https://github.com/AndrasKovacs/flatparse
-    commit: c4b5dd8d4378377993697dac61ce1716e0ef19ea
-- completed:
-    hackage: strongweak-0.3.1@sha256:86cb3ccda0955bbdfc70a8fd90dc80e32a5283b05cd3f2b39858925fc4bad988,3343
-    pantry-tree:
-      size: 986
-      sha256: c75962b91a69d18c644dc628df350d80a6bd542469fa3ce9c080b24d39c834c2
-  original:
-    hackage: strongweak-0.3.1
+    hackage: flatparse-0.3.5.0
 - completed:
     hackage: mason-0.2.5@sha256:44ead52c404f49006e4759d746b9008f8a6b2c642cbb27d26e7e25e7ba9a6f71,1221
     pantry-tree:
@@ -29,6 +18,13 @@ packages:
       sha256: 4eda0ef67a4f4475f8ab1dc38aca2a86ff5a522eab57e7c63ddc66b4da9bd874
   original:
     hackage: mason-0.2.5@sha256:44ead52c404f49006e4759d746b9008f8a6b2c642cbb27d26e7e25e7ba9a6f71,1221
+- completed:
+    hackage: strongweak-0.3.1@sha256:86cb3ccda0955bbdfc70a8fd90dc80e32a5283b05cd3f2b39858925fc4bad988,3343
+    pantry-tree:
+      size: 986
+      sha256: c75962b91a69d18c644dc628df350d80a6bd542469fa3ce9c080b24d39c834c2
+  original:
+    hackage: strongweak-0.3.1
 - completed:
     hackage: text-icu-0.8.0.1@sha256:22d21c91e7a81f1ee5766b3406f4fe9df0ff8cc426581a861de3f6f2fa413449,4624
     pantry-tree:

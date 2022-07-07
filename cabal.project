@@ -1,7 +1,0 @@
-packages: .
-
--- final set of new binary primitives (address/location) are yet to be released
-source-repository-package
-  type: git
-  location: https://github.com/AndrasKovacs/flatparse
-  tag: c4b5dd8d4378377993697dac61ce1716e0ef19ea

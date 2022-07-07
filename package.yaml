@@ -6,7 +6,7 @@ extra-source-files:
 - README.md
 - CHANGELOG.md
 category: Data, Serialization
-tested-with: GHC ==8.10.7 || ==9.2.2
+tested-with: GHC ==9.2.2
 license: MIT
 license-file: LICENSE
 
@@ -67,6 +67,9 @@ default-extensions:
 # useful extensions to know about, but which must be specified on-demand
 #- UndecidableInstances
 
+ghc-options:
+- -Wall
+
 dependencies:
 - base >= 4.14 && < 5
 - bytestring ^>= 0.11
@@ -81,10 +84,7 @@ dependencies:
 - strongweak ^>= 0.3.1
 - either ^>= 5.0.1.1
 - text-icu ^>= 0.8.0.1
-- flatparse ^>= 0.3.4.0
-
-ghc-options:
-- -Wall
+- flatparse ^>= 0.3.5.0
 
 library:
   source-dirs: src
