@@ -20,6 +20,12 @@ them effectively and efficiently in Haskell. Here's why it's useful:
   * **Performant:** Parsing and serialization is low-level and *extremely fast*,
     using [flatparse][gh-flatparse] and [mason][gh-mason] respectively.
 
+## Usage
+### Dependencies
+You need the **ICU library**. For running, you just need the runtime. For
+building, you need development files as well (headers etc). Alternatively, you
+may turn off the ICU features with a Cabal flag.
+
 ## Philosophy
 ### Modelling, not serializing
 binrep is good at modelling binary data formats. It is not a plain

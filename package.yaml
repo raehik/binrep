@@ -6,7 +6,7 @@ extra-source-files:
 - README.md
 - CHANGELOG.md
 category: Data, Serialization
-tested-with: GHC ==9.2.2
+tested-with: GHC ==9.2.3
 license: MIT
 license-file: LICENSE
 
@@ -83,7 +83,6 @@ dependencies:
 - vector ^>= 0.12.3.1
 - strongweak ^>= 0.3.1
 - either ^>= 5.0.1.1
-- text-icu ^>= 0.8.0.1
 - flatparse ^>= 0.3.5.0
 
 library:
@@ -101,3 +100,16 @@ tests:
     - QuickCheck ^>= 2.14.2
     - quickcheck-instances ^>= 0.3.26
     - generic-random ^>= 1.5.0.1
+
+flags:
+  icu:
+    description: use text-icu package (requires ICU library)
+    default: true
+    manual: true
+
+when:
+- condition: flag(icu)
+  dependencies:
+  - text-icu ^>= 0.8.0.1
+  cpp-options:
+  - -DHAVE_ICU
