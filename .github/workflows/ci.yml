@@ -37,9 +37,9 @@ jobs:
         os: [ubuntu-latest]
         cabal: [latest]
         ghc:
-        - 9.2.2
+        - 9.2.3
         include:
-        - ghc: 9.2.2
+        - ghc: 9.2.3
           build: release
 
     steps:
@@ -118,15 +118,18 @@ jobs:
         os: [macos-latest]
         cabal: [latest]
         ghc:
-        - 9.2.2
+        - 9.2.3
         include:
-        - ghc: 9.2.2
+        - ghc: 9.2.3
           build: release
 
     steps:
 
     # TODO figure out timestamp fixer on Mac (no Mac available to test)
     - uses: actions/checkout@v2
+
+    - name: Prepare icu4c for developer usage (expose to pkg-config)
+      run: echo "PKG_CONFIG_PATH=/usr/local/opt/icu4c/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
 
     - name: Setup Haskell build environment
       id: setup-haskell-build-env
@@ -177,66 +180,76 @@ jobs:
 
   windows-cabal-test:
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.os }} / test / GHC ${{ matrix.ghc }}, Cabal
+    name: ${{ matrix.os }} (MSYS2, ${{ matrix.msystem }})) / test / GHC ${{ matrix.ghc }}, Cabal
     strategy:
       fail-fast: false
       matrix:
         os: [windows-latest]
         cabal: [latest]
         ghc:
-        - 9.2.2
+        - 9.2.3
+        msystem: [MINGW64]
         include:
-        - ghc: 9.2.2
+        - ghc: 9.2.3
           build: release
 
     steps:
 
-    # TODO can't do cache fixer on Windows b/c it's a Bash script...
     - uses: actions/checkout@v2
 
-    - name: Setup Haskell build environment
-      id: setup-haskell-build-env
-      uses: haskell/actions/setup@v1
+    - uses: msys2/setup-msys2@v2
       with:
-        ghc-version: ${{ matrix.ghc }}
-        cabal-version: ${{ matrix.cabal }}
+        msystem: ${{ matrix.msystem }}
+        pacboy: >-
+          pkgconf:p
+          icu:p
+        location: D:\
 
-    - run: cabal freeze
+    - name: Install ghcup
+      run: 'Set-ExecutionPolicy Bypass -Scope Process -Force;[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;Invoke-Command -ScriptBlock ([ScriptBlock]::Create((Invoke-WebRequest https://www.haskell.org/ghcup/sh/bootstrap-haskell.ps1 -UseBasicParsing))) -ArgumentList $false,$true,$true,$false,$false,$false,$false,"C:\","https://gitlab.haskell.org/haskell/ghcup-hs/-/raw/v0.1.17.5/scripts/bootstrap/bootstrap-haskell","D:\msys64","C:\cabal"'
 
-    - name: Cache Cabal build artifacts
+    # TODO idk why this doesn't work
+    - run: echo "source /c/ghcup/env" >> ~/.bashrc
+      shell: msys2 {0}
+
+    - run: >-
+        sed --in-place
+        's/extra-lib-dirs: /extra-lib-dirs: C:\\ghcup\\ghc\\${{ matrix.ghc }}\\x86_64-w64-mingw32\\lib, /g'
+        /c/cabal/config
+      shell: msys2 {0}
+
+    - run: ghcup install cabal ${{ matrix.cabal }} --set
+    - run: ghcup install ghc ${{ matrix.ghc }} --set
+
+    - name: Cache global Cabal store
       uses: actions/cache@v2
       with:
-        path: |
-          ${{ steps.setup-haskell-build-env.outputs.cabal-store }}
-          dist-newstyle
-        key:          test-cabal-build-artifacts-${{ runner.os }}-ghc_${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
-        restore-keys: test-cabal-build-artifacts-${{ runner.os }}-ghc_${{ matrix.ghc }}
+        path: C:/cabal/store
+        key: test-cabal-global-store-${{ runner.os }}-ghc_${{ matrix.ghc }}
 
-    - name: Build (exe)
-      if: "env.exe != 0 && matrix.build == 'release'"
-      run: cabal build -O2
-    - name: Build (skip exe)
-      if: "env.exe != 0 && matrix.build != 'release'"
-      run: cabal build -O0
-    - name: Build (no exe)
-      if: "env.exe == 0"
-      run: cabal build -O0
+    - run: cabal update
 
-    - name: Test
-      run: cabal test --test-show-details=streaming
+    - run: cabal freeze
+      shell: msys2 {0}
       env:
-        HSPEC_OPTIONS: --color
+        BASH_ENV: /c/ghcup/env
 
-    - name: Install
-      if: "env.exe != 0 && matrix.build == 'release'"
-      run: cabal install
-
-    # note that Cabal uses symlinks -- actions/upload-artifact@v2 apparently
-    # dereferences for us
-    - name: Upload executable
-      if: "env.exe != 0 && matrix.build == 'release'"
-      uses: actions/upload-artifact@v2
+    - name: (binrep) Cache project Cabal store
+      uses: actions/cache@v2
       with:
-        path: C:/cabal/bin/${{ env.exe }}.exe
-        name: ${{ env.exe }}-${{ runner.os }}-ghc_${{ matrix.ghc }}-cabal-${{ github.sha }}
-        if-no-files-found: error
+        path: dist-newstyle
+        key:          test-cabal-project-binrep-${{ runner.os }}-ghc_${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
+        restore-keys: test-cabal-project-binrep-${{ runner.os }}-ghc_${{ matrix.ghc }}
+
+    - name: (binrep) Build (no exe)
+      run: cabal build -O0
+      shell: msys2 {0}
+      env:
+        BASH_ENV: /c/ghcup/env
+
+    - name: (binrep) Test
+      run: cabal test --test-show-details=streaming
+      shell: msys2 {0}
+      env:
+        BASH_ENV: /c/ghcup/env
+        HSPEC_OPTIONS: --color

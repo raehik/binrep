@@ -8,7 +8,9 @@ module Binrep.Type.Text
   , Encode, encode
   , Decode(..)
   , encodeToRep
+#ifdef HAVE_ICU
   , decodeViaTextICU
+#endif
   ) where
 
 import Binrep.Type.Common ( Endianness(..) )
@@ -33,7 +35,9 @@ import System.IO.Unsafe qualified
 import Control.Exception qualified
 import Data.Text.Encoding.Error qualified
 
+#ifdef HAVE_ICU
 import Data.Text.ICU.Convert qualified as ICU
+#endif
 
 type Bytes = B.ByteString
 
@@ -67,8 +71,6 @@ instance Encode ('UTF16 'BE) where encode' = Text.encodeUtf16BE
 instance Encode ('UTF16 'LE) where encode' = Text.encodeUtf16LE
 instance Encode ('UTF32 'BE) where encode' = Text.encodeUtf32BE
 instance Encode ('UTF32 'LE) where encode' = Text.encodeUtf32LE
-
-instance Encode 'SJIS where encode' = encodeViaTextICU' "Shift-JIS"
 
 -- | Encode some validated text.
 encode :: forall enc. Encode enc => AsText enc -> Bytes
@@ -108,8 +110,6 @@ instance Decode ('UTF32 'LE) where decode = decodeText show $ wrapUnsafeDecoder 
 #if MIN_VERSION_text(2,0,0)
 instance Decode 'ASCII where decode = decodeText $ wrapUnsafeDecoder Text.decodeASCII
 #endif
-
-instance Decode 'SJIS where decode = decodeText id $ decodeViaTextICU' "Shift-JIS"
 
 --------------------------------------------------------------------------------
 -- Helpers
@@ -154,6 +154,14 @@ wrapUnsafeDecoder f =
     . Control.Exception.evaluate
     . f
 
+--------------------------------------------------------------------------------
+-- ICU
+
+#ifdef HAVE_ICU
+instance Encode 'SJIS where encode' = encodeViaTextICU' "Shift-JIS"
+instance Decode 'SJIS where
+    decode  = decodeText id $ decodeViaTextICU' "Shift-JIS"
+
 -- | Encode some 'Text' to the given character set using text-icu.
 --
 -- No guarantees about correctness. Encodings are weird. e.g. Shift JIS's
@@ -182,3 +190,4 @@ decodeViaTextICU charset t = do
 decodeViaTextICU' :: String -> B.ByteString -> Either String Text
 decodeViaTextICU' charset t = do
     System.IO.Unsafe.unsafeDupablePerformIO $ decodeViaTextICU charset t
+#endif
