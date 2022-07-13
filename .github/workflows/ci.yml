@@ -128,15 +128,15 @@ jobs:
     # TODO figure out timestamp fixer on Mac (no Mac available to test)
     - uses: actions/checkout@v2
 
-    - name: Prepare icu4c for developer usage (expose to pkg-config)
-      run: echo "PKG_CONFIG_PATH=/usr/local/opt/icu4c/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
-
     - name: Setup Haskell build environment
       id: setup-haskell-build-env
       uses: haskell/actions/setup@v1
       with:
         ghc-version: ${{ matrix.ghc }}
         cabal-version: ${{ matrix.cabal }}
+
+    - name: Prepare icu4c for developer usage (expose to pkg-config)
+      run: echo "PKG_CONFIG_PATH=/usr/local/opt/icu4c/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
 
     - run: cabal freeze
 
