@@ -1,3 +1,6 @@
+## Unreleased
+  * add initial varint definitions at `Binrep.Type.Varint`
+
 ## 0.2.0 (2022-07-07)
 Multiple rewrites (unable to push to Hackage for a while due to dependencies).
 

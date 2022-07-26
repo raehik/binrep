@@ -1,6 +1,20 @@
 # To-dos
+## Octet instead of byte?
+Is it better to refer to octets instead of bytes? An octet is always 8 bits,
+while a byte is kind of "not necessarily".
+
+## Safety against unknown inputs
+Consider implementing "practical maxes" for various types.
+
+  * https://github.com/multiformats/unsigned-varint does this
+  * So do Haskell's protobufs:
+    https://hackage.haskell.org/package/protocol-buffers-2.4.17/docs/src/Text.ProtocolBuffers.Get.html#decode7unrolled
+
+May help prevent unexpected OOMs?
+
 ## More primitives
   * Varint
+    * base done, but doesn't support everything
     * `newtype Varint sign end = Varint { unVarint :: VarintRep sign }`
     * apparently `Varint s 'LE` would be LEB128, `Varint s 'BE` would be VLQ
     * https://developers.google.com/protocol-buffers/docs/encoding , Mason

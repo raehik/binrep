@@ -62,6 +62,7 @@ library
       Binrep.Type.NullPadded
       Binrep.Type.Sized
       Binrep.Type.Text
+      Binrep.Type.Varint
       Binrep.Type.Vector
       Binrep.Util
       Data.Aeson.Extra.SizedVector
