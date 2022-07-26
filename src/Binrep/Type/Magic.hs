@@ -1,11 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 {- | Magic numbers (also just magic): short constant bytestrings usually
-     found at the top of a file, included as a safety check for parsing.
-
-TODO rename: MagicBytes -> MagicVals, and have ByteVal be a "consumer" of
-MagicVals where each value must be a byte. (It's conceivable that we have
-another consumer which makes each value into a non-empty list of bytes, LE/BE.)
+     found at the top of a file, often used as an early sanity check.
 
 TODO unassociated type fams bad (maybe). turn into class -- and turn the reifier
 into a default method! (TODO think about this)
@@ -41,8 +37,27 @@ import Data.Data ( Data )
 
 import Mason.Builder qualified as Mason
 
+import Strongweak
+
+-- | An empty data type representing a magic number (a constant bytestring) via
+--   a phantom type.
+--
+-- The phantom type variable unambiguously defines a short, constant bytestring.
+-- A handful of types are supported for using magics conveniently, e.g. for pure
+-- ASCII magics, you may use a 'Symbol' type-level string.
 data Magic (a :: k) = Magic
     deriving stock (Generic, Data, Show, Eq)
+
+-- | Weaken a 'Magic a' to the unit. Perhaps you prefer pattern matching on @()@
+--   over @Magic@, or wish a weak type to be fully divorced from its binrep
+--   origins.
+instance Weaken (Magic a) where
+    type Weak (Magic a) = ()
+    weaken _ = ()
+
+-- | Strengthen the unit to some 'Magic a'.
+instance Strengthen (Magic a) where
+    strengthen _ = pure Magic
 
 -- | Assumes magic values are individual bytes.
 type instance CBLen (Magic a) = Length (MagicVals a)
