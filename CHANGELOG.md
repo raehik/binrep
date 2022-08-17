@@ -1,4 +1,6 @@
 ## Unreleased
+  * move `CBLen` into `BLen` as an associated type family
+  * clean up magics (another open type family to associated)
   * add initial varint definitions at `Binrep.Type.Varint`
 
 ## 0.2.0 (2022-07-07)

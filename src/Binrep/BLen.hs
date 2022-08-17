@@ -1,4 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE UndecidableInstances #-} -- for CBLen
 
 module Binrep.BLen
   ( module Binrep.BLen
@@ -6,39 +7,61 @@ module Binrep.BLen
   ) where
 
 import Binrep.BLen.Internal.AsBLen
-import Binrep.CBLen
 import Binrep.Util ( natVal'' )
 
-import GHC.TypeNats
+import GHC.TypeLits
 import Data.ByteString qualified as B
 import Data.Word
 import Data.Int
 
 type BLenT = Int
 
--- | The length in bytes of a value of the given type can be known on the cheap
---   e.g. by reading a length field, or using compile time information.
---
--- Concepts such as null padding require the notion of length in bytes in order
--- to handle. In a hand-rolled parser, you may keep count of the current length
--- as you go. Here, the individual types keep track, and expose it via this
--- typeclass.
---
--- Obtaining the length of a value is usually an @O(1)@ operation like reading a
--- field or returning a constant. When it's not, it's often an indicator of a
--- problematic type e.g. plain Haskell lists.
---
--- We derive a default instance for constant-size types by throwing away the
--- value and reifying the type level natural.
---
--- Note that one can derive a free 'BLen' instance for any type with a 'Put'
--- instance via serializing it and checking the length. _Do not do this._ If you
--- find you can't write a decent 'BLen' instance for a type, it may be that you
--- need to rethink the representation.
+{- | The length in bytes of a value of the given type can be known on the cheap
+     e.g. by reading a length field, or using compile time information.
+
+Some binary representation building blocks require the notion of length in bytes
+in order to handle, e.g. null padding. One may always obtain this by serializing
+the value, then reading out the length of the output bytestring. But in most
+cases, we can be much more efficient.
+
+  * Certain primitives have a size known at compile time, irrelevant of the
+    value. A 'Word64' is always 8 bytes; some data null-padded to @n@ bytes is
+    exactly @n@ bytes long.
+  * For simple ADTs, it's often possible to calculate length in bytes via
+    pattern matching and some numeric operations. Very little actual work.
+
+This type class enables each type to implement its own efficient method of byte
+length calculation. Aim to write something that plainly feels more efficient
+than full serialization. If that doesn't feel possible, you might be working
+with a type ill-suited for binary representation.
+
+A thought: Some instances could be improved by reifying 'CBLen'. But it would
+mess up all the deriving, and it feels like too minor an improvement to be
+worthwhile supporting, writing a bunch of newtype wrappers, etc.
+-}
 class BLen a where
+    -- | The length in bytes of the serialized value.
+    --
+    -- The default implementation reifies the constant length for the type. If a
+    -- type-wide constant length is not defined, it will fail at compile time.
     blen :: a -> BLenT
     default blen :: KnownNat (CBLen a) => a -> BLenT
     blen _ = cblen @a
+
+    -- | The length in bytes of any value of the given type is constant.
+    --
+    -- Many binary representation primitives are constant, or may be designed to
+    -- "store" their size in their type. This is a stronger statement about
+    -- their length than just 'blen'.
+    --
+    -- This is now an associated type family of the 'BLen' type class in hopes
+    -- of simplifying the binrep framework.
+    type CBLen a :: Natural
+    type CBLen a =
+        TypeError
+            (       'Text "No CBLen associated family instance defined for "
+              ':<>: 'ShowType a
+            )
 
 typeNatToBLen :: forall n. KnownNat n => BLenT
 typeNatToBLen = natToBLen $ natVal'' @n
@@ -59,11 +82,22 @@ instance (BLen a, BLen b) => BLen (a, b) where
 instance BLen B.ByteString where
     blen = posIntToBLen . B.length
 
-deriving anyclass instance BLen Word8
-deriving anyclass instance BLen  Int8
-deriving anyclass instance BLen Word16
-deriving anyclass instance BLen  Int16
-deriving anyclass instance BLen Word32
-deriving anyclass instance BLen  Int32
-deriving anyclass instance BLen Word64
-deriving anyclass instance BLen  Int64
+instance BLen Word8  where type CBLen Word8  = 1
+instance BLen  Int8  where type CBLen  Int8  = 1
+instance BLen Word16 where type CBLen Word16 = 2
+instance BLen  Int16 where type CBLen  Int16 = 2
+instance BLen Word32 where type CBLen Word32 = 4
+instance BLen  Int32 where type CBLen  Int32 = 4
+instance BLen Word64 where type CBLen Word64 = 8
+instance BLen  Int64 where type CBLen  Int64 = 8
+
+--------------------------------------------------------------------------------
+
+-- | Newtype wrapper for defining 'BLen' instances which are allowed to assume
+--   the existence of a valid 'CBLen' family instance.
+newtype WithCBLen a = WithCBLen { unWithCBLen :: a }
+
+instance KnownNat (CBLen a) => BLen (WithCBLen [a]) where
+    blen (WithCBLen l) = cblen @a * length l
+instance KnownNat (CBLen a + CBLen b) => BLen (WithCBLen (a, b)) where
+    type CBLen (WithCBLen (a, b)) = CBLen a + CBLen b

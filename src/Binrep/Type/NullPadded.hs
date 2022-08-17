@@ -19,10 +19,9 @@ data NullPad (n :: Natural)
 
 type NullPadded n a = Refined (NullPad n) a
 
--- | The size of some null-padded data is known - at compile time!
-type instance CBLen (NullPadded n a) = n
-
-deriving anyclass instance KnownNat n => BLen (NullPadded n a)
+instance KnownNat n => BLen (NullPadded n a) where
+    -- | The size of some null-padded data is known - at compile time!
+    type CBLen (NullPadded n a) = n
 
 instance (BLen a, KnownNat n) => Predicate (NullPad n) a where
     validate p a

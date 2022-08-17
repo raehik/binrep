@@ -32,8 +32,8 @@ brCfgNoSum = BR.Cfg { BR.cSumTag = undefined }
 newtype TarNat n = TarNat { getTarNat :: AsciiNat 8 }
     deriving stock (Generic, Show, Eq)
 
-type instance CBLen (TarNat n) = n
-instance KnownNat n => BLen (TarNat n)
+instance KnownNat n => BLen (TarNat n) where
+    type CBLen (TarNat n) = n
 
 -- | No need to check for underflow etc. as TarNat guarantees good sizing.
 instance KnownNat n => Put (TarNat n) where

@@ -90,9 +90,8 @@ type family IRep (sign :: ISign) (size :: ISize) where
 deriving via (IRep sign size) instance ToJSON   (IRep sign size) => ToJSON   (I sign size e)
 deriving via (IRep sign size) instance FromJSON (IRep sign size) => FromJSON (I sign size e)
 
-type instance CBLen (I sign size end) = CBLen (IRep sign size)
-
-deriving anyclass instance KnownNat (CBLen (I sign size end)) => BLen (I sign size end)
+instance KnownNat (CBLen (I sign size end)) => BLen (I sign size end) where
+    type CBLen (I sign size end) = CBLen (IRep sign size)
 
 instance Put (I 'U 'I1 e) where put = put . getI
 instance Get (I 'U 'I1 e) where get = I <$> get

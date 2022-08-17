@@ -24,7 +24,7 @@ brCfgNoSum :: BR.Cfg W8
 brCfgNoSum = BR.Cfg { BR.cSumTag = undefined }
 
 data Tiff where
-    Tiff :: (Put (I 'U 'I4 end), bs ~ MagicVals (TiffMagic end), ByteVals bs, KnownNat (Length bs)) => TiffBody end -> Tiff
+    Tiff :: (Put (I 'U 'I4 end), bs ~ MagicBytes (TiffMagic end), ReifyBytes bs, KnownNat (Length bs)) => TiffBody end -> Tiff
 
 instance Show Tiff where
     show (Tiff body) = "Tiff " <> show body
@@ -35,11 +35,11 @@ data TiffBody (end :: Endianness) = TiffBody
   } deriving stock (Generic, Show, Eq)
 deriving stock instance (KnownSymbol (TiffMagic end), Typeable end) => Data (TiffBody end)
 
-instance (bs ~ MagicVals (TiffMagic end), KnownNat (Length bs)) => BLen (TiffBody end) where
+instance (bs ~ MagicBytes (TiffMagic end), KnownNat (Length bs)) => BLen (TiffBody end) where
     blen = blenGeneric brCfgNoSum
-instance (bs ~ MagicVals (TiffMagic end), ByteVals bs, irep ~ I 'U 'I4 end, Put irep) => Put  (TiffBody end) where
+instance (bs ~ MagicBytes (TiffMagic end), ReifyBytes bs, irep ~ I 'U 'I4 end, Put irep) => Put  (TiffBody end) where
     put  = putGeneric  brCfgNoSum
-instance (bs ~ MagicVals (TiffMagic end), ByteVals bs, irep ~ I 'U 'I4 end, Get irep) => Get  (TiffBody end) where
+instance (bs ~ MagicBytes (TiffMagic end), ReifyBytes bs, irep ~ I 'U 'I4 end, Get irep) => Get  (TiffBody end) where
     get  = getGeneric  brCfgNoSum
 
 instance BLen Tiff where

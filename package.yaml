@@ -19,7 +19,7 @@ author: Ben Orchard
 # hpack release, and then that release in Stack.
 language: GHC2021
 
-# raehik's extensions (GHC 9.2; last updated: 2022-06-15)
+# raehik's extensions (GHC 9.2; last updated: 2022-08-17)
 default-extensions:
 # syntax that should be default
 - EmptyCase
@@ -59,6 +59,7 @@ default-extensions:
 - MagicHash
 - ImportQualifiedPost # 8.10
 - StandaloneKindSignatures # 8.10
+- BinaryLiterals # 7.10
 
 # essential, but can break things, so be wary
 - ScopedTypeVariables # changes type var scoping quite dramatically

@@ -11,9 +11,8 @@ import Data.Vector.Sized qualified as V
 import Data.Vector.Sized ( Vector )
 import GHC.TypeNats
 
-type instance CBLen (Vector n a) = CBLen a * n
-
 instance BLen a => BLen (Vector n a) where
+    type CBLen (Vector n a) = CBLen a * n
     blen = V.sum . V.map blen
 
 instance Put a => Put (Vector n a) where

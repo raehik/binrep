@@ -1,33 +1,31 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-{- | Generically derive 'CBLen' type family instances.
+{- | _Experimental._ Generically derive 'CBLen' type family instances.
 
-This is mostly playing around -- I've only just learned regular GHC generics,
-and pulling everything up to the type level is even more confusing and weird.
+A type having a valid 'CBLen' instance usually indicates one of the following:
 
-A 'CBLen' instance usually indicates a type is either extremely simple or comes
-with size information in the type. Be careful deriving or writing instances for
-your own types - @BLen@ is usually correct/sufficient.
+  * it's a primitive, or extremely simple
+  * it holds size information in its type
+  * it's constructed from other constant byte length types
 
-You can attempt to derive a 'CBLen' type family instance generically for a type
-via
+The first two cases must be handled manually. The third case is where Haskell
+generics excel, and the one this module targets.
 
-    type instance CBLen a = CBLenGeneric w a
+You can (attempt to) derive a 'CBLen' type family instance generically for a
+type via
 
-As with deriving @BLen@, you must provide the type used to store the sum tag for
-sum types.
+    instance BLen a where type CBLen a = CBLenGeneric w a
 
-Then try doing something with it e.g. have GHC derive a @BLen@ instance for you
-via the default method (that reifies CBLen)
+As with deriving @BLen@ generically, you must provide the type used to store the
+sum tag for sum types.
 
-    deriving anyclass BLen a
-
-Hopefully it either compiles, or you get a useful type error. If not, sorry.
+Then try using it. Hopefully it works, or you get a useful type error. If not,
+sorry. I don't have much faith in this code.
 -}
 
 module Binrep.Generic.CBLen where
 
-import Binrep.CBLen
+import Binrep.BLen
 import Binrep.Generic.Internal
 
 import GHC.Generics

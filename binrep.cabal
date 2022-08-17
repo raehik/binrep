@@ -36,7 +36,6 @@ library
       Binrep
       Binrep.BLen
       Binrep.BLen.Internal.AsBLen
-      Binrep.CBLen
       Binrep.Example
       Binrep.Example.FileTable
       Binrep.Example.Tar
@@ -100,6 +99,7 @@ library
       MagicHash
       ImportQualifiedPost
       StandaloneKindSignatures
+      BinaryLiterals
       ScopedTypeVariables
       TypeOperators
   ghc-options: -Wall
@@ -162,6 +162,7 @@ test-suite spec
       MagicHash
       ImportQualifiedPost
       StandaloneKindSignatures
+      BinaryLiterals
       ScopedTypeVariables
       TypeOperators
   ghc-options: -Wall

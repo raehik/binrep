@@ -18,9 +18,7 @@ data Size (n :: Natural)
 
 type Sized n a = Refined (Size n) a
 
-type instance CBLen (Sized n a) = n
-
-deriving anyclass instance KnownNat n => BLen (Sized n a)
+instance KnownNat n => BLen (Sized n a) where type CBLen (Sized n a) = n
 
 instance (BLen a, KnownNat n) => Predicate (Size n) a where
     validate p a

@@ -801,21 +801,25 @@ type family Length (a :: [k]) :: Natural where
     Length '[]       = 0
     Length (a ': as) = 1 + Length as
 
--- | Efficiently reify a list of type-level 'Byte's to a bytestring builder.
+-- | Efficiently reify a list of type-level 'Natural' bytes to to a bytestring
+--   builder.
+--
+-- Attempting to reify a 'Natural' larger than 255 results in a type error.
 --
 -- This is about as far as one should go for pointless performance here, I
 -- should think.
-class ByteVals (ns :: [Natural]) where byteVals :: Builder
-instance (n ~ Length ns, KnownNat n, WriteByteVals ns) => ByteVals ns where
-    byteVals = Mason.primFixed (BI.fixedPrim (fromIntegral n) go) ()
+class ReifyBytes (ns :: [Natural]) where reifyBytes :: Builder
+instance (n ~ Length ns, KnownNat n, WriteReifiedBytes ns) => ReifyBytes ns where
+    reifyBytes = Mason.primFixed (BI.fixedPrim (fromIntegral n) go) ()
       where
         n = natVal'' @n
-        go = \() (Ptr p#) -> writeByteVals @ns p#
+        go = \() (Ptr p#) -> writeReifiedBytes @ns p#
 
-class WriteByteVals (ns :: [Natural]) where writeByteVals :: Addr# -> IO ()
-instance WriteByteVals '[] where writeByteVals _ = pure ()
-instance (ByteVal n, WriteByteVals ns) => WriteByteVals (n ': ns) where
-    writeByteVals p# =
+-- bit ugly
+class WriteReifiedBytes (ns :: [Natural]) where writeReifiedBytes :: Addr# -> IO ()
+instance WriteReifiedBytes '[] where writeReifiedBytes _ = pure ()
+instance (ByteVal n, WriteReifiedBytes ns) => WriteReifiedBytes (n ': ns) where
+    writeReifiedBytes p# =
         case runRW# (writeWord8OffAddr# p# 0# w#) of
-          _ -> writeByteVals @ns (plusAddr# p# 1#)
+          _ -> writeReifiedBytes @ns (plusAddr# p# 1#)
       where w# = byteVal @n proxy#

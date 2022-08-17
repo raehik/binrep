@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 
 {- | Magic numbers (also just magic): short constant bytestrings usually
      found at the top of a file, often used as an early sanity check.
@@ -59,22 +60,15 @@ instance Weaken (Magic a) where
 instance Strengthen (Magic a) where
     strengthen _ = pure Magic
 
--- | Assumes magic values are individual bytes.
-type instance CBLen (Magic a) = Length (MagicVals a)
+instance (KnownNat (Length (MagicBytes a))) => BLen (Magic a) where
+    type CBLen (Magic a) = Length (MagicBytes a)
 
--- | Assumes magic values are individual bytes.
-deriving anyclass instance KnownNat (Length (MagicVals a)) => BLen (Magic a)
+instance (bs ~ MagicBytes a, ReifyBytes bs) => Put (Magic a) where
+    put Magic = reifyBytes @bs
 
--- | Forces magic values to be individual bytes.
-instance (bs ~ MagicVals a, ByteVals bs) => Put (Magic a) where
-    put Magic = byteVals @bs
-
--- | Forces magic values to be individual bytes.
---
--- TODO improve show - maybe hexbytestring goes here? lol
-instance (bs ~ MagicVals a, ByteVals bs) => Get (Magic a) where
+instance (bs ~ MagicBytes a, ReifyBytes bs) => Get (Magic a) where
     get = do
-        let expected = Mason.toStrictByteString $ byteVals @bs
+        let expected = Mason.toStrictByteString $ reifyBytes @bs
         actual <- FP.takeBs $ B.length expected
         if   actual == expected
         then return Magic
@@ -93,10 +87,6 @@ out the function applications or something. Essentially, you can't do this:
 So you have to write that out for every concrete function over lists.
 -}
 
-type family MagicVals (a :: k) :: [Natural]
-type instance MagicVals (a :: Symbol)    = SymbolUnicodeCodepoints a
-type instance MagicVals (a :: [Natural]) = a
-
 type family SymbolUnicodeCodepoints (a :: Symbol) :: [Natural] where
     SymbolUnicodeCodepoints a = CharListUnicodeCodepoints (SymbolAsCharList a)
 
@@ -110,3 +100,20 @@ type family SymbolAsCharList (a :: Symbol) :: [Char] where
 type family SymbolAsCharList' (a :: Maybe (Char, Symbol)) :: [Char] where
     SymbolAsCharList' 'Nothing = '[]
     SymbolAsCharList' ('Just '(c, s)) = c ': SymbolAsCharList' (UnconsSymbol s)
+
+--------------------------------------------------------------------------------
+
+-- | Types which define a magic value.
+class Magical (a :: k) where
+    -- | How to turn the type into a list of bytes.
+    type MagicBytes a :: [Natural]
+
+-- | Type-level naturals go as-is. (Make sure you don't go over 255, though!)
+instance Magical (ns :: [Natural]) where
+    type MagicBytes ns = ns
+
+-- | Type-level symbols are turned into their Unicode codepoints - but
+--   multibyte characters aren't handled, so they'll simply be overlarge bytes,
+--   which will fail further down.
+instance Magical (sym :: Symbol) where
+    type MagicBytes sym = SymbolUnicodeCodepoints sym
