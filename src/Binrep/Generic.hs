@@ -23,8 +23,10 @@ import Numeric ( readHex )
 import Data.Void ( Void )
 import Control.Exception ( Exception, throw )
 
-cfg :: Eq a => (String -> a) -> Cfg a
-cfg f = Cfg { cSumTag = f, cSumTagEq = (==) }
+import Binrep.Util ( tshow )
+
+cfg :: (Eq a, Show a) => (String -> a) -> Cfg a
+cfg f = Cfg { cSumTag = f, cSumTagEq = (==), cSumTagShow = tshow }
 
 -- | Obtain the tag for a sum type value by applying a function to the
 --   constructor name, and reading the result as a hexadecimal number.

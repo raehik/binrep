@@ -7,6 +7,7 @@ import GHC.TypeLits ( TypeError )
 
 import Binrep.Put
 import Binrep.Generic.Internal
+import Util.Generic
 
 putGeneric :: (Generic a, GPut (Rep a), Put w) => Cfg w -> a -> Builder
 putGeneric cfg = gput cfg . from

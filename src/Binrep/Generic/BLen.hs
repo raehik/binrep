@@ -7,6 +7,7 @@ import GHC.TypeLits ( TypeError )
 
 import Binrep.BLen
 import Binrep.Generic.Internal
+import Util.Generic
 
 blenGeneric :: (Generic a, GBLen (Rep a), BLen w) => Cfg w -> a -> BLenT
 blenGeneric cfg = gblen cfg . from
