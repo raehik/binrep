@@ -28,14 +28,15 @@ spec = do
       \(bs :: B.ByteString) -> runGet (runPut bs) `shouldBe` Right (bs, "")
     prop "parse-print roundtrip isomorphism (generic, sum tag via nullterm constructor)" $ do
       \(d :: D) -> runGet (runPut d) `shouldBe` Right (d, "")
-    prop "serializing a type with an incorrect generic derivation throw an exception" $ do
+    prop "serializing a type with an incorrect generic derivation throws an exception" $ do
       \(d :: DNoSum) -> do
         let evaluateShouldThrow a = evaluate a `shouldThrow` (\case EDerivedSumInstanceWithNonSumCfg -> True)
         evaluateShouldThrow (blen d)
         evaluateShouldThrow (runPut d)
     prop "parsing a type with an incorrect generic derivation fails" $ do
-      \(bs :: B.ByteString) ->
-        runGet @DNoSum bs `shouldBe` Left (EGeneric (EGenericSumTag (EBase ENoVoid)))
+      \(bs :: B.ByteString) -> do
+        let e = EGeneric "DNoSum" $ EGenericSum $ EGenericSumTag $ EBase ENoVoid
+        runGet @DNoSum bs `shouldBe` Left e
 
 --------------------------------------------------------------------------------
 

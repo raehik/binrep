@@ -1,5 +1,3 @@
--- TODO remove Show instance requirement
-
 {-# LANGUAGE UndecidableInstances #-} -- required for TypeError >:(
 
 module Binrep.Generic.Get where
@@ -9,65 +7,81 @@ import GHC.TypeLits ( TypeError )
 
 import Binrep.Get
 import Binrep.Generic.Internal
+import Util.Generic
 
 import FlatParse.Basic qualified as FP
 import Control.Applicative ( (<|>) )
 
-getGeneric :: (Generic a, GGet (Rep a), Get w, Show w) => Cfg w -> Getter a
-getGeneric cfg = to <$> gget cfg
+import Numeric.Natural
 
-class GGet f where
-    gget :: (Get w, Show w) => Cfg w -> Getter (f a)
+getGeneric :: (Generic a, GGetD (Rep a), Get w) => Cfg w -> Getter a
+getGeneric cfg = to <$> ggetD cfg
 
--- | Empty constructor.
-instance GGet U1 where
-    gget _ = return U1
+class GGetD f where
+    ggetD :: Get w => Cfg w -> Getter (f a)
 
--- | Field.
-instance Get c => GGet (K1 i c) where
-    gget _ = K1 <$> get
+instance (GGetC f, Datatype d) => GGetD (D1 d f) where
+    ggetD cfg = M1 <$> ggetC cfg (datatypeName' @d)
 
--- | Product type fields are consecutive.
-instance (GGet l, GGet r) => GGet (l :*: r) where
-    gget cfg = do l <- gget cfg
-                  r <- gget cfg
-                  return $ l :*: r
+class GGetC f where
+    ggetC :: Get w => Cfg w -> String -> Getter (f a)
 
--- | Constructor sums are differentiated by a prefix tag.
-instance GGetSum (l :+: r) => GGet (l :+: r) where
-    gget cfg = do
-        tag <- getE $ EGenericSumTag
-        case ggetsum cfg tag of
-          Just parser -> parser
-          Nothing -> errE $ eGenericSumTagInvalid tag
+-- | Refuse to derive instance for empty data types.
+instance TypeError GErrRefuseVoid => GGetC V1 where
+    ggetC = undefined
 
-getE :: Get a => (E -> EGeneric) -> Getter a
-getE f = FP.cutting get (EGeneric $ f $ EBase EFail) (\e _ -> EGeneric $ f e)
+-- | TODO: Non-sum data types.
+instance (GGetS f, Constructor c) => GGetC (C1 c f) where
+    ggetC cfg dStr = (M1 . snd) <$> ggetS cfg dStr (conName' @c) 0
 
-errE :: EGeneric -> Getter a
-errE = FP.err . EGeneric
+class GGetS f where
+    ggetS :: Get w => Cfg w -> String -> String -> Natural -> Getter (Natural, (f a))
 
--- | Refuse to derive instance for void datatype.
-instance TypeError GErrRefuseVoid => GGet V1 where
-    gget = undefined
+-- | The empty constructor trivially succeeds without parsing anything.
+instance GGetS U1 where
+    ggetS _ _ _ fIdx = pure (fIdx, U1)
 
--- | Any datatype, constructor or record.
-instance GGet f => GGet (M1 i d f) where
-    gget cfg = M1 <$> gget cfg
+instance (GGetS l, GGetS r) => GGetS (l :*: r) where
+    ggetS cfg dStr cStr fIdx = do
+        (fIdx',  l) <- ggetS cfg dStr cStr fIdx
+        (fIdx'', r) <- ggetS cfg dStr cStr (fIdx'+1)
+        pure (fIdx'', l :*: r)
+
+instance (Get a, Selector s) => GGetS (S1 s (Rec0 a)) where
+    ggetS _ dStr cStr fIdx = do
+        a <- getEWrap $ EGeneric dStr . EGenericField cStr sStr fIdx
+        pure (fIdx, M1 (K1 a))
+      where
+        sStr = selName'' @s
 
 --------------------------------------------------------------------------------
 
-class GGetSum f where
-    ggetsum :: (Get w, Show w) => Cfg w -> w -> Maybe (Getter (f a))
+-- | Constructor sums are differentiated by a prefix tag.
+instance GGetCSum (l :+: r) => GGetC (l :+: r) where
+    ggetC cfg dStr = do
+        tag <- getEWrap $ EGeneric dStr . EGenericSum . EGenericSumTag
+        case ggetCSum cfg dStr tag of
+          Just parser -> parser
+          Nothing -> do
+            let tagPretty = cSumTagShow cfg $ tag
+            FP.err $ EGeneric dStr $ EGenericSum $ EGenericSumTagNoMatch [] tagPretty
 
-instance (GGetSum l, GGetSum r) => GGetSum (l :+: r) where
-    ggetsum cfg tag = l <|> r
+-- | TODO: Want to return an @Either [(String, Text)]@ indicating the
+-- constructors and their expected tags tested, but needs fiddling (can't use
+-- 'Alternative'). Pretty minor, but Aeson does it and it's nice.
+class GGetCSum f where
+    ggetCSum :: Get w => Cfg w -> String -> w -> Maybe (Getter (f a))
+
+instance (GGetCSum l, GGetCSum r) => GGetCSum (l :+: r) where
+    ggetCSum cfg dStr tag = l <|> r
       where
-        l = fmap L1 <$> ggetsum cfg tag
-        r = fmap R1 <$> ggetsum cfg tag
+        l = fmap L1 <$> ggetCSum cfg dStr tag
+        r = fmap R1 <$> ggetCSum cfg dStr tag
 
--- | Bad. Need to wrap this like SumFromString in Aeson.
-instance (GGet r, Constructor c) => GGetSum (C1 c r) where
-    ggetsum cfg tag
-     | (cSumTagEq cfg) tag ((cSumTag cfg) (conName' @c)) = Just $ gget cfg
-     | otherwise = Nothing
+instance (GGetS f, Constructor c) => GGetCSum (C1 c f) where
+    ggetCSum cfg dStr tag =
+        let cStr = conName' @c
+            cTag = (cSumTag cfg) cStr
+        in  if   (cSumTagEq cfg) tag cTag
+            then Just ((M1 . snd) <$> ggetS cfg dStr cStr 0)
+            else Nothing

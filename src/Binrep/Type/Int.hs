@@ -99,31 +99,31 @@ instance Put (I 'S 'I1 e) where put = put . getI
 instance Get (I 'S 'I1 e) where get = I <$> get
 
 instance Put (I 'U 'I2 'BE) where put (I i) = Mason.word16BE i
-instance Get (I 'U 'I2 'BE) where get = I <$> FP.anyWord16be
+instance Get (I 'U 'I2 'BE) where get = I <$> cutEBase FP.anyWord16be (ERanOut 2)
 instance Put (I 'U 'I2 'LE) where put (I i) = Mason.word16LE i
-instance Get (I 'U 'I2 'LE) where get = I <$> FP.anyWord16le
+instance Get (I 'U 'I2 'LE) where get = I <$> cutEBase FP.anyWord16le (ERanOut 2)
 instance Put (I 'S 'I2 'BE) where put (I i) = Mason.int16BE i
-instance Get (I 'S 'I2 'BE) where get = I <$> FP.anyInt16be
+instance Get (I 'S 'I2 'BE) where get = I <$> cutEBase FP.anyInt16be  (ERanOut 2)
 instance Put (I 'S 'I2 'LE) where put (I i) = Mason.int16LE i
-instance Get (I 'S 'I2 'LE) where get = I <$> FP.anyInt16le
+instance Get (I 'S 'I2 'LE) where get = I <$> cutEBase FP.anyInt16le  (ERanOut 2)
 
 instance Put (I 'U 'I4 'BE) where put (I i) = Mason.word32BE i
-instance Get (I 'U 'I4 'BE) where get = I <$> FP.anyWord32be
+instance Get (I 'U 'I4 'BE) where get = I <$> cutEBase FP.anyWord32be (ERanOut 4)
 instance Put (I 'U 'I4 'LE) where put (I i) = Mason.word32LE i
-instance Get (I 'U 'I4 'LE) where get = I <$> FP.anyWord32le
+instance Get (I 'U 'I4 'LE) where get = I <$> cutEBase FP.anyWord32le (ERanOut 4)
 instance Put (I 'S 'I4 'BE) where put (I i) = Mason.int32BE i
-instance Get (I 'S 'I4 'BE) where get = I <$> FP.anyInt32be
+instance Get (I 'S 'I4 'BE) where get = I <$> cutEBase FP.anyInt32be  (ERanOut 4)
 instance Put (I 'S 'I4 'LE) where put (I i) = Mason.int32LE i
-instance Get (I 'S 'I4 'LE) where get = I <$> FP.anyInt32le
+instance Get (I 'S 'I4 'LE) where get = I <$> cutEBase FP.anyInt32le  (ERanOut 4)
 
 instance Put (I 'U 'I8 'BE) where put (I i) = Mason.word64BE i
-instance Get (I 'U 'I8 'BE) where get = I <$> FP.anyWord64be
+instance Get (I 'U 'I8 'BE) where get = I <$> cutEBase FP.anyWord64be (ERanOut 8)
 instance Put (I 'U 'I8 'LE) where put (I i) = Mason.word64LE i
-instance Get (I 'U 'I8 'LE) where get = I <$> FP.anyWord64le
+instance Get (I 'U 'I8 'LE) where get = I <$> cutEBase FP.anyWord64le (ERanOut 8)
 instance Put (I 'S 'I8 'BE) where put (I i) = Mason.int64BE i
-instance Get (I 'S 'I8 'BE) where get = I <$> FP.anyInt64be
+instance Get (I 'S 'I8 'BE) where get = I <$> cutEBase FP.anyInt64be  (ERanOut 8)
 instance Put (I 'S 'I8 'LE) where put (I i) = Mason.int64LE i
-instance Get (I 'S 'I8 'LE) where get = I <$> FP.anyInt64le
+instance Get (I 'S 'I8 'LE) where get = I <$> cutEBase FP.anyInt64le  (ERanOut 8)
 
 -- | Shortcut.
 type family IMax (sign :: ISign) (size :: ISize) :: Natural where

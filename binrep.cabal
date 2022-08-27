@@ -67,6 +67,7 @@ library
       Data.Aeson.Extra.SizedVector
       Haskpatch.Format.Bps
       Haskpatch.Format.Vcdiff
+      Util.Generic
   other-modules:
       Paths_binrep
   hs-source-dirs:

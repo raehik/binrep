@@ -2,7 +2,10 @@
 
 module Binrep.Get
   ( Getter, Get(..), runGet, runGetter
-  , E(..), EBase(..), eBase, EGeneric(..), eGenericSumTagInvalid
+  , E(..), EBase(..), EGeneric(..), EGenericSum(..)
+  , eBase
+  , getEWrap, getEBase
+  , cutEBase
   , GetWith(..), runGetWith
   ) where
 
@@ -19,19 +22,32 @@ import Data.Void ( Void )
 import GHC.Generics ( Generic )
 
 import Data.Text ( Text )
-import Binrep.Util ( tshow )
 
 import Binrep.BLen ( BLenT )
+
+import Numeric.Natural
 
 type Getter a = FP.Parser E a
 
 data E
   = EBase EBase
-  | EGeneric EGeneric
+
+  | EGeneric String {- ^ datatype name -} EGeneric
+
     deriving stock (Eq, Show, Generic)
 
 eBase :: EBase -> Getter a
 eBase = FP.err . EBase
+
+-- | TODO confirm correct operation (error combination)
+getEWrap :: Get a => (E -> E) -> Getter a
+getEWrap f = FP.cutting get (f $ EBase EFail) (\e _ -> f e)
+
+getEBase :: Get a => EBase -> Getter a
+getEBase = FP.cut get . EBase
+
+cutEBase :: Getter a -> EBase -> Getter a
+cutEBase f e = FP.cut f $ EBase e
 
 data EBase
   = ENoVoid
@@ -53,19 +69,20 @@ data EBase
   | EFailParse String B.ByteString Word8
   -- ^ parse fail (where you parse a larger object, then a smaller one in it)
 
+  | ERanOut Natural
+  -- ^ ran out of input, needed precisely @n@ bytes for this part (n > 0)
+
     deriving stock (Eq, Show, Generic)
 
 data EGeneric
-  = EGenericSumTag E
-  | EGenericSumTagInvalid Text
-    -- ^ TODO need either a typevar and instance, or some flatparse code to
-    -- recover the bytes parsed for the sum tag (and use a 'ByteString')
-    -- for now I've apparently already shoved a Show in there soooo using that.
-    -- but not ideal
+  = EGenericSum EGenericSum
+  | EGenericField String (Maybe String) Natural E
     deriving stock (Eq, Show, Generic)
 
-eGenericSumTagInvalid :: Show a => a -> EGeneric
-eGenericSumTagInvalid = EGenericSumTagInvalid . tshow
+data EGenericSum
+  = EGenericSumTag E
+  | EGenericSumTagNoMatch [String] Text
+    deriving stock (Eq, Show, Generic)
 
 class Get a where
     -- | Parse from binary.
@@ -82,14 +99,14 @@ runGetter g bs = case FP.runParser g bs of
 
 -- | Impossible to parse 'Void'.
 instance Get Void where
-    get = FP.err $ EBase ENoVoid
+    get = eBase ENoVoid
 
 -- | Parse heterogeneous lists in order. No length indicator, so either fails or
 --   succeeds by reaching EOF. Probably not what you usually want, but sometimes
 --   used at the "top" of binary formats.
 instance Get a => Get [a] where
     get = do as <- FP.many get
-             FP.cut FP.eof $ EBase EEof
+             cutEBase FP.eof EEof
              return as
 
 instance (Get a, Get b) => Get (a, b) where
@@ -101,8 +118,8 @@ instance (Get a, Get b) => Get (a, b) where
 instance Get B.ByteString where
     get = FP.takeRestBs
 
-instance Get Word8 where get = FP.anyWord8
-instance Get  Int8 where get = FP.anyInt8
+instance Get Word8 where get = cutEBase FP.anyWord8 (ERanOut 1)
+instance Get  Int8 where get = cutEBase FP.anyInt8  (ERanOut 1)
 
 -- | A type that can be parsed from binary given some environment.
 --
