@@ -65,6 +65,8 @@ library
       Binrep.Type.Vector
       Binrep.Util
       Data.Aeson.Extra.SizedVector
+      Haskpatch.Format.Bps
+      Haskpatch.Format.Vcdiff
   other-modules:
       Paths_binrep
   hs-source-dirs:
@@ -113,7 +115,7 @@ library
     , megaparsec >=9.2.0 && <9.3
     , refined ==0.7.*
     , strongweak >=0.3.1 && <0.4
-    , text ==1.2.*
+    , text >=1.2 && <2.1
     , vector >=0.12.3.1 && <0.13
     , vector-sized >=1.5.0 && <1.6
   if flag(icu)
@@ -183,7 +185,7 @@ test-suite spec
     , quickcheck-instances >=0.3.26 && <0.4
     , refined ==0.7.*
     , strongweak >=0.3.1 && <0.4
-    , text ==1.2.*
+    , text >=1.2 && <2.1
     , vector >=0.12.3.1 && <0.13
     , vector-sized >=1.5.0 && <1.6
   if flag(icu)

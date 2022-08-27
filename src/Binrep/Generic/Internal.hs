@@ -8,6 +8,8 @@ import GHC.Generics
 data Cfg a = Cfg
   { cSumTag :: String -> a
   -- ^ How to turn a constructor name into a byte tag.
+
+  , cSumTagEq :: a -> a -> Bool
   }
 
 -- | Common type error string for when GHC attempts to derive an binrep instance

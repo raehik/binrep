@@ -10,9 +10,13 @@ import Binrep.BLen.Internal.AsBLen
 import Binrep.Util ( natVal'' )
 
 import GHC.TypeLits
+
 import Data.ByteString qualified as B
+
 import Data.Word
 import Data.Int
+
+import Data.Void ( Void, absurd )
 
 type BLenT = Int
 
@@ -71,6 +75,10 @@ typeNatToBLen = natToBLen $ natVal'' @n
 cblen :: forall a n. (n ~ CBLen a, KnownNat n) => BLenT
 cblen = typeNatToBLen @n
 {-# INLINE cblen #-}
+
+-- | Impossible to put a byte length to 'Void'.
+instance BLen Void where
+    blen = absurd
 
 -- | @O(n)@
 instance BLen a => BLen [a] where

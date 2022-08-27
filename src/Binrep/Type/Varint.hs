@@ -68,7 +68,7 @@ instance (VarintContinuation cont, Integral i, Bits i) => Get (Varnat 'Redundant
         go i = do
             w8 <- FP.anyWord8
             let i' = unsafeShiftL i 7 .|. fromIntegral (clearBit w8 7)
-            if varintContinue @cont (testBit w8 7) then go i' else pure (Varnat i')
+            if testVarintCont @cont w8 7 then go i' else pure (Varnat i')
 
 -- | TODO nothing to test against - unsure if correct
 instance (VarintContinuation cont, Integral i, Bits i) => Get (Varnat 'Bijective cont 'BE i) where
@@ -77,7 +77,7 @@ instance (VarintContinuation cont, Integral i, Bits i) => Get (Varnat 'Bijective
         go i = do
             w8 <- FP.anyWord8
             let i' = unsafeShiftL i 7 .|. (fromIntegral (clearBit w8 7) + 1)
-            if varintContinue @cont (testBit w8 7) then go i' else pure (Varnat (i'-1))
+            if testVarintCont @cont w8 7 then go i' else pure (Varnat (i'-1))
 
 -- | protobuf (cont=on), LEB128 (cont=on)
 --
@@ -88,7 +88,7 @@ instance (VarintContinuation cont, Integral i, Bits i) => Get (Varnat 'Redundant
         go i n = do
             w8 <- FP.anyWord8
             let i' = i .|. unsafeShiftL (fromIntegral (clearBit w8 7)) n
-            if varintContinue @cont (testBit w8 7) then go i' (n+7) else pure (Varnat i')
+            if testVarintCont @cont w8 7 then go i' (n+7) else pure (Varnat i')
 
 -- | Git varint (cont=on), BPS (beat patches) (cont=off)
 instance (VarintContinuation cont, Integral i, Bits i) => Get (Varnat 'Bijective cont 'LE i) where
@@ -97,23 +97,40 @@ instance (VarintContinuation cont, Integral i, Bits i) => Get (Varnat 'Bijective
         go i n = do
             w8 <- FP.anyWord8
             let i' = i .|. unsafeShiftL (fromIntegral (clearBit w8 7) + 1) n
-            if varintContinue @cont (testBit w8 7) then go i' (n+7) else pure (Varnat (i'-1))
+            if testVarintCont @cont w8 7 then go i' (n+7) else pure (Varnat (i'-1))
 
-class VarintContinuation (cont :: ContinuationBitBehaviour) where
-    varintContinue :: Bool -> Bool
-    varintContinueSet :: Bits a => a -> a
-instance VarintContinuation 'OnContinues  where
-    varintContinue = id
-    varintContinueSet a = setBit a 7
-instance VarintContinuation 'OffContinues where
-    varintContinue = not
-    varintContinueSet a = setBit a 7
-
--- TODO
+-- TODO uses fromIntegral's overflow behaviour
 instance (VarintContinuation cont, Integral i, Bits i) => Put (Varnat 'Redundant cont 'LE i) where
     put (Varnat i) = do
         if i < 0b10000000 then
             put @Word8 $ fromIntegral i
         else
-               put @Word8 (varintContinueSet @cont (fromIntegral i))
+               put @Word8 (setVarintCont @cont (fromIntegral i) 7)
             <> put @(Varnat 'Redundant cont 'LE i) (Varnat (unsafeShiftR i 7))
+
+-- TODO BE. Hard.
+instance (VarintContinuation cont, Integral i, Bits i) => Put (Varnat 'Redundant cont 'BE i) where
+    put (Varnat i) = do
+        if i < 0b10000000 then
+            put @Word8 $ fromIntegral i
+        else
+               put @(Varnat 'Redundant cont 'LE i) (Varnat (unsafeShiftR i 7))
+            <> put @Word8 (setVarintCont @cont (fromIntegral (i .&. 0b11111111)) 7)
+
+--------------------------------------------------------------------------------
+
+class VarintContinuation (cont :: ContinuationBitBehaviour) where
+    varintContinue :: Bool
+instance VarintContinuation 'OnContinues  where varintContinue = True
+instance VarintContinuation 'OffContinues where varintContinue = False
+
+testVarintCont
+    :: forall cont a. VarintContinuation cont => Bits a => a -> Int -> Bool
+testVarintCont a n = case varintContinue @cont of True  -> b
+                                                  False -> not b
+  where b = testBit a n
+
+setVarintCont
+    :: forall cont a. VarintContinuation cont => Bits a => a -> Int -> a
+setVarintCont = case varintContinue @cont of True  -> setBit
+                                             False -> clearBit

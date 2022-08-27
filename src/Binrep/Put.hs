@@ -3,8 +3,10 @@ module Binrep.Put where
 import Mason.Builder qualified as Mason
 
 import Data.ByteString qualified as B
+
 import Data.Word
 import Data.Int
+import Data.Void ( Void, absurd )
 
 type Builder = Mason.BuilderFor Mason.StrictByteStringBackend
 
@@ -18,6 +20,10 @@ runPut = runBuilder . put
 
 runBuilder :: Builder -> B.ByteString
 runBuilder = Mason.toStrictByteString
+
+-- | Impossible to serialize 'Void'.
+instance Put Void where
+    put = absurd
 
 -- | Serialize each element in order. No length indicator, so parse until either
 --   error or EOF. Usually not what you want, but sometimes used at the "top" of

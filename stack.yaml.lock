@@ -5,12 +5,12 @@
 
 packages:
 - completed:
-    hackage: flatparse-0.3.5.0@sha256:ed98a973cb958555924a4bd9862480e4b7632ec7495abcc0bee1d10fad476a42,3936
+    hackage: flatparse-0.3.5.1@sha256:f10369df044cf9782dfd1ce7bd865f2d3e2ea7d71cc0040df62b3ac921021a45,3936
     pantry-tree:
       size: 1062
-      sha256: deb8fd3167f3b8ec2f67be2e8c5efeb4f78240b3a91127b7416d2ac0790db31e
+      sha256: e0d48ff528737de7351bd3d491ad6913bbd4aca0b9957386512820a0f09eedd5
   original:
-    hackage: flatparse-0.3.5.0
+    hackage: flatparse-0.3.5.1
 - completed:
     hackage: mason-0.2.5@sha256:44ead52c404f49006e4759d746b9008f8a6b2c642cbb27d26e7e25e7ba9a6f71,1221
     pantry-tree:

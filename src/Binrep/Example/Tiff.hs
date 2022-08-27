@@ -5,7 +5,6 @@ module Binrep.Example.Tiff where
 
 import Binrep
 import Binrep.Generic
-import Binrep.Generic qualified as BR
 import Binrep.Type.Common ( Endianness(..) )
 import Binrep.Type.Int
 import Binrep.Type.Magic
@@ -20,9 +19,6 @@ import Data.ByteString qualified as B
 
 type W8 = I 'U 'I1 'LE
 
-brCfgNoSum :: BR.Cfg W8
-brCfgNoSum = BR.Cfg { BR.cSumTag = undefined }
-
 data Tiff where
     Tiff :: (Put (I 'U 'I4 end), bs ~ MagicBytes (TiffMagic end), ReifyBytes bs, KnownNat (Length bs)) => TiffBody end -> Tiff
 
@@ -36,11 +32,11 @@ data TiffBody (end :: Endianness) = TiffBody
 deriving stock instance (KnownSymbol (TiffMagic end), Typeable end) => Data (TiffBody end)
 
 instance (bs ~ MagicBytes (TiffMagic end), KnownNat (Length bs)) => BLen (TiffBody end) where
-    blen = blenGeneric brCfgNoSum
+    blen = blenGeneric cNoSum
 instance (bs ~ MagicBytes (TiffMagic end), ReifyBytes bs, irep ~ I 'U 'I4 end, Put irep) => Put  (TiffBody end) where
-    put  = putGeneric  brCfgNoSum
+    put  = putGeneric  cNoSum
 instance (bs ~ MagicBytes (TiffMagic end), ReifyBytes bs, irep ~ I 'U 'I4 end, Get irep) => Get  (TiffBody end) where
-    get  = getGeneric  brCfgNoSum
+    get  = getGeneric  cNoSum
 
 instance BLen Tiff where
     blen (Tiff body) = blen body

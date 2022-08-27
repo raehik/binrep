@@ -72,7 +72,7 @@ instance (bs ~ MagicBytes a, ReifyBytes bs) => Get (Magic a) where
         actual <- FP.takeBs $ B.length expected
         if   actual == expected
         then return Magic
-        else FP.err $ "bad magic: expected "<>show expected<>", got "<>show actual
+        else eBase $ EExpected expected actual
 
 {-
 I do lots of functions on lists, because they're structurally simple. But you

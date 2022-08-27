@@ -30,8 +30,6 @@ import GHC.Generics ( Generic )
 import Data.Data ( Data )
 import Numeric ( showOct, showHex, showBin, showInt )
 
-import FlatParse.Basic qualified as FP
-
 -- | A 'Natural' represented in binary as an ASCII string, where each character
 --   a is a digit in the given base (> 1).
 --
@@ -66,8 +64,8 @@ instance Get (AsciiNat 8) where
     get = do
         bs <- get
         case asciiBytesToNat octalFromAsciiDigit 8 bs of
-          Left bs' -> FP.err $ "TODO " <> show bs'
-          Right n  -> return $ AsciiNat n
+          Left  w -> eBase $ EFailParse "hex ASCII natural" bs w
+          Right n -> return $ AsciiNat n
 
 octalFromAsciiDigit :: Word8 -> Maybe Word8
 octalFromAsciiDigit = \case

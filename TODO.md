@@ -12,6 +12,10 @@ Consider implementing "practical maxes" for various types.
 
 May help prevent unexpected OOMs?
 
+## Structured parse errors like strongweak
+It means lots of work wrapping flatparse and making my own various combinators,
+but otherwise everything's already there.
+
 ## More primitives
   * Varint
     * base done, but doesn't support everything
