@@ -1,4 +1,4 @@
-## Unreleased
+## 0.3.0 (2022-08-27)
   * useful parsing errors in `Get`
     * e.g. if parsing fails at "any Word64", emits "ran out, needed 8 bytes"
     * generic deriver places tons of data type info in highly structured errors
