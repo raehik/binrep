@@ -1,3 +1,5 @@
+-- TODO remove Show instance requirement
+
 {-# LANGUAGE UndecidableInstances #-} -- required for TypeError >:(
 
 module Binrep.Generic.Get where
@@ -9,14 +11,13 @@ import Binrep.Get
 import Binrep.Generic.Internal
 
 import FlatParse.Basic qualified as FP
-import FlatParse.Basic ( Parser )
 import Control.Applicative ( (<|>) )
 
-getGeneric :: (Generic a, GGet (Rep a), Get w, Eq w, Show w) => Cfg w -> Parser String a
+getGeneric :: (Generic a, GGet (Rep a), Get w, Show w) => Cfg w -> Getter a
 getGeneric cfg = to <$> gget cfg
 
 class GGet f where
-    gget :: (Get w, Eq w, Show w) => Cfg w -> Parser String (f a)
+    gget :: (Get w, Show w) => Cfg w -> Getter (f a)
 
 -- | Empty constructor.
 instance GGet U1 where
@@ -35,10 +36,16 @@ instance (GGet l, GGet r) => GGet (l :*: r) where
 -- | Constructor sums are differentiated by a prefix tag.
 instance GGetSum (l :+: r) => GGet (l :+: r) where
     gget cfg = do
-        tag <- get
+        tag <- getE $ EGenericSumTag
         case ggetsum cfg tag of
           Just parser -> parser
-          Nothing -> FP.err $ "invalid sum type tag: "<>show tag
+          Nothing -> errE $ eGenericSumTagInvalid tag
+
+getE :: Get a => (E -> EGeneric) -> Getter a
+getE f = FP.cutting get (EGeneric $ f $ EBase EFail) (\e _ -> EGeneric $ f e)
+
+errE :: EGeneric -> Getter a
+errE = FP.err . EGeneric
 
 -- | Refuse to derive instance for void datatype.
 instance TypeError GErrRefuseVoid => GGet V1 where
@@ -51,7 +58,7 @@ instance GGet f => GGet (M1 i d f) where
 --------------------------------------------------------------------------------
 
 class GGetSum f where
-    ggetsum :: (Get w, Eq w, Show w) => Cfg w -> w -> Maybe (Parser String (f a))
+    ggetsum :: (Get w, Show w) => Cfg w -> w -> Maybe (Getter (f a))
 
 instance (GGetSum l, GGetSum r) => GGetSum (l :+: r) where
     ggetsum cfg tag = l <|> r
@@ -62,5 +69,5 @@ instance (GGetSum l, GGetSum r) => GGetSum (l :+: r) where
 -- | Bad. Need to wrap this like SumFromString in Aeson.
 instance (GGet r, Constructor c) => GGetSum (C1 c r) where
     ggetsum cfg tag
-     | tag == (cSumTag cfg) (conName' @c) = Just $ gget cfg
+     | (cSumTagEq cfg) tag ((cSumTag cfg) (conName' @c)) = Just $ gget cfg
      | otherwise = Nothing

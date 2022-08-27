@@ -57,13 +57,13 @@ instance (Get a, BLen a, KnownNat n) => Get (NullPadded n a) where
         let len = blen a
             nullStrLen = n - len
         if   nullStrLen < 0
-        then FP.err $ "too long: " <> show len <> " > " <> show n
+        then eBase $ EOverlong n len
         else getNNulls nullStrLen >> return (reallyUnsafeRefine a)
       where
         n = typeNatToBLen @n
 
-getNNulls :: BLenT -> Parser String ()
+getNNulls :: BLenT -> Parser E ()
 getNNulls = \case 0 -> return ()
                   n -> FP.anyWord8 >>= \case
                          0x00    -> getNNulls $ n-1
-                         nonNull -> FP.err "TODO expected null, wasn't"
+                         nonNull -> eBase $ EExpectedByte 0x00 nonNull

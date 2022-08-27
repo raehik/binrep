@@ -41,7 +41,7 @@ instance KnownSymbol str => Get  (MagicUTF8 str) where
         actual <- FP.takeBs $ B.length expected
         if   actual == expected
         then return MagicUTF8
-        else FP.err $ "bad magic: expected "<>show expected<>", got "<>show actual
+        else eBase $ EExpected expected actual
 
 encodeStringUtf8 :: String -> B.ByteString
 encodeStringUtf8 = Text.encodeUtf8 . Text.pack

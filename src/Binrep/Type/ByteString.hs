@@ -27,7 +27,6 @@ import Refined.Unsafe
 
 import Data.ByteString qualified as B
 import FlatParse.Basic qualified as FP
-import FlatParse.Basic ( Parser )
 import Data.Word ( Word8 )
 import GHC.TypeNats ( KnownNat )
 
@@ -50,8 +49,8 @@ data Rep
 -- | A bytestring using the given representation, stored in the 'Text' type.
 type AsByteString (rep :: Rep) = Refined rep B.ByteString
 
-getCString :: Parser String B.ByteString
-getCString = FP.anyCString
+getCString :: Getter B.ByteString
+getCString = FP.cut FP.anyCString $ EBase $ EFailNamed "cstring"
 
 instance BLen (AsByteString 'C) where
     blen cbs = posIntToBLen $ B.length (unrefine cbs) + 1

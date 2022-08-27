@@ -1,8 +1,9 @@
 -- | Derive 'BLen', 'Put', 'Get' and 'CBLen' instances generically.
 
 module Binrep.Generic
-  ( Cfg(..)
+  ( Cfg(..), cfg
   , cSumTagHex, cSumTagNullTerm, cDef
+  , cNoSum, EDerivedSumInstanceWithNonSumCfg(..)
   , blenGeneric, putGeneric, getGeneric, CBLenGeneric
   ) where
 
@@ -19,7 +20,11 @@ import Data.Text.Encoding qualified as Text
 
 import Numeric ( readHex )
 
--- TODO better error handling (see what aeson does)
+import Data.Void ( Void )
+import Control.Exception ( Exception, throw )
+
+cfg :: Eq a => (String -> a) -> Cfg a
+cfg f = Cfg { cSumTag = f, cSumTagEq = (==) }
 
 -- | Obtain the tag for a sum type value by applying a function to the
 --   constructor name, and reading the result as a hexadecimal number.
@@ -45,5 +50,28 @@ forceRead = \case []        -> error "no parse"
 cSumTagNullTerm :: String -> AsByteString 'C
 cSumTagNullTerm = reallyUnsafeRefine . Text.encodeUtf8 . Text.pack
 
+-- | Default generic derivation configuration, using 'cSumTagNullTerm'.
 cDef :: Cfg (AsByteString 'C)
-cDef = Cfg { cSumTag = cSumTagNullTerm }
+cDef = cfg cSumTagNullTerm
+
+-- | Special generic derivation configuration you may use for non-sum data
+--   types.
+--
+-- When generically deriving binrep instances for a non-sum type, you may like
+-- to ignore sum tag handling. You could use 'cDef', but this will silently
+-- change behaviour if your type becomes a sum type. This configuration will
+-- generate clear runtime errors when used with a sum type.
+--
+-- By selecting 'Void' for the sum tag type, consumption actions (serializing,
+-- getting length in bytes) will runtime error, while generation actions
+-- (parsing) will hit the 'Void' instance first and always safely error out.
+cNoSum :: Cfg Void
+cNoSum = cfg $ \_ -> throw EDerivedSumInstanceWithNonSumCfg
+
+-- This indirection enables us to test for this precise exception being thrown
+-- in an incorrect configuration! Awesome!
+data EDerivedSumInstanceWithNonSumCfg = EDerivedSumInstanceWithNonSumCfg
+instance Show EDerivedSumInstanceWithNonSumCfg where
+    show EDerivedSumInstanceWithNonSumCfg =
+        "Binrep.Generic.cNoSum: non-sum generic derivation configuration used with a sum type"
+instance Exception EDerivedSumInstanceWithNonSumCfg

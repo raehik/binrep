@@ -2,9 +2,6 @@ module Binrep.Example.Tar where
 
 import Binrep
 import Binrep.Generic
-import Binrep.Generic qualified as BR
-import Binrep.Type.Common ( Endianness(..) )
-import Binrep.Type.Int
 import Binrep.Type.NullPadded
 import Binrep.Type.AsciiNat
 
@@ -19,9 +16,6 @@ import Data.ByteString qualified as B
 import FlatParse.Basic qualified as FP
 
 type BS = B.ByteString
-
-brCfgNoSum :: BR.Cfg (I 'U 'I1 'LE)
-brCfgNoSum = BR.Cfg { BR.cSumTag = undefined }
 
 -- | The naturals in tars are sized octal ASCII digit strings that end with a
 --   null byte (and may start with leading ASCII zeroes). The size includes the
@@ -48,7 +42,7 @@ instance KnownNat n => Get (TarNat n) where
         an <- FP.isolate (fromIntegral (n - 1)) get
         get @Word8 >>= \case
           0x00 -> return $ TarNat an
-          w    -> FP.err $ "TODO expected null byte, got " <> show w
+          w    -> eBase $ EExpectedByte 0x00 w
       where
         n = typeNatToBLen @n
 
@@ -62,6 +56,6 @@ data Tar = Tar
   , tarFileLastMod :: TarNat 12
   } deriving stock (Generic, Show, Eq)
 
-instance BLen Tar where blen = blenGeneric brCfgNoSum
-instance Put  Tar where put  = putGeneric  brCfgNoSum
-instance Get  Tar where get  = getGeneric  brCfgNoSum
+instance BLen Tar where blen = blenGeneric cNoSum
+instance Put  Tar where put  = putGeneric  cNoSum
+instance Get  Tar where get  = getGeneric  cNoSum
