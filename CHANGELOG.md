@@ -1,4 +1,7 @@
 ## Unreleased
+  * useful parsing errors in `Get`
+    * e.g. if parsing fails at "any Word64", emits "ran out, needed 8 bytes"
+    * generic deriver places tons of data type info in highly structured errors
   * move `CBLen` into `BLen` as an associated type family
   * clean up magics (another open type family to associated)
   * add initial varint definitions at `Binrep.Type.Varint`
