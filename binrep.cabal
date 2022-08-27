@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           binrep
-version:        0.2.0
+version:        0.3.0
 synopsis:       Encode precise binary representations directly in types
 description:    Please see README.md.
 category:       Data, Serialization
@@ -17,7 +17,7 @@ license:        MIT
 license-file:   LICENSE
 build-type:     Simple
 tested-with:
-    GHC ==9.2.3
+    GHC ==9.2.4
 extra-source-files:
     README.md
     CHANGELOG.md
