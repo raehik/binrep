@@ -52,7 +52,6 @@ cutEBase f e = FP.cut f $ EBase e
 data EBase
   = ENoVoid
   | EFail
-  | EEof
 
   | EExpectedByte Word8 Word8
   -- ^ expected first, got second
@@ -105,9 +104,13 @@ instance Get Void where
 --   succeeds by reaching EOF. Probably not what you usually want, but sometimes
 --   used at the "top" of binary formats.
 instance Get a => Get [a] where
-    get = do as <- FP.many get
-             cutEBase FP.eof EEof
-             return as
+    get = go
+      where
+        go = do
+            FP.withOption FP.eof (\() -> pure []) $ do
+                a <- get
+                as <- go
+                pure $ a : as
 
 instance (Get a, Get b) => Get (a, b) where
     get = do
