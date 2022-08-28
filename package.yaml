@@ -111,6 +111,6 @@ flags:
 when:
 - condition: flag(icu)
   dependencies:
-  - text-icu ^>= 0.8.0.1
+  - text-icu >= 0.7.0.0 && < 0.9
   cpp-options:
   - -DHAVE_ICU
