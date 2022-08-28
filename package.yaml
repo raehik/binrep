@@ -1,5 +1,5 @@
 name: binrep
-version: 0.3.0
+version: 0.3.1
 synopsis: Encode precise binary representations directly in types
 description: Please see README.md.
 extra-source-files:

@@ -1,3 +1,6 @@
+## 0.3.1 (2022-08-28)
+  * fix `Get [a]` instance
+
 ## 0.3.0 (2022-08-27)
   * useful parsing errors in `Get`
     * e.g. if parsing fails at "any Word64", emits "ran out, needed 8 bytes"
