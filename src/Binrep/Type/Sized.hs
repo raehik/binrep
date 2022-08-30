@@ -37,6 +37,6 @@ instance Put a => Put (Sized n a) where
 instance (Get a, KnownNat n) => Get (Sized n a) where
     get = do
         a <- FP.isolate (fromIntegral n) get
-        return $ reallyUnsafeRefine a
+        pure $ reallyUnsafeRefine a
       where
         n = typeNatToBLen @n

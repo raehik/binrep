@@ -41,7 +41,7 @@ instance KnownNat n => Get (TarNat n) where
     get = do
         an <- FP.isolate (fromIntegral (n - 1)) get
         get @Word8 >>= \case
-          0x00 -> return $ TarNat an
+          0x00 -> pure $ TarNat an
           w    -> eBase $ EExpectedByte 0x00 w
       where
         n = typeNatToBLen @n

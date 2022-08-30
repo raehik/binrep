@@ -16,4 +16,4 @@ instance (FromJSON (v a), KnownNat n, V.Vector v a) => FromJSON (VSI.Vector v n 
         v <- parseJSON j
         case VS.toSized v of
           Nothing -> fail "TODO bad size"
-          Just v' -> return v'
+          Just v' -> pure v'

@@ -71,7 +71,7 @@ instance (bs ~ MagicBytes a, ReifyBytes bs) => Get (Magic a) where
         let expected = Mason.toStrictByteString $ reifyBytes @bs
         actual <- FP.takeBs $ B.length expected
         if   actual == expected
-        then return Magic
+        then pure Magic
         else eBase $ EExpected expected actual
 
 {-

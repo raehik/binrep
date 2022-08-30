@@ -40,7 +40,7 @@ instance KnownSymbol str => Get  (MagicUTF8 str) where
         let expected = encodeStringUtf8 $ symVal @str
         actual <- FP.takeBs $ B.length expected
         if   actual == expected
-        then return MagicUTF8
+        then pure MagicUTF8
         else eBase $ EExpected expected actual
 
 encodeStringUtf8 :: String -> B.ByteString

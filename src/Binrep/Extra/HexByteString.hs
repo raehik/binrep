@@ -76,7 +76,7 @@ parseHexByte :: (MonadParsec e s m, Token s ~ Char, Num a) => m a
 parseHexByte = do
     c1 <- MC.hexDigitChar
     c2 <- MC.hexDigitChar
-    return $ 0x10 * fromIntegral (Char.digitToInt c1) + fromIntegral (Char.digitToInt c2)
+    pure $ 0x10 * fromIntegral (Char.digitToInt c1) + fromIntegral (Char.digitToInt c2)
 
 -- | Pretty print to default format @00 12 AB FF@: space between each byte, all
 --   caps.

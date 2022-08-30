@@ -75,7 +75,7 @@ instance (itype ~ I 'U size end, irep ~ IRep 'U size, Integral irep, Get itype) 
     get = do
         len <- get @itype
         bs <- FP.takeBs $ fromIntegral len
-        return $ reallyUnsafeRefine bs
+        pure $ reallyUnsafeRefine bs
 
 -- | A C-style bytestring must not contain any null bytes.
 instance Predicate 'C B.ByteString where

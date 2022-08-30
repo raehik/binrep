@@ -106,5 +106,5 @@ getLenPfx g = do
         -- GHC without lots of refactoring. This is good enough.
         case cmpNat (Proxy :: Proxy n) (Proxy :: Proxy (MaxBound irep)) of
           GTI -> error "impossible"
-          LTI -> return $ LenPfx x
-          EQI -> return $ LenPfx x
+          LTI -> pure $ LenPfx x
+          EQI -> pure $ LenPfx x

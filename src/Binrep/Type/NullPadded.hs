@@ -58,12 +58,12 @@ instance (Get a, BLen a, KnownNat n) => Get (NullPadded n a) where
             nullStrLen = n - len
         if   nullStrLen < 0
         then eBase $ EOverlong n len
-        else getNNulls nullStrLen >> return (reallyUnsafeRefine a)
+        else getNNulls nullStrLen >> pure (reallyUnsafeRefine a)
       where
         n = typeNatToBLen @n
 
 getNNulls :: BLenT -> Parser E ()
-getNNulls = \case 0 -> return ()
+getNNulls = \case 0 -> pure ()
                   n -> FP.anyWord8 >>= \case
                          0x00    -> getNNulls $ n-1
                          nonNull -> eBase $ EExpectedByte 0x00 nonNull

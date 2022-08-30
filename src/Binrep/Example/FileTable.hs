@@ -86,7 +86,7 @@ getEntry addr# = do
     name <- get
     dat  <- FP.withAnyWord8# $ \offset# -> FP.withAnyWord8# $ \len# ->
         FP.takeBsOffAddr# addr# (w8i# offset#) (w8i# len#)
-    return $ Entry name (reallyUnsafeRefine dat)
+    pure $ Entry name (reallyUnsafeRefine dat)
 
 w8i# :: Word8# -> Int#
 w8i# w# = word2Int# (word8ToWord# w#)

@@ -65,7 +65,7 @@ instance Get (AsciiNat 8) where
         bs <- get
         case asciiBytesToNat octalFromAsciiDigit 8 bs of
           Left  w -> eBase $ EFailParse "hex ASCII natural" bs w
-          Right n -> return $ AsciiNat n
+          Right n -> pure $ AsciiNat n
 
 octalFromAsciiDigit :: Word8 -> Maybe Word8
 octalFromAsciiDigit = \case

@@ -116,7 +116,7 @@ instance (Get a, Get b) => Get (a, b) where
     get = do
         a <- get
         b <- get
-        return (a, b)
+        pure (a, b)
 
 instance Get B.ByteString where
     get = FP.takeRestBs

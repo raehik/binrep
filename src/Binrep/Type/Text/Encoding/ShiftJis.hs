@@ -35,7 +35,7 @@ instance Decode ShiftJis where
 encodeViaTextICU :: String -> Text -> IO B.ByteString
 encodeViaTextICU charset t = do
     conv <- ICU.open charset Nothing
-    return $ ICU.fromUnicode conv t
+    pure $ ICU.fromUnicode conv t
 
 encodeViaTextICU' :: String -> Text -> B.ByteString
 encodeViaTextICU' charset t =
@@ -47,7 +47,7 @@ encodeViaTextICU' charset t =
 decodeViaTextICU :: String -> B.ByteString -> IO (Either String Text)
 decodeViaTextICU charset t = do
     conv <- ICU.open charset Nothing
-    return $ Right $ ICU.toUnicode conv t
+    pure $ Right $ ICU.toUnicode conv t
 
 decodeViaTextICU' :: String -> B.ByteString -> Either String Text
 decodeViaTextICU' charset t = do
