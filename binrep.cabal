@@ -61,6 +61,12 @@ library
       Binrep.Type.NullPadded
       Binrep.Type.Sized
       Binrep.Type.Text
+      Binrep.Type.Text.Encoding.Ascii
+      Binrep.Type.Text.Encoding.ShiftJis
+      Binrep.Type.Text.Encoding.Utf16
+      Binrep.Type.Text.Encoding.Utf32
+      Binrep.Type.Text.Encoding.Utf8
+      Binrep.Type.Text.Internal
       Binrep.Type.Varint
       Binrep.Type.Vector
       Binrep.Util

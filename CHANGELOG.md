@@ -1,3 +1,7 @@
+## Unreleased
+  * refactor `Binrep.Type.Text`: users can now add extend to add their own
+    encodings
+
 ## 0.3.1 (2022-08-28)
   * fix `Get [a]` instance
 
