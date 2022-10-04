@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.35.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -79,38 +79,17 @@ library
   hs-source-dirs:
       src
   default-extensions:
-      EmptyCase
       LambdaCase
-      InstanceSigs
-      BangPatterns
       ExplicitNamespaces
       DerivingStrategies
       DerivingVia
-      StandaloneDeriving
       DeriveAnyClass
-      DeriveGeneric
-      DeriveDataTypeable
-      DeriveFunctor
-      DeriveFoldable
-      DeriveTraversable
-      DeriveLift
-      FlexibleContexts
-      FlexibleInstances
-      MultiParamTypeClasses
       GADTs
-      PolyKinds
       RoleAnnotations
-      RankNTypes
-      TypeApplications
       DefaultSignatures
       TypeFamilies
       DataKinds
       MagicHash
-      ImportQualifiedPost
-      StandaloneKindSignatures
-      BinaryLiterals
-      ScopedTypeVariables
-      TypeOperators
   ghc-options: -Wall
   build-depends:
       aeson ==2.0.*
@@ -125,11 +104,11 @@ library
     , text >=1.2 && <2.1
     , vector >=0.12.3.1 && <0.13
     , vector-sized >=1.5.0 && <1.6
+  default-language: GHC2021
   if flag(icu)
     cpp-options: -DHAVE_ICU
     build-depends:
         text-icu >=0.7.0.0 && <0.9
-  default-language: Haskell2010
 
 test-suite spec
   type: exitcode-stdio-1.0
@@ -142,38 +121,17 @@ test-suite spec
   hs-source-dirs:
       test
   default-extensions:
-      EmptyCase
       LambdaCase
-      InstanceSigs
-      BangPatterns
       ExplicitNamespaces
       DerivingStrategies
       DerivingVia
-      StandaloneDeriving
       DeriveAnyClass
-      DeriveGeneric
-      DeriveDataTypeable
-      DeriveFunctor
-      DeriveFoldable
-      DeriveTraversable
-      DeriveLift
-      FlexibleContexts
-      FlexibleInstances
-      MultiParamTypeClasses
       GADTs
-      PolyKinds
       RoleAnnotations
-      RankNTypes
-      TypeApplications
       DefaultSignatures
       TypeFamilies
       DataKinds
       MagicHash
-      ImportQualifiedPost
-      StandaloneKindSignatures
-      BinaryLiterals
-      ScopedTypeVariables
-      TypeOperators
   ghc-options: -Wall
   build-tool-depends:
       hspec-discover:hspec-discover >=2.7 && <2.10
@@ -195,8 +153,8 @@ test-suite spec
     , text >=1.2 && <2.1
     , vector >=0.12.3.1 && <0.13
     , vector-sized >=1.5.0 && <1.6
+  default-language: GHC2021
   if flag(icu)
     cpp-options: -DHAVE_ICU
     build-depends:
         text-icu >=0.7.0.0 && <0.9
-  default-language: Haskell2010

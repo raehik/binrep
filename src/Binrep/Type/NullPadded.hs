@@ -1,3 +1,7 @@
+-- | Static-length data via null-padding.
+--
+-- For null-terminated strings, see 'Binrep.Type.ByteString'.
+
 {-# LANGUAGE OverloadedStrings #-}
 
 module Binrep.Type.NullPadded where
@@ -11,12 +15,18 @@ import Refined.Unsafe
 import GHC.TypeNats
 import Data.Typeable ( typeRep )
 import FlatParse.Basic qualified as FP
-import FlatParse.Basic ( Parser )
 import Mason.Builder qualified as Mason
 import Data.ByteString qualified as BS
 
 data NullPad (n :: Natural)
 
+-- | A type which is to be null-padded to a given total length.
+--
+-- Given some @'NullPadded' n a@ term @x@, it is guaranteed that
+--
+--     blen x <= typeNatToBLen @n
+--
+-- That is, the serialized stored data will not be longer than the total length.
 type NullPadded n a = Refined (NullPad n) a
 
 instance KnownNat n => BLen (NullPadded n a) where
@@ -25,22 +35,23 @@ instance KnownNat n => BLen (NullPadded n a) where
 
 instance (BLen a, KnownNat n) => Predicate (NullPad n) a where
     validate p a
-      | len > n
+      | len <= n = success
+      | otherwise
           = throwRefineOtherException (typeRep p) $
                    "too long: " <> tshow len <> " > " <> tshow n
-      | otherwise = success
       where
         n = typeNatToBLen @n
         len = blen a
 
--- TODO cleanup
 instance (Put a, BLen a, KnownNat n) => Put (NullPadded n a) where
-    put wrnpa =
-        let npa = unrefine wrnpa
-            paddingLength = n - blen npa
-         in put npa <> Mason.byteString (BS.replicate (fromIntegral paddingLength) 0x00)
+    put npa = put a <> Mason.byteString paddingBs
       where
+        paddingBs = BS.replicate (blenToPosInt paddingLength) 0x00
+        -- note that regular subtraction is legal here because we have a
+        -- guarantee that @blen a <= n@. this is safe subtraction of naturals!
+        paddingLength = n - blen a
         n = typeNatToBLen @n
+        a = unrefine npa
 
 -- | Safety: we assert actual length is within expected length (in order to
 --   calculate how much padding to parse).
@@ -50,20 +61,18 @@ instance (Put a, BLen a, KnownNat n) => Put (NullPadded n a) where
 -- correctness here, so it'd be nice to know about the padding well-formedness
 -- (i.e. that it's all nulls).
 --
--- TODO maybe better definition via isolate
+-- TODO: there is a possible clearer definition via isolate.
 instance (Get a, BLen a, KnownNat n) => Get (NullPadded n a) where
     get = do
         a <- get
         let len = blen a
-            nullStrLen = n - len
-        if   nullStrLen < 0
-        then eBase $ EOverlong n len
-        else getNNulls nullStrLen >> pure (reallyUnsafeRefine a)
-      where
-        n = typeNatToBLen @n
-
-getNNulls :: BLenT -> Parser E ()
-getNNulls = \case 0 -> pure ()
-                  n -> FP.anyWord8 >>= \case
-                         0x00    -> getNNulls $ n-1
-                         nonNull -> eBase $ EExpectedByte 0x00 nonNull
+        case n `safeBLenSub` len of
+          Nothing -> eBase $ EOverlong n len
+          Just nullStrLen -> do
+            let nullStrLen' = blenToPosInt nullStrLen
+            paddingBs <- FP.takeBs nullStrLen'
+            let expectedPaddingBs = BS.replicate nullStrLen' 0x00
+            if   paddingBs == expectedPaddingBs
+            then pure $ reallyUnsafeRefine a
+            else eBase $ EExpected expectedPaddingBs paddingBs
+      where n = typeNatToBLen @n

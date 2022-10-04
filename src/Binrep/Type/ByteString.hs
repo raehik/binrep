@@ -1,13 +1,12 @@
 {- | Machine bytestrings.
 
-I mix string and bytestring terminology here due to bad C influences, but this
+I mix string and bytestring terminology here, due to bad C influences. This
 module is specifically interested in bytestrings and their encoding. String/text
-encoding is handled in another module.
+encoding is handled in 'Binrep.Type.Text'.
 
-Note that the length prefix predicate is also defined here... because that's
-just Pascal-style bytestrings, extended to other types. I can't easily put it in
-an orphan module, because we define byte length for *all length-prefixed types*
-in one fell swoop.
+Note that the 'Binrep.Type.LenPfx' module generalizes the Pascal-style
+bytestring. But defining Pascal-style bytestrings as vectors over 'Word8' would
+be crap for performance.
 -}
 
 -- TODO redocument. pretty all over the place

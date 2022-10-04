@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE NoStarIsType #-}
 
 {- TODO can I replace this with a closed newtype family?? idk if I even want to
     it's just this is clumsy to use sometimes
@@ -130,12 +131,28 @@ type family IMax (sign :: ISign) (size :: ISize) :: Natural where
     IMax sign size = MaxBound (IRep sign size)
 
 -- | Restricted reflected version of @maxBound@.
+--
+-- For machine integer types: @max k = 2^(8k-1) - 1@
 type family MaxBound w :: Natural where
-    MaxBound Word8  = 255
-    MaxBound  Int8  = 127
-    MaxBound Word16 = 65535
-    MaxBound  Int16 = 32767
-    MaxBound Word32 = 4294967295
-    MaxBound  Int32 = 2147483647
-    MaxBound Word64 = 18446744073709551615
-    MaxBound  Int64 = 9223372036854775807
+    MaxBound Word8  = 2^(8*1   ) -1
+    MaxBound  Int8  = 2^(8*1 -1) -1
+    MaxBound Word16 = 2^(8*2   ) -1
+    MaxBound  Int16 = 2^(8*2 -1) -1
+    MaxBound Word32 = 2^(8*4   ) -1
+    MaxBound  Int32 = 2^(8*4 -1) -1
+    MaxBound Word64 = 2^(8*8   ) -1
+    MaxBound  Int64 = 2^(8*8 -1) -1
+
+-- | Restricted reflected version of @minBound@.
+--
+-- For machine integer types: @min k = - (2^(8k-1))@ -- then make sure to negate
+-- when reifying!
+type family MinBound w :: Natural where
+    MinBound Word8  = 2^(8*1   ) -1
+    MinBound  Int8  = 2^(8*1 -1) -1
+    MinBound Word16 = 2^(8*2   ) -1
+    MinBound  Int16 = 2^(8*2 -1) -1
+    MinBound Word32 = 2^(8*4   ) -1
+    MinBound  Int32 = 2^(8*4 -1) -1
+    MinBound Word64 = 2^(8*8   ) -1
+    MinBound  Int64 = 2^(8*8 -1) -1

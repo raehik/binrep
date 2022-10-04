@@ -30,6 +30,9 @@ class AsBLen a where
     -- This is intended for wrapping the output of 'length' functions.
     posIntToBLen :: Int -> a
 
+    -- | Convert some blen to an 'Int' @i@ where @i >= 0@ to a blen.
+    blenToPosInt :: a -> Int
+
     -- | Convert some 'Word#' @w@ where @w <= maxBound @a@ to a blen.
     wordToBLen# :: Word# -> a
 
@@ -43,9 +46,10 @@ instance AsBLen Int where
     posIntToBLen = id
     {-# INLINE posIntToBLen #-}
 
-    natToBLen = \case
-      NS w# -> wordToBLen# w#
-      NB _  -> error "TODO natural too large"
+    blenToPosInt = id
+    {-# INLINE blenToPosInt #-}
+
+    natToBLen = natToInt
     {-# INLINE natToBLen #-}
 
     wordToBLen# w# = I# (word2Int# w#)
@@ -58,8 +62,17 @@ instance AsBLen Natural where
     posIntToBLen = posIntToNat
     {-# INLINE posIntToBLen #-}
 
+    blenToPosInt = natToInt
+    {-# INLINE blenToPosInt #-}
+
     wordToBLen# = NS
     {-# INLINE wordToBLen# #-}
 
     natToBLen = id
     {-# INLINE natToBLen #-}
+
+natToInt :: Natural -> Int
+natToInt = \case
+  NS w# -> wordToBLen# w#
+  NB _  -> error "TODO natural too large"
+{-# INLINE natToInt #-}

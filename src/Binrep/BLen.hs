@@ -90,14 +90,14 @@ instance (BLen a, BLen b) => BLen (a, b) where
 instance BLen B.ByteString where
     blen = posIntToBLen . B.length
 
-instance BLen Word8  where type CBLen Word8  = 1
-instance BLen  Int8  where type CBLen  Int8  = 1
-instance BLen Word16 where type CBLen Word16 = 2
-instance BLen  Int16 where type CBLen  Int16 = 2
-instance BLen Word32 where type CBLen Word32 = 4
-instance BLen  Int32 where type CBLen  Int32 = 4
-instance BLen Word64 where type CBLen Word64 = 8
-instance BLen  Int64 where type CBLen  Int64 = 8
+instance BLen Word8  where type CBLen Word8  = 2^0
+instance BLen  Int8  where type CBLen  Int8  = 2^0
+instance BLen Word16 where type CBLen Word16 = 2^1
+instance BLen  Int16 where type CBLen  Int16 = 2^1
+instance BLen Word32 where type CBLen Word32 = 2^2
+instance BLen  Int32 where type CBLen  Int32 = 2^2
+instance BLen Word64 where type CBLen Word64 = 2^3
+instance BLen  Int64 where type CBLen  Int64 = 2^3
 
 --------------------------------------------------------------------------------
 
@@ -106,6 +106,6 @@ instance BLen  Int64 where type CBLen  Int64 = 8
 newtype WithCBLen a = WithCBLen { unWithCBLen :: a }
 
 instance KnownNat (CBLen a) => BLen (WithCBLen [a]) where
-    blen (WithCBLen l) = cblen @a * length l
+    blen (WithCBLen l) = cblen @a * posIntToBLen (length l)
 instance KnownNat (CBLen a + CBLen b) => BLen (WithCBLen (a, b)) where
     type CBLen (WithCBLen (a, b)) = CBLen a + CBLen b
