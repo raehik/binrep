@@ -10,4 +10,4 @@ x nm = do
     TyConI (DataD _ _ _ _ cs _) <- reify nm
     -- [InstanceD _ cxt ty' decs] <- reifyInstances ''BLen [ty]
     [d| instance BLen $ty where blen _ = 5 |]
- where ty = return $ ConT nm
+ where ty = pure $ ConT nm

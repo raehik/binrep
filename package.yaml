@@ -13,17 +13,13 @@ license-file: LICENSE
 github: raehik/binrep
 maintainer: Ben Orchard <thefirstmuffinman@gmail.com>
 author: Ben Orchard
-
-# TODO 2022-04-22 This will be supported eventually - I looked just now, and
-# there was a fix 10 hours ago! But it'll take a while to trickle down into an
-# hpack release, and then that release in Stack.
+# raehik's extensions (GHC 9.2; last updated: 2022-10-05)
 language: GHC2021
-
-# raehik's extensions (GHC 9.2; last updated: 2022-10-04)
 default-extensions:
 # syntax that should be default
 - LambdaCase
 - ExplicitNamespaces # 7.6
+- NoStarIsType
 
 ## deriving-related
 - DerivingStrategies # 8.2
@@ -42,8 +38,30 @@ default-extensions:
 # other syntax
 - MagicHash
 
-# useful extensions to know about, but which must be specified on-demand
-#- UndecidableInstances
+# useful extensions to know about, but which should be specified on-demand
+#
+# UndecidableInstances:
+#   required for type class wizardry
+#   generally only enable if you were expecting to & compilation fails without
+# AllowAmbiguousTypes:
+#   often goes hand in hand with TypeApplications-heavy code
+#   enabling on demand brings attention to the sort of functions to expect
+# StarIsType:
+#   may need to enable if you're working with old code that uses `Int :: *`
+# ApplicativeDo:
+#   fantastic, but may contain issues and surprises, and still new to most
+#   Haskell programmers. suggest per-module
+# CPP, TemplateHaskell: big scary extensions, only enable when using
+#
+# possible additions:
+#
+# OverloadedStrings:
+#   incredibly useful but can force unexpected type annotations
+#   I prefer enabling only in modules that deal with string-likes
+# FunctionalDependencies:
+#   less common extension but remains useful
+# PatternSynonyms:
+#   amazing but huge, and without enabling you can still use (just not define)
 
 ghc-options:
 - -Wall

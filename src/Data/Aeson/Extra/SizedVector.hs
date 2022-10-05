@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Data.Aeson.Extra.SizedVector where
+module Data.Aeson.Extra.SizedVector() where
 
 import Data.Aeson
 import Data.Vector.Generic.Sized.Internal qualified as VSI

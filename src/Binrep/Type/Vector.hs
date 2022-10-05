@@ -1,6 +1,5 @@
 -- | Sized vectors.
 
-{-# LANGUAGE NoStarIsType #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
@@ -12,7 +11,9 @@ import Data.Vector.Sized ( Vector )
 import GHC.TypeNats
 
 instance BLen a => BLen (Vector n a) where
+    -- requires UndecidableInstances due to recursive type family application
     type CBLen (Vector n a) = CBLen a * n
+
     blen = V.sum . V.map blen
 
 instance Put a => Put (Vector n a) where

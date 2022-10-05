@@ -81,6 +81,7 @@ library
   default-extensions:
       LambdaCase
       ExplicitNamespaces
+      NoStarIsType
       DerivingStrategies
       DerivingVia
       DeriveAnyClass
@@ -123,6 +124,7 @@ test-suite spec
   default-extensions:
       LambdaCase
       ExplicitNamespaces
+      NoStarIsType
       DerivingStrategies
       DerivingVia
       DeriveAnyClass
