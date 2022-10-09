@@ -80,9 +80,7 @@ library
       src
   default-extensions:
       LambdaCase
-      ExplicitNamespaces
       NoStarIsType
-      DerivingStrategies
       DerivingVia
       DeriveAnyClass
       GADTs
@@ -123,9 +121,7 @@ test-suite spec
       test
   default-extensions:
       LambdaCase
-      ExplicitNamespaces
       NoStarIsType
-      DerivingStrategies
       DerivingVia
       DeriveAnyClass
       GADTs
