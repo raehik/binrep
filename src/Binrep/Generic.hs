@@ -1,30 +1,45 @@
--- | Derive 'BLen', 'Put', 'Get' and 'CBLen' instances generically.
-
 module Binrep.Generic
-  ( Cfg(..), cfg
-  , cSumTagHex, cSumTagNullTerm, cDef
-  , cNoSum, EDerivedSumInstanceWithNonSumCfg(..)
-  , blenGeneric, putGeneric, getGeneric, CBLenGeneric
+  (
+  -- * Shared configuration
+    Cfg(..), cfg, cSumTagHex, cSumTagNullTerm, cDef
+  -- * BLen
+  , blenGenericSum, BLen.blenGenericNonSum
+  -- * Put
+  , putGenericSum, Put.putGenericNonSum
+  -- * Get
+  , Get.getGenericSum, Get.getGenericNonSum
+  -- * CBLen
+  , type CBLen.CBLenGeneric
   ) where
 
-import Binrep.Generic.Internal
-import Binrep.Generic.BLen
-import Binrep.Generic.Put
-import Binrep.Generic.Get
-import Binrep.Generic.CBLen
+import GHC.Generics
+import Binrep
+import Bytezap ( Poke )
+import Binrep.BLen.Simple.Generic qualified as BLen
+import Binrep.Put.Bytezap.Generic qualified as Put
+import Binrep.Get.Flatparse.Generic qualified as Get
+import Binrep.Get.Flatparse.Generic ( Cfg(..) )
+import Binrep.CBLen.Generic qualified as CBLen
 
-import Binrep.Type.ByteString ( AsByteString, Rep(..) )
-import Refined.Unsafe ( reallyUnsafeRefine )
+import Binrep.Type.NullTerminated
+import Data.ByteString qualified as B
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as Text
-
+import Refined.Unsafe
 import Numeric ( readHex )
-
-import Data.Void ( Void )
-import Control.Exception ( Exception, throw )
-
 import Binrep.Util ( tshow )
 
+putGenericSum
+    :: (Generic a, Put.GPutDSum (Rep a), Put w) => Cfg w -> a -> Poke
+putGenericSum c = Put.putGenericSum (put . cSumTag c)
+
+blenGenericSum
+    :: (Generic a, BLen.GBLenDSum (Rep a), BLen w) => Cfg w -> a -> Int
+blenGenericSum c = BLen.blenGenericSum (blen . cSumTag c)
+
+
+-- | Construct a binrep generic deriving config, filling out the relevant
+--   records using 'Eq' and 'Show'.
 cfg :: (Eq a, Show a) => (String -> a) -> Cfg a
 cfg f = Cfg { cSumTag = f, cSumTagEq = (==), cSumTagShow = tshow }
 
@@ -49,31 +64,9 @@ forceRead = \case []        -> error "no parse"
 -- The refine force is safe under the assumption that Haskell constructor names
 -- are UTF-8 with no null bytes allowed. I haven't confirmed that, but I'm
 -- fairly certain.
-cSumTagNullTerm :: String -> AsByteString 'C
+cSumTagNullTerm :: String -> NullTerminated B.ByteString
 cSumTagNullTerm = reallyUnsafeRefine . Text.encodeUtf8 . Text.pack
 
 -- | Default generic derivation configuration, using 'cSumTagNullTerm'.
-cDef :: Cfg (AsByteString 'C)
+cDef :: Cfg (NullTerminated B.ByteString)
 cDef = cfg cSumTagNullTerm
-
--- | Special generic derivation configuration you may use for non-sum data
---   types.
---
--- When generically deriving binrep instances for a non-sum type, you may like
--- to ignore sum tag handling. You could use 'cDef', but this will silently
--- change behaviour if your type becomes a sum type. This configuration will
--- generate clear runtime errors when used with a sum type.
---
--- By selecting 'Void' for the sum tag type, consumption actions (serializing,
--- getting length in bytes) will runtime error, while generation actions
--- (parsing) will hit the 'Void' instance first and always safely error out.
-cNoSum :: Cfg Void
-cNoSum = cfg $ \_ -> throw EDerivedSumInstanceWithNonSumCfg
-
--- This indirection enables us to test for this precise exception being thrown
--- in an incorrect configuration! Awesome!
-data EDerivedSumInstanceWithNonSumCfg = EDerivedSumInstanceWithNonSumCfg
-instance Show EDerivedSumInstanceWithNonSumCfg where
-    show EDerivedSumInstanceWithNonSumCfg =
-        "Binrep.Generic.cNoSum: non-sum generic derivation configuration used with a sum type"
-instance Exception EDerivedSumInstanceWithNonSumCfg

@@ -1,11 +1,7 @@
-{-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE UndecidableInstances #-} -- for weirder type families
 
 {- | Magic numbers (also just magic): short constant bytestrings usually
      found at the top of a file, often used as an early sanity check.
-
-TODO unassociated type fams bad (maybe). turn into class -- and turn the reifier
-into a default method! (TODO think about this)
 
 There are two main flavors of magics:
 
@@ -28,22 +24,19 @@ module Binrep.Type.Magic where
 
 import Binrep
 import Binrep.Type.Byte
+import FlatParse.Basic qualified as FP
 
 import GHC.TypeLits
-import Data.ByteString qualified as B
-import FlatParse.Basic qualified as FP
 
 import GHC.Generics ( Generic )
 import Data.Data ( Data )
 
-import Mason.Builder qualified as Mason
-
 import Strongweak
 
--- | An empty data type representing a magic number (a constant bytestring) via
---   a phantom type.
+-- | A singleton data type representing a "magic number" (a constant bytestring)
+--   via a phantom type.
 --
--- The phantom type variable unambiguously defines a short, constant bytestring.
+-- The phantom type variable unambiguously defines a constant bytestring.
 -- A handful of types are supported for using magics conveniently, e.g. for pure
 -- ASCII magics, you may use a 'Symbol' type-level string.
 data Magic (a :: k) = Magic
@@ -54,25 +47,35 @@ data Magic (a :: k) = Magic
 --   origins.
 instance Weaken (Magic a) where
     type Weak (Magic a) = ()
-    weaken _ = ()
+    weaken Magic = ()
 
 -- | Strengthen the unit to some 'Magic a'.
 instance Strengthen (Magic a) where
-    strengthen _ = pure Magic
+    strengthen () = pure Magic
 
-instance (KnownNat (Length (MagicBytes a))) => BLen (Magic a) where
-    type CBLen (Magic a) = Length (MagicBytes a)
+instance IsCBLen (Magic a) where type CBLen (Magic a) = Length (MagicBytes a)
+deriving via CBLenly (Magic a) instance
+    KnownNat (Length (MagicBytes a)) => BLen (Magic a)
 
 instance (bs ~ MagicBytes a, ReifyBytes bs) => Put (Magic a) where
     put Magic = reifyBytes @bs
 
-instance (bs ~ MagicBytes a, ReifyBytes bs) => Get (Magic a) where
+instance (bs ~ MagicBytes a, ReifyBytes bs, KnownNat (Length bs))
+  => Get (Magic a) where
+    -- TODO silly optimization: we _could_ skip comparing BS lengths because we
+    -- know they have to be the same. lmao
     get = do
-        let expected = Mason.toStrictByteString $ reifyBytes @bs
-        actual <- FP.takeBs $ B.length expected
+        actual <- FP.take (blen magic)
         if   actual == expected
         then pure Magic
         else eBase $ EExpected expected actual
+      where
+        expected = runPut magic
+        magic = Magic :: Magic a
+
+type family Length (a :: [k]) :: Natural where
+    Length '[]       = 0
+    Length (a ': as) = 1 + Length as
 
 {-
 I do lots of functions on lists, because they're structurally simple. But you

@@ -1,12 +1,12 @@
 name: binrep
-version: 0.3.1
+version: 1.0.0
 synopsis: Encode precise binary representations directly in types
 description: Please see README.md.
 extra-source-files:
 - README.md
 - CHANGELOG.md
 category: Data, Serialization
-tested-with: GHC ==9.2.4
+tested-with: GHC ==9.4.4
 license: MIT
 license-file: LICENSE
 
@@ -53,18 +53,18 @@ ghc-options:
 
 dependencies:
 - base >= 4.14 && < 5
-- bytestring ^>= 0.11
-- refined >= 0.7 && < 0.9
-- aeson ^>= 2.0 # because we use refined which uses it (also for HexByteString)
-- text >= 1.2 && < 2.1
-- either ^>= 5.0.1.1
-- megaparsec ^>= 9.2.0 # for HexByteString
+- flatparse ^>= 0.4.0.1
+- parser-combinators ^>= 1.3.0
 - mason ^>= 0.2.5
+- bytestring ^>= 0.11
+- strongweak ^>= 0.3.1
+- refined >= 0.7 && < 0.9
+- text ^>= 2
 - vector-sized ^>= 1.5.0
 - vector ^>= 0.12.3.1
-- strongweak ^>= 0.3.1
 - either ^>= 5.0.1.1
-- flatparse ^>= 0.3.5.0
+- megaparsec ^>= 9.2.0 # for HexByteString
+- aeson >= 2.0 && < 2.2 # because we use refined which uses it (also for HexByteString)
 
 library:
   source-dirs: src
@@ -94,3 +94,13 @@ when:
   - text-icu >= 0.7.0.0 && < 0.9
   cpp-options:
   - -DHAVE_ICU
+
+benchmarks:
+  bench:
+    source-dirs: bench
+    main: Main.hs
+    dependencies:
+    - binrep
+    - gauge
+    ghc-options:
+    - -O2

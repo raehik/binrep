@@ -1,157 +1,115 @@
-{-# LANGUAGE UndecidableInstances #-}
+-- | "Machine" integers: sized integers & naturals with explicit endianness type
+--   tags for serialization.
 
-{- TODO can I replace this with a closed newtype family?? idk if I even want to
-    it's just this is clumsy to use sometimes
--}
+{-# LANGUAGE CPP #-} -- for host endianness checking
+{-# LANGUAGE UndecidableInstances #-} -- for convenient type level arithmetic
 
 module Binrep.Type.Int where
 
 import Binrep
+import Bytezap.Poke.Int qualified as BZ
+import FlatParse.Basic qualified as FP
+
 import Binrep.Type.Common ( Endianness(..) )
 import Strongweak
 
 import Data.Word
 import Data.Int
 import Data.Aeson
-import FlatParse.Basic qualified as FP
-import Mason.Builder qualified as Mason
 
 import GHC.Generics ( Generic )
-import Data.Data ( Typeable, Data )
+import Data.Data ( Data )
 import GHC.TypeNats
 
--- | Wrapper type grouping machine integers (sign, size) along with an explicit
---   endianness.
---
--- The internal representation is selected via a type family to correspond to
--- the relevant Haskell data type, so common overflow behaviour should match.
--- We derive lots of handy instances, so you may perform regular arithmetic on
--- pairs of these types. For example:
---
--- >>> 255 + 1 :: I 'U 'I1 e
--- 0
---
--- >>> 255 + 1 :: I 'U 'I2 e
--- 256
-newtype I (sign :: ISign) (size :: ISize) (e :: Endianness)
-  = I { getI :: IRep sign size }
-    deriving stock (Generic)
-
-deriving instance (Data (IRep sign size), Typeable sign, Typeable size, Typeable e) => Data (I sign size e)
-deriving via (IRep sign size) instance Show     (IRep sign size) => Show     (I sign size e)
-
--- Steal various numeric instances from the representation types.
-deriving via (IRep sign size) instance Eq       (IRep sign size) => Eq       (I sign size e)
-deriving via (IRep sign size) instance Ord      (IRep sign size) => Ord      (I sign size e)
-deriving via (IRep sign size) instance Bounded  (IRep sign size) => Bounded  (I sign size e)
-deriving via (IRep sign size) instance Num      (IRep sign size) => Num      (I sign size e)
-deriving via (IRep sign size) instance Real     (IRep sign size) => Real     (I sign size e)
-deriving via (IRep sign size) instance Enum     (IRep sign size) => Enum     (I sign size e)
-deriving via (IRep sign size) instance Integral (IRep sign size) => Integral (I sign size e)
-
--- | Unsigned machine integers can be idealized as naturals.
-instance (irep ~ IRep 'U size, Integral irep) => Weaken (I 'U size end) where
-    type Weak (I 'U size end) = Natural
-    weaken = fromIntegral
-instance (irep ~ IRep 'U size, Integral irep, Bounded irep, Show irep, Typeable size, Typeable end)
-  => Strengthen (I 'U size end) where
-      strengthen = strengthenBounded
-
--- | Signed machine integers can be idealized as integers.
-instance (irep ~ IRep 'S size, Integral irep) => Weaken (I 'S size end) where
-    type Weak (I 'S size end) = Integer
-    weaken = fromIntegral
-instance (irep ~ IRep 'S size, Integral irep, Bounded irep, Show irep, Typeable size, Typeable end)
-  => Strengthen (I 'S size end) where
-      strengthen = strengthenBounded
+import Binrep.Via ( Binreply(..) )
 
 -- | Machine integer sign.
+--
+-- Signed integers use two's complement for representation.
 data ISign
-  = S -- ^   signed
-  | U -- ^ unsigned
+  = U -- ^ unsigned
+  | I -- ^   signed (two's complement)
     deriving stock (Generic, Data, Show, Eq)
 
--- | Machine integer size in number of bytes.
-data ISize = I1 | I2 | I4 | I8
-    deriving stock (Generic, Data, Show, Eq)
+-- | A type tagged with the endianness (byte order) to use when serializing.
+--
+-- Intended to be used to wrap existing types which do not otherwise expose
+-- endianness, namely the machine integers 'Int32', 'Word64' etc. As such, it
+-- derives various relevant type classes using the wrapped type.
+--
+-- May be considered a restricted 'Data.Tagged.Tagged' (from the @tagged@
+-- package).
+newtype Endian (end :: Endianness) a = Endian
+    { -- | Discard endianness information.
+      unEndian :: a }
+    deriving stock (Generic, Data, Show)
+    deriving (Eq, Ord, Bounded, Num, Enum, Real, Integral, IsCBLen, BLen, Weaken, Strengthen, ToJSON, FromJSON) via a
+
+-- | Endianness doesn't matter for single bytes.
+deriving via Binreply Word8 instance Put (Endian end Word8)
+
+-- | Endianness doesn't matter for single bytes.
+deriving via Binreply Word8 instance Get (Endian end Word8)
+
+-- | Endianness doesn't matter for single bytes.
+deriving via Binreply  Int8 instance Put (Endian end  Int8)
+
+-- | Endianness doesn't matter for single bytes.
+deriving via Binreply  Int8 instance Get (Endian end  Int8)
+
+{- 2023-02-01 raehik:
+byteswapping should be faster than poking "backwards" byte by byte. confirmed
+with nikita-volkov's ptr-poker package via benchmarks (single operation ~2%
+faster) and inspecting disassembly (byteswapX is inlined at the assembly level
+as BSWAP, byte by byte takes lots of MOVs and SHRs)
+
+2023-02-18 raehik: this change is applied to nikita-volkov's ptr-poker pkg :)
+-}
+
+instance Put (Endian 'LE Word16) where put = BZ.w16le . unEndian
+instance Get (Endian 'LE Word16) where get = Endian <$> cutEBase FP.anyWord16le (ERanOut 2)
+instance Put (Endian 'BE Word16) where put = BZ.w16be . unEndian
+instance Get (Endian 'BE Word16) where get = Endian <$> cutEBase FP.anyWord16be (ERanOut 2)
+
+instance Put (Endian 'LE Word32) where put = BZ.w32le . unEndian
+instance Get (Endian 'LE Word32) where get = Endian <$> cutEBase FP.anyWord32le (ERanOut 4)
+instance Put (Endian 'BE Word32) where put = BZ.w32be . unEndian
+instance Get (Endian 'BE Word32) where get = Endian <$> cutEBase FP.anyWord32be (ERanOut 4)
+
+instance Put (Endian 'LE Word64) where put = BZ.w64le . unEndian
+instance Get (Endian 'LE Word64) where get = Endian <$> cutEBase FP.anyWord64le (ERanOut 8)
+instance Put (Endian 'BE Word64) where put = BZ.w64be . unEndian
+instance Get (Endian 'BE Word64) where get = Endian <$> cutEBase FP.anyWord64be (ERanOut 8)
+
+instance Put (Endian 'LE Int16) where put = BZ.i16le . unEndian
+instance Get (Endian 'LE Int16) where get = Endian <$> cutEBase FP.anyInt16le (ERanOut 2)
+instance Put (Endian 'BE Int16) where put = BZ.i16be . unEndian
+instance Get (Endian 'BE Int16) where get = Endian <$> cutEBase FP.anyInt16be (ERanOut 2)
+
+instance Put (Endian 'LE Int32) where put = BZ.i32le . unEndian
+instance Get (Endian 'LE Int32) where get = Endian <$> cutEBase FP.anyInt32le (ERanOut 4)
+instance Put (Endian 'BE Int32) where put = BZ.i32be . unEndian
+instance Get (Endian 'BE Int32) where get = Endian <$> cutEBase FP.anyInt32be (ERanOut 4)
+
+instance Put (Endian 'LE Int64) where put = BZ.i64le . unEndian
+instance Get (Endian 'LE Int64) where get = Endian <$> cutEBase FP.anyInt64le (ERanOut 8)
+instance Put (Endian 'BE Int64) where put = BZ.i64be . unEndian
+instance Get (Endian 'BE Int64) where get = Endian <$> cutEBase FP.anyInt64be (ERanOut 8)
 
 -- | Grouping for matching a signedness and size to a Haskell integer data type.
-type family IRep (sign :: ISign) (size :: ISize) where
-    IRep 'U 'I1 = Word8
-    IRep 'S 'I1 =  Int8
-    IRep 'U 'I2 = Word16
-    IRep 'S 'I2 =  Int16
-    IRep 'U 'I4 = Word32
-    IRep 'S 'I4 =  Int32
-    IRep 'U 'I8 = Word64
-    IRep 'S 'I8 =  Int64
+type family IRep (isign :: ISign) (isize :: Natural) where
+    IRep 'U 8 = Word8
+    IRep 'I 8 =  Int8
+    IRep 'U 16 = Word16
+    IRep 'I 16 =  Int16
+    IRep 'U 32 = Word32
+    IRep 'I 32 =  Int32
+    IRep 'U 64 = Word64
+    IRep 'I 64 =  Int64
 
--- Also steal Aeson instances. The parser applies bounding checks appropriately.
-deriving via (IRep sign size) instance ToJSON   (IRep sign size) => ToJSON   (I sign size e)
-deriving via (IRep sign size) instance FromJSON (IRep sign size) => FromJSON (I sign size e)
-
-instance KnownNat (CBLen (I sign size end)) => BLen (I sign size end) where
-    type CBLen (I sign size end) = CBLen (IRep sign size)
-
-instance Put (I 'U 'I1 e) where put = put . getI
-instance Get (I 'U 'I1 e) where get = I <$> get
-instance Put (I 'S 'I1 e) where put = put . getI
-instance Get (I 'S 'I1 e) where get = I <$> get
-
-instance Put (I 'U 'I2 'BE) where put (I i) = Mason.word16BE i
-instance Get (I 'U 'I2 'BE) where get = I <$> cutEBase FP.anyWord16be (ERanOut 2)
-instance Put (I 'U 'I2 'LE) where put (I i) = Mason.word16LE i
-instance Get (I 'U 'I2 'LE) where get = I <$> cutEBase FP.anyWord16le (ERanOut 2)
-instance Put (I 'S 'I2 'BE) where put (I i) = Mason.int16BE i
-instance Get (I 'S 'I2 'BE) where get = I <$> cutEBase FP.anyInt16be  (ERanOut 2)
-instance Put (I 'S 'I2 'LE) where put (I i) = Mason.int16LE i
-instance Get (I 'S 'I2 'LE) where get = I <$> cutEBase FP.anyInt16le  (ERanOut 2)
-
-instance Put (I 'U 'I4 'BE) where put (I i) = Mason.word32BE i
-instance Get (I 'U 'I4 'BE) where get = I <$> cutEBase FP.anyWord32be (ERanOut 4)
-instance Put (I 'U 'I4 'LE) where put (I i) = Mason.word32LE i
-instance Get (I 'U 'I4 'LE) where get = I <$> cutEBase FP.anyWord32le (ERanOut 4)
-instance Put (I 'S 'I4 'BE) where put (I i) = Mason.int32BE i
-instance Get (I 'S 'I4 'BE) where get = I <$> cutEBase FP.anyInt32be  (ERanOut 4)
-instance Put (I 'S 'I4 'LE) where put (I i) = Mason.int32LE i
-instance Get (I 'S 'I4 'LE) where get = I <$> cutEBase FP.anyInt32le  (ERanOut 4)
-
-instance Put (I 'U 'I8 'BE) where put (I i) = Mason.word64BE i
-instance Get (I 'U 'I8 'BE) where get = I <$> cutEBase FP.anyWord64be (ERanOut 8)
-instance Put (I 'U 'I8 'LE) where put (I i) = Mason.word64LE i
-instance Get (I 'U 'I8 'LE) where get = I <$> cutEBase FP.anyWord64le (ERanOut 8)
-instance Put (I 'S 'I8 'BE) where put (I i) = Mason.int64BE i
-instance Get (I 'S 'I8 'BE) where get = I <$> cutEBase FP.anyInt64be  (ERanOut 8)
-instance Put (I 'S 'I8 'LE) where put (I i) = Mason.int64LE i
-instance Get (I 'S 'I8 'LE) where get = I <$> cutEBase FP.anyInt64le  (ERanOut 8)
-
--- | Shortcut.
-type family IMax (sign :: ISign) (size :: ISize) :: Natural where
-    IMax sign size = MaxBound (IRep sign size)
-
--- | Restricted reflected version of @maxBound@.
+-- | Largest representable value for a machine integer made of @n@ bits.
 --
--- For machine integer types: @max k = 2^(8k-1) - 1@
-type family MaxBound w :: Natural where
-    MaxBound Word8  = 2^(8*1   ) -1
-    MaxBound  Int8  = 2^(8*1 -1) -1
-    MaxBound Word16 = 2^(8*2   ) -1
-    MaxBound  Int16 = 2^(8*2 -1) -1
-    MaxBound Word32 = 2^(8*4   ) -1
-    MaxBound  Int32 = 2^(8*4 -1) -1
-    MaxBound Word64 = 2^(8*8   ) -1
-    MaxBound  Int64 = 2^(8*8 -1) -1
-
--- | Restricted reflected version of @minBound@.
---
--- For machine integer types: @min k = - (2^(8k-1))@ -- then make sure to negate
--- when reifying!
-type family MinBound w :: Natural where
-    MinBound Word8  = 2^(8*1   ) -1
-    MinBound  Int8  = 2^(8*1 -1) -1
-    MinBound Word16 = 2^(8*2   ) -1
-    MinBound  Int16 = 2^(8*2 -1) -1
-    MinBound Word32 = 2^(8*4   ) -1
-    MinBound  Int32 = 2^(8*4 -1) -1
-    MinBound Word64 = 2^(8*8   ) -1
-    MinBound  Int64 = 2^(8*8 -1) -1
+-- If signed ''I', twos complement is used, so negative range has 1 extra value.
+type family IMax (isign :: ISign) (n :: Natural) :: Natural where
+    IMax 'U n = 2^n-1
+    IMax 'I n = 2^(n-1)
