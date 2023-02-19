@@ -1,3 +1,12 @@
+{- TODO 2023-02-15 raehik
+Encoding shouldn't change to a bytestring, for efficiency. Due to convenient
+representations, we can efficiently serialize a Text directly to a builder,
+skipping intermediate ByteString conversion.
+
+Hm. Maybe that means it should be changed to the builder. What does that mean
+for decoding?
+-}
+
 module Binrep.Type.Text
   ( AsText
   , Encode(..), encode, encodeToRep
@@ -12,8 +21,6 @@ module Binrep.Type.Text
   ) where
 
 import Binrep.Type.Text.Internal
-
-import Binrep.Type.ByteString qualified
 
 import Refined
 
@@ -39,7 +46,7 @@ encode = encode' @enc . unrefine
 -- >>> :t bs
 -- bs :: Refined 'C Bytes
 encodeToRep
-    :: forall (rep :: Binrep.Type.ByteString.Rep) enc
+    :: forall rep enc
     .  (Encode enc, Predicate rep Bytes)
     => AsText enc
     -> Either RefineException (Refined rep Bytes)

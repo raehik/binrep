@@ -1,37 +1,41 @@
--- | Static-length data via null-padding.
---
--- For null-terminated strings, see 'Binrep.Type.ByteString'.
-
 {-# LANGUAGE OverloadedStrings #-}
 
 module Binrep.Type.NullPadded where
 
 import Binrep
+import Bytezap.Bytes qualified as BZ
+import FlatParse.Basic qualified as FP
+import Control.Monad.Combinators qualified as Monad
+
 import Binrep.Util ( tshow )
 
 import Refined
 import Refined.Unsafe
+import Data.Typeable ( typeRep )
 
 import GHC.TypeNats
-import Data.Typeable ( typeRep )
-import FlatParse.Basic qualified as FP
-import Mason.Builder qualified as Mason
-import Data.ByteString qualified as BS
+import Util.TypeNats ( natValInt )
 
 data NullPad (n :: Natural)
 
 -- | A type which is to be null-padded to a given total length.
 --
--- Given some @'NullPadded' n a@ term @x@, it is guaranteed that
+-- Given some @a :: 'NullPadded' n a@, it is guaranteed that
 --
---     blen x <= typeNatToBLen @n
+-- @
+-- 'blen' a '<=' 'natValInt' \@n
+-- @
+--
+-- thus
+--
+-- @
+-- 'natValInt' \@n '-' 'blen' a '>=' 0
+-- @
 --
 -- That is, the serialized stored data will not be longer than the total length.
+--
+-- The binrep instances are careful not to construct bytestrings unnecessarily.
 type NullPadded n a = Refined (NullPad n) a
-
-instance KnownNat n => BLen (NullPadded n a) where
-    -- | The size of some null-padded data is known - at compile time!
-    type CBLen (NullPadded n a) = n
 
 instance (BLen a, KnownNat n) => Predicate (NullPad n) a where
     validate p a
@@ -40,39 +44,22 @@ instance (BLen a, KnownNat n) => Predicate (NullPad n) a where
           = throwRefineOtherException (typeRep p) $
                    "too long: " <> tshow len <> " > " <> tshow n
       where
-        n = typeNatToBLen @n
+        n = natValInt @n
         len = blen a
 
-instance (Put a, BLen a, KnownNat n) => Put (NullPadded n a) where
-    put npa = put a <> Mason.byteString paddingBs
+instance (BLen a, Put a, KnownNat n) => Put (NullPadded n a) where
+    put ra = put a <> BZ.pokeByteReplicate paddingLen 0x00
       where
-        paddingBs = BS.replicate (blenToPosInt paddingLength) 0x00
-        -- note that regular subtraction is legal here because we have a
-        -- guarantee that @blen a <= n@. this is safe subtraction of naturals!
-        paddingLength = n - blen a
-        n = typeNatToBLen @n
-        a = unrefine npa
+        a = unrefine ra
+        paddingLen = natValInt @n - blen a
+        -- ^ refinement guarantees >=0
 
--- | Safety: we assert actual length is within expected length (in order to
---   calculate how much padding to parse).
---
--- Note that the consumer probably doesn't care about the content of the
--- padding, just that the data is chunked correctly. I figure we care about
--- correctness here, so it'd be nice to know about the padding well-formedness
--- (i.e. that it's all nulls).
---
--- TODO: there is a possible clearer definition via isolate.
-instance (Get a, BLen a, KnownNat n) => Get (NullPadded n a) where
+instance (BLen a, Get a, KnownNat n) => Get (NullPadded n a) where
     get = do
         a <- get
-        let len = blen a
-        case n `safeBLenSub` len of
-          Nothing -> eBase $ EOverlong n len
-          Just nullStrLen -> do
-            let nullStrLen' = blenToPosInt nullStrLen
-            paddingBs <- FP.takeBs nullStrLen'
-            let expectedPaddingBs = BS.replicate nullStrLen' 0x00
-            if   paddingBs == expectedPaddingBs
-            then pure $ reallyUnsafeRefine a
-            else eBase $ EExpected expectedPaddingBs paddingBs
-      where n = typeNatToBLen @n
+        let paddingLen = natValInt @n - blen a
+        if   paddingLen < 0
+        then eBase $ EFailNamed "TODO used to be EOverlong, cba"
+        else do
+            Monad.skipCount paddingLen (FP.word8 0x00)
+            pure $ reallyUnsafeRefine a

@@ -1,4 +1,34 @@
 # To-dos
+## Intermediate types should use the bytestring builder type, not a bytestring
+Saves on allocations if you're just gonna serialize. Specifically, the text
+modules probably want this. Not sure how to do it exactly to retain maximum
+soundness.
+
+This might be a big change. I need to check aeson's design more thoroughly, it'd
+look like the `Encoding` stuff.
+
+2023-02-19: No, actually, I think this is a Text-unique thing, and they just
+need some extra definitions.
+
+## Serialize with bytezap
+All change!
+
+## ~Special static parser like peeky-blinders~
+How about
+
+```haskell
+newtype Peek a = Addr# -> State# RealWorld -> (# State# RealWorld, a, Addr# #)
+```
+
+The problem is that it's just a shitty flatparse, where all you can do is march
+on forward. No errors other than the length check at the start (which is
+separate, handled by `CBLen`). Which is sad, because the fancy parsing is a
+feature of binrep. Sure, I could replace the low-level parsers with this
+peeky-blinders-style parser, but then I lose the error handling.
+
+Changing this ever so slightly to support more features simply ends up
+approximating flatparse, which is stupid. No, I'm settled: flatparse-only, baby.
+
 ## Octet instead of byte?
 Is it better to refer to octets instead of bytes? An octet is always 8 bits,
 while a byte is kind of "not necessarily".

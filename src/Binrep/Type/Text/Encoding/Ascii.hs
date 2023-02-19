@@ -13,6 +13,10 @@ import Data.Char qualified as Char
 import Data.Text qualified as Text
 import Data.Text ( Text )
 
+import Data.Text.Encoding qualified as Text
+import Control.Exception qualified
+import System.IO.Unsafe qualified
+
 -- | 7-bit
 data Ascii
 
@@ -23,10 +27,20 @@ instance Encode Ascii where encode' = encode' @Utf8
 -- TODO can I give some compile time warning about this instance missing on
 -- below text-2.0?? would be cool
 #if MIN_VERSION_text(2,0,0)
-instance Decode Ascii where decode = decodeText $ wrapUnsafeDecoder Text.decodeASCII
+-- TODO 2023-01-26 raehik: awful UX by text. hopefully safe lol?? works at least
+instance Decode Ascii where decode = decodeText id $ catchErrorCall Text.decodeASCII
 #endif
 
+catchErrorCall :: (a -> b) -> a -> Either String b
+catchErrorCall f a = System.IO.Unsafe.unsafeDupablePerformIO $ do
+    Control.Exception.try @Control.Exception.ErrorCall (Control.Exception.evaluate (f a)) >>= \case
+      Right b -> pure $ Right b
+      Left  (Control.Exception.ErrorCallWithLocation msg _) -> pure $ Left msg
+
 -- | 'Text' must be validated if you want to permit 7-bit ASCII only.
+--
+-- TODO there should be a MUCH faster check here in text-2.0. text-short has it,
+-- text doesn't yet. see: https://github.com/haskell/text/issues/496
 instance Predicate Ascii Text where
     validate p t = if   Text.all Char.isAscii t
                    then success

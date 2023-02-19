@@ -1,46 +1,38 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    flake-parts.url = "github:hercules-ci/flake-parts";
+    #nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    #flake-parts.url = "github:hercules-ci/flake-parts";
     haskell-flake.url = "github:srid/haskell-flake";
   };
-  outputs = inputs@{ self, nixpkgs, flake-parts, ... }:
+  outputs = inputs@{ nixpkgs, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = nixpkgs.lib.systems.flakeExposed;
       imports = [ inputs.haskell-flake.flakeModule ];
-
       perSystem = { self', pkgs, ... }: {
-
-        # Typically, you just want a single project named "default". But
-        # multiple projects are also possible, each using different GHC version.
         haskellProjects.default = {
-          # If you have a .cabal file in the root, this option is determined
-          # automatically. Otherwise, specify all your local packages here.
-          # packages.example.root = ./.;
-
-          # The base package set representing a specific GHC version.
-          # By default, this is pkgs.haskellPackages.
-          # You may also create your own. See https://haskell.flake.page/package-set
-          # basePackages = pkgs.haskellPackages;
-
-          # Dependency overrides go here. See https://haskell.flake.page/dependency
-          # source-overrides = { };
-          # overrides = self: super: { };
-
-          # devShell = {
-          #  # Enabled by default
-          #  enable = true;  
-          #
-          #  # Programs you want to make available in the shell.
-          #  # Default programs can be disabled by setting to 'null'
-          #  tools = hp: { fourmolu = hp.fourmolu; ghcid = null; };
-          #
-          #  hlsCheck.enable = true;
-          # };
+          #haskellPackages = pkgs.haskell.packages.ghc925;
+          haskellPackages = pkgs.haskell.packages.ghc944;
+          packages = {
+            binrep.root = ./.;
+          };
+          # nix hls, ghcid breaks on 9.4
+          buildTools = _: { haskell-language-server = null; ghcid = null; hlint
+        = null; };
+          overrides = self: super: {
+            hspec-smallcheck = super.hspec-smallcheck_0_5_3;
+            mason = super.mason_0_2_6;
+            flatparse = self.callCabal2nix "flatparse" (pkgs.fetchFromGitHub {
+              owner = "AndrasKovacs";
+              repo = "flatparse";
+              rev = "d96616b7abdf78f064f775c47d218c4721daa38c";
+              sha256 = "eO4L+QTsn+HbawjJO2j/EJag62OKMH/PzbcyZJKEbu0=";
+            }) {};
+          };
+          # hlintCheck.enable = true;
+          # hlsCheck.enable = true;
         };
-
         # haskell-flake doesn't set the default package, but you can do it here.
-        packages.default = self'.packages.binrep;
+        #packages.default = self'.packages.my-package;
       };
     };
 }

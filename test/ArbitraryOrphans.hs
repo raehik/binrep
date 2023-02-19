@@ -1,10 +1,11 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-{-# LANGUAGE UndecidableInstances #-}
 
 module ArbitraryOrphans() where
 
 import Test.QuickCheck ( Arbitrary )
-import Binrep.Type.Int ( I(..), IRep )
+import Binrep.Type.Int
+import Data.Kind
 
--- | Machine integers steal their underlying representation's instance.
-deriving via (IRep sign size) instance Arbitrary (IRep sign size) => Arbitrary (I sign size e)
+-- TODO 2023-01-26 raehik: why does the following crash GHC
+deriving via (a :: Type) instance Arbitrary a => Arbitrary (Endian end a)
+--deriving newtype instance Arbitrary a => Arbitrary (Endian end a)

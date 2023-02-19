@@ -5,6 +5,6 @@ import Data.Data ( Data )
 
 -- | Byte order.
 data Endianness
-  = BE -- ^    big endian, MSB first. e.g. most network protocols
-  | LE -- ^ little endian, MSB last.  e.g. most processor architectures
+  = LE -- ^ little endian, MSB last.  e.g. most processor architectures
+  | BE -- ^    big endian, MSB first. e.g. most network protocols
     deriving stock (Generic, Data, Show, Eq)
