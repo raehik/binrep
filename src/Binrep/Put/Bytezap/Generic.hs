@@ -25,6 +25,7 @@ module Binrep.Put.Bytezap.Generic where
 import GHC.Generics
 import GHC.TypeError ( TypeError )
 import Util.Generic ( conName' )
+import Binrep.Util.Class
 import Binrep.Util.Generic
 
 import Bytezap ( Poke )
@@ -59,7 +60,7 @@ instance TypeError EUnexpectedNonSum => GPutDSum (C1 c f) where
     gputDSum = undefined
 
 -- | Refuse to derive an instance for an empty data type.
-instance TypeError ERefuseEmpty => GPutDSum V1 where
+instance TypeError ENoEmpty => GPutDSum V1 where
     gputDSum = undefined
 
 -- | Generic putter (constructor sum level).
@@ -103,5 +104,5 @@ instance GPutC f => GPutDNonSum (C1 c f) where
     gputDNonSum (M1 a) = gputC a
 
 -- | Refuse to derive an instance for an empty data type.
-instance TypeError ERefuseEmpty => GPutDNonSum V1 where
+instance TypeError ENoEmpty => GPutDNonSum V1 where
     gputDNonSum = undefined

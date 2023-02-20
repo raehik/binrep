@@ -19,6 +19,7 @@ module Binrep.Get.Flatparse.Generic where
 import GHC.Generics
 import GHC.TypeError ( TypeError )
 import Util.Generic ( datatypeName', conName', selName'' )
+import Binrep.Util.Class
 import Binrep.Util.Generic
 import Data.Text ( Text )
 import Binrep.Get.Flatparse
@@ -80,7 +81,7 @@ instance TypeError EUnexpectedNonSum => GGetDSum' cd (C1 cc f) where
     ggetDSum' = undefined
 
 -- | Refuse to derive an instance for an empty data type.
-instance TypeError ERefuseEmpty => GGetDSum' cd V1 where
+instance TypeError ENoEmpty => GGetDSum' cd V1 where
     ggetDSum' = undefined
 
 -- | Generic getter (constructor sum level).
@@ -153,5 +154,5 @@ instance GGetC cd cc 0 f => GGetDNonSum' cd (C1 cc f) where
     ggetDNonSum' = M1 <$> ggetC @cd @cc @0
 
 -- | Refuse to derive an instance for an empty data type.
-instance TypeError ERefuseEmpty => GGetDNonSum' cd V1 where
+instance TypeError ENoEmpty => GGetDNonSum' cd V1 where
     ggetDNonSum' = undefined

@@ -1,17 +1,24 @@
-module Binrep.Put.Bytezap where
+{-# LANGUAGE UndecidableInstances #-} -- for 'TypeError'
 
-import Binrep.BLen.Simple
+module Binrep.Put.Bytezap where
 
 import Bytezap
 import Bytezap.Poke.Bytes
 import Bytezap.Poke.Int
+import Data.ByteString qualified as B
+import Binrep.BLen.Simple
+
+import Binrep.Util.Class
+import GHC.TypeError
 
 import Data.Void
 import Data.Word
 import Data.Int
-import Data.ByteString qualified as B
 
 class Put a where put :: a -> Poke
+
+instance TypeError ENoEmpty => Put Void where put = undefined
+instance TypeError ENoSum => Put (Either a b) where put = undefined
 
 runPut :: (BLen a, Put a) => a -> B.ByteString
 runPut a = runPoke (blen a) (put a)
@@ -21,10 +28,6 @@ runPut a = runPoke (blen a) (put a)
 instance Put () where
     {-# INLINE put #-}
     put = mempty
-
-instance Put Void where
-    {-# INLINE put #-}
-    put = absurd
 
 instance (Put l, Put r) => Put (l, r) where
     {-# INLINE put #-}
