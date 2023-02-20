@@ -26,9 +26,13 @@ instance Put Void where
     {-# INLINE put #-}
     put = absurd
 
-instance Put Write where
+instance (Put l, Put r) => Put (l, r) where
     {-# INLINE put #-}
-    put = writePoke
+    put (l, r) = put l <> put r
+
+instance Put a => Put [a] where
+    {-# INLINE put #-}
+    put = mconcat . map put
 
 instance Put B.ByteString where
     {-# INLINE put #-}
@@ -41,3 +45,9 @@ instance Put Word8 where
 instance Put Int8  where
     {-# INLINE put #-}
     put = i8
+
+---
+
+instance Put Write where
+    {-# INLINE put #-}
+    put = writePoke
