@@ -18,7 +18,7 @@ import Util.TypeNats ( natValInt )
 
 -- | Essentially reflects a 'BLen' type to 'CBLen'.
 data Size (n :: Natural)
-type Sized n a = Refined (Size n) a
+type Sized n = Refined (Size n)
 
 instance (BLen a, KnownNat n) => Predicate (Size n) a where
     validate p a
