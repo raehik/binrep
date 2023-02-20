@@ -2,14 +2,11 @@
 {-# LANGUAGE UndecidableInstances #-} -- required for easier instances
 {-# LANGUAGE OverloadedStrings #-} -- for refined errors
 
-{- TODO
-  * Max () = 1?
--}
-
 module Binrep.Type.LengthPrefixed where
 
 import Binrep
 import FlatParse.Basic qualified as FP
+import Control.Monad.Combinators qualified as Monad
 
 import Binrep.Type.Int
 import Data.Vector.Sized ( Vector )
@@ -73,12 +70,24 @@ instance (Prefix pfx, Get pfx, Get a, GetLength a)
 
 -- TODO getcount instead? idk
 class GetLength a where getLength' :: Int -> Getter a
-instance GetLength B.ByteString where getLength' = FP.take
+instance GetLength B.ByteString where
+    {-# INLINE getLength' #-}
+    getLength' = FP.take
+instance Get a => GetLength [a] where
+    {-# INLINE getLength' #-}
+    getLength' n = Monad.count n get
 
+-- | Types which may be used as prefixes.
+--
+-- Generally, these will be integer types.
+--
+-- Note that this is separate to binary representation, so endianness is
+-- irrelevant.
 class Prefix a where
     type Max a :: Natural
 
-    -- | used by put. guaranteed that it fits from refined.
+    -- | used by put. guaranteed that it fits from refined. that is, lenToPfx <=
+    --   Max.
     lenToPfx :: Int -> a
 
     -- | used by get. better not lie.
@@ -93,15 +102,17 @@ class Prefix a where
 instance Prefix () where
     type Max () = 0
     lenToPfx 0 = ()
-    lenToPfx _ = error "() prefix somehow had non-empty data?? you fucked up."
+    lenToPfx _ = error "you lied to refine and broke everything :("
     pfxToLen () = 0
 
 -- I don't think @'Prefix' 'Void'@ is a sensible instance.
 
+-- "I'm not a (w)rapper"
 instance Prefix a => Prefix (Endian end a) where
     type Max (Endian end a) = Max a
     lenToPfx = Endian . lenToPfx
     pfxToLen = pfxToLen . unEndian
+
 instance Prefix Word8  where
     type Max Word8  = 2^8  - 1
     lenToPfx = fromIntegral

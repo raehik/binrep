@@ -37,7 +37,6 @@ blenGenericSum
     :: (Generic a, BLen.GBLenDSum (Rep a), BLen w) => Cfg w -> a -> Int
 blenGenericSum c = BLen.blenGenericSum (blen . cSumTag c)
 
-
 -- | Construct a binrep generic deriving config, filling out the relevant
 --   records using 'Eq' and 'Show'.
 cfg :: (Eq a, Show a) => (String -> a) -> Cfg a
