@@ -2,6 +2,11 @@
 {-# LANGUAGE UndecidableInstances #-} -- required for easier instances
 {-# LANGUAGE OverloadedStrings #-} -- for refined errors
 
+{- TODO 2023-02-20
+  * split into sizeprefix (Type) and lengthprefix (Type -> Type)
+  * better behaviour for lengthprefix, sizeprefix is a special case
+-}
+
 module Binrep.Type.LengthPrefixed where
 
 import Binrep
@@ -15,67 +20,86 @@ import GHC.TypeNats
 import Util.TypeNats ( natValInt )
 import Data.Word
 import Data.ByteString qualified as B
-import Refined hiding ( Weaken )
+import Refined hiding ( Weaken(..), strengthen )
 import Refined.Unsafe
+import Refined.Unsafe.Type
 
 import Data.Typeable ( Typeable, typeRep )
 import Data.List qualified as List
 
-class HasLength a where getLength :: a -> Int
-instance KnownNat n => HasLength (Vector n a) where getLength = V.length
-instance HasLength B.ByteString where getLength = B.length
-instance HasLength [a] where getLength = List.length
+import Data.Foldable qualified as Foldable
 
-class HasLength a => KnownLength a where type Length a :: Natural
-instance KnownNat n => KnownLength (Vector n a) where
-    type Length (Vector n a) = n
+import Strongweak
 
-data LengthPrefix pfx
-type LengthPrefixed pfx = Refined (LengthPrefix pfx)
+data CountPrefix pfx
+type CountPrefixed pfx = Refined (CountPrefix pfx)
 
-instance (HasLength a, KnownNat (Max pfx), Typeable pfx)
-  => Predicate (LengthPrefix pfx) a where
+instance (KnownNat (Max pfx), Foldable f, Typeable pfx)
+  => Predicate (CountPrefix pfx) (f a) where
     validate p a
-      | getLength a <= natValInt @(Max pfx) = Nothing
+      | Foldable.length a <= natValInt @(Max pfx) = Nothing
       | otherwise = throwRefineOtherException (typeRep p) $
           "thing too big for length prefix type"
 
--- compile time check
-lengthPrefix
-    :: forall pfx a
-    .  (Length a <= Max pfx)
-    => a -> LengthPrefixed pfx a
-lengthPrefix = reallyUnsafeRefine
-
 -- TODO no idea if this is sensible
-instance IsCBLen (LengthPrefixed pfx a) where
-    type CBLen (LengthPrefixed pfx a) = CBLen pfx + CBLen a
+instance IsCBLen (CountPrefixed pfx a) where
+    type CBLen (CountPrefixed pfx a) = CBLen pfx + CBLen a
 
-instance (Prefix pfx, HasLength a, BLen pfx, BLen a)
-  => BLen (LengthPrefixed pfx a) where
-    blen ra = blen (lenToPfx @pfx (getLength a)) + blen a
+instance (Prefix pfx, Foldable f, BLen pfx, BLen (f a))
+  => BLen (CountPrefixed pfx (f a)) where
+    blen ra = blen (lenToPfx @pfx (Foldable.length a)) + blen a
       where a = unrefine ra
 
-instance (Prefix pfx, HasLength a, Put pfx, Put a)
-  => Put (LengthPrefixed pfx a) where
-    put ra = put (lenToPfx @pfx (getLength a)) <> put a
+instance (Prefix pfx, Foldable f, Put pfx, Put (f a))
+  => Put (CountPrefixed pfx (f a)) where
+    put ra = put (lenToPfx @pfx (Foldable.length a)) <> put a
       where a = unrefine ra
 
-instance (Prefix pfx, Get pfx, Get a, GetLength a)
-  => Get (LengthPrefixed pfx a) where
+-- Fucking lol dude this is wicked
+class GetF f where getFCount :: Get a => Int -> Getter (f a)
+instance GetF [] where getFCount n = Monad.count n get
+
+-- Suck my nuts
+instance (Prefix pfx, GetF f, Get pfx, Get a)
+  => Get (CountPrefixed pfx (f a)) where
     get = do
         pfx <- get @pfx
-        a <- getLength' (pfxToLen pfx)
+        a <- getFCount (pfxToLen pfx)
         pure $ reallyUnsafeRefine a
 
--- TODO getcount instead? idk
-class GetLength a where getLength' :: Int -> Getter a
-instance GetLength B.ByteString where
-    {-# INLINE getLength' #-}
-    getLength' = FP.take
-instance Get a => GetLength [a] where
-    {-# INLINE getLength' #-}
-    getLength' n = Monad.count n get
+data SizePrefix pfx
+type SizePrefixed pfx = Refined (SizePrefix pfx)
+
+instance (KnownNat (Max pfx), BLen a, Typeable pfx)
+  => Predicate (SizePrefix pfx) a where
+    validate p a
+      | blen a <= natValInt @(Max pfx) = Nothing
+      | otherwise = throwRefineOtherException (typeRep p) $
+          "thing too big for length prefix type"
+
+-- TODO no idea if this is sensible
+instance IsCBLen (SizePrefixed pfx a) where
+    type CBLen (SizePrefixed pfx a) = CBLen pfx + CBLen a
+
+instance (Prefix pfx, BLen a, BLen pfx)
+  => BLen (SizePrefixed pfx a) where
+    blen ra = blen (lenToPfx @pfx (blen a)) + blen a
+      where a = unrefine ra
+
+instance (Prefix pfx, BLen a, Put pfx, Put a)
+  => Put (SizePrefixed pfx a) where
+    put ra = put (lenToPfx @pfx (blen a)) <> put a
+      where a = unrefine ra
+
+class GetSize a where getSize :: Int -> Getter a
+instance GetSize B.ByteString where getSize = FP.take
+
+instance (Prefix pfx, GetSize a, Get pfx)
+  => Get (CountPrefixed pfx a) where
+    get = do
+        pfx <- get @pfx
+        a <- getSize (pfxToLen pfx)
+        pure $ reallyUnsafeRefine a
 
 -- | Types which may be used as prefixes.
 --
@@ -83,6 +107,8 @@ instance Get a => GetLength [a] where
 --
 -- Note that this is separate to binary representation, so endianness is
 -- irrelevant.
+--
+-- TODO oops can't use 'Int's everywhere because of overflow :'( that's OK
 class Prefix a where
     type Max a :: Natural
 
