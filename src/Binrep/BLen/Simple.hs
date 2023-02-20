@@ -14,11 +14,16 @@ import Data.Void
 import Data.ByteString qualified as B
 import Data.Word
 import Data.Int
+import Bytezap ( Write(..) )
 
 class BLen a where blen :: a -> Int
 
 instance TypeError ENoEmpty => BLen Void where blen = undefined
 instance TypeError ENoSum => BLen (Either a b) where blen = undefined
+
+instance BLen Write where
+    {-# INLINE blen #-}
+    blen = writeSize
 
 -- | Unit type has length 0.
 instance BLen () where

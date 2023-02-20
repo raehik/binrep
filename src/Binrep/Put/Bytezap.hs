@@ -24,6 +24,10 @@ runPut :: (BLen a, Put a) => a -> B.ByteString
 runPut a = runPoke (blen a) (put a)
 {-# INLINE runPut #-}
 
+instance Put Write where
+    {-# INLINE put #-}
+    put = writePoke
+
 -- | Unit type serializes to nothing. How zen.
 instance Put () where
     {-# INLINE put #-}
@@ -48,9 +52,3 @@ instance Put Word8 where
 instance Put Int8  where
     {-# INLINE put #-}
     put = i8
-
----
-
-instance Put Write where
-    {-# INLINE put #-}
-    put = writePoke

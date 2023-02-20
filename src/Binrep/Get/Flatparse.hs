@@ -18,6 +18,8 @@ import GHC.TypeError
 import Data.Void
 import Data.Word
 import Data.Int
+import Bytezap
+import Bytezap.Bytes qualified as BZ
 
 import GHC.Generics ( Generic )
 
@@ -96,6 +98,18 @@ runGetter g bs = case FP.runParser g bs of
                    FP.OK a bs' -> Right (a, bs')
                    FP.Fail     -> Left $ EBase EFail
                    FP.Err e    -> Left e
+
+-- | TODO add a prim in flatparse
+instance Get Write where
+    {-# INLINE get #-}
+    get = BZ.byteString <$> FP.takeRest
+
+{-
+asdf :: (Getter (Int, Addr# -> IO ())) -> Getter Write
+asdf f = do
+    (size, poke) <- f
+    pure $ Write size (_ poke)
+-}
 
 -- | Unit type parses nothing.
 instance Get () where
