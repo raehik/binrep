@@ -55,7 +55,6 @@ dependencies:
 - base >= 4.14 && < 5
 - flatparse ^>= 0.4.0.1
 - parser-combinators ^>= 1.3.0
-- mason ^>= 0.2.5
 - bytestring ^>= 0.11
 - strongweak ^>= 0.3.1
 - refined >= 0.7 && < 0.9
