@@ -47,10 +47,12 @@ library
       Binrep.Type.Byte
       Binrep.Type.Common
       Binrep.Type.Int
-      Binrep.Type.LengthPrefixed
       Binrep.Type.Magic
       Binrep.Type.NullPadded
       Binrep.Type.NullTerminated
+      Binrep.Type.Prefix
+      Binrep.Type.Prefix.Count
+      Binrep.Type.Prefix.Size
       Binrep.Type.Sized
       Binrep.Type.Text
       Binrep.Type.Text.Encoding.Ascii
