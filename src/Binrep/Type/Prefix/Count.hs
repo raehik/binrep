@@ -1,6 +1,5 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE UndecidableInstances #-} -- required for easier instances
-{-# LANGUAGE OverloadedStrings #-} -- for refined errors
+{-# LANGUAGE UndecidableInstances #-} -- required for type-level stuff
+{-# LANGUAGE OverloadedStrings #-} -- required for refined errors
 
 module Binrep.Type.Prefix.Count where
 

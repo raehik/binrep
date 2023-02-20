@@ -1,11 +1,5 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE UndecidableInstances #-} -- required for easier instances
-{-# LANGUAGE OverloadedStrings #-} -- for refined errors
-
-{- TODO 2023-02-20
-  * split into sizeprefix (Type) and lengthprefix (Type -> Type)
-  * better behaviour for lengthprefix, sizeprefix is a special case
--}
+{-# LANGUAGE UndecidableInstances #-} -- required for type-level stuff
+{-# LANGUAGE OverloadedStrings #-} -- required for refined errors
 
 module Binrep.Type.Prefix.Size where
 
