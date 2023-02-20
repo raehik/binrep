@@ -1,28 +1,29 @@
-{-# LANGUAGE UndecidableInstances #-} -- for 'CBLenly'
+{-# LANGUAGE UndecidableInstances #-} -- for 'CBLenly', 'TypeError'
 {-# LANGUAGE AllowAmbiguousTypes #-} -- for 'cblen', 'natValInt'
 
 module Binrep.BLen.Simple where
 
 import Binrep.CBLen
-
 import GHC.TypeNats
 import Util.TypeNats ( natValInt )
+
+import Binrep.Util.Class
+import GHC.TypeError
+
+import Data.Void
+import Data.ByteString qualified as B
 import Data.Word
 import Data.Int
-import Data.ByteString qualified as B
-import Data.Void
 
 class BLen a where blen :: a -> Int
+
+instance TypeError ENoEmpty => BLen Void where blen = undefined
+instance TypeError ENoSum => BLen (Either a b) where blen = undefined
 
 -- | Unit type has length 0.
 instance BLen () where
     {-# INLINE blen #-}
     blen () = 0
-
--- | Uninhabited type can't be measured.
-instance BLen Void where
-    {-# INLINE blen #-}
-    blen = absurd
 
 -- | Sum tuples.
 instance (BLen l, BLen r) => BLen (l, r) where

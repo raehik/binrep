@@ -1,4 +1,4 @@
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE UndecidableInstances #-} -- hugely unsafe module
 
 {- | _Experimental._ Generically derive 'CBLen' type family instances.
 
@@ -26,7 +26,7 @@ sorry. I don't have much faith in this code.
 module Binrep.CBLen.Generic where
 
 import Binrep.CBLen
-import Binrep.Util.Generic
+import Binrep.Util.Class
 
 import GHC.Generics
 import GHC.TypeLits
@@ -44,7 +44,7 @@ type family GCBLen w (f :: k -> Type) :: Natural where
 
     GCBLen w (l :+: r)  = CBLen w + GCBLenCaseMaybe (GCBLenSum w (l :+: r))
 
-    GCBLen _ V1         = TypeError ERefuseEmpty
+    GCBLen _ V1         = TypeError ENoEmpty
     GCBLen w (M1 _ _ f) = GCBLen w f
 
 --type family GCBLenSum w (f :: k -> Type) :: Maybe Natural where

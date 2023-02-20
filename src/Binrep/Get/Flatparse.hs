@@ -1,4 +1,4 @@
--- {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE UndecidableInstances #-} -- for 'TypeError'
 
 module Binrep.Get.Flatparse
   ( Getter, Get(..), runGet, runGetter
@@ -10,12 +10,14 @@ module Binrep.Get.Flatparse
   ) where
 
 import FlatParse.Basic qualified as FP
-
 import Data.ByteString qualified as B
 
+import Binrep.Util.Class
+import GHC.TypeError
+
+import Data.Void
 import Data.Word
 import Data.Int
-import Data.Void ( Void )
 
 import GHC.Generics ( Generic )
 
@@ -48,9 +50,6 @@ cutEBase f e = FP.cut f $ EBase e
 data EBase
   = EFail
   -- ^ TODO ? maybe unannotated error? idk.
-
-  | ENoVoid
-  -- ^ can't parse a 'Void'
 
   | EExpectedByte Word8 Word8
   -- ^ expected first, got second
@@ -86,6 +85,9 @@ class Get a where
     -- | Parse from binary.
     get :: Getter a
 
+instance TypeError ENoEmpty => Get Void where get = undefined
+instance TypeError ENoSum => Get (Either a b) where get = undefined
+
 runGet :: Get a => B.ByteString -> Either E (a, B.ByteString)
 runGet = runGetter get
 
@@ -99,11 +101,6 @@ runGetter g bs = case FP.runParser g bs of
 instance Get () where
     {-# INLINE get #-}
     get = pure ()
-
--- | Impossible to parse uninhabited type.
-instance Get Void where
-    {-# INLINE get #-}
-    get = eBase ENoVoid
 
 -- | Parse tuples left-to-right.
 instance (Get l, Get r) => Get (l, r) where

@@ -6,6 +6,7 @@ import GHC.Generics
 import GHC.TypeLits ( TypeError )
 
 import Binrep.BLen.Simple
+import Binrep.Util.Class
 import Binrep.Util.Generic
 import Util.Generic
 
@@ -39,7 +40,7 @@ instance TypeError EUnexpectedNonSum => GBLenDSum (C1 c f) where
     gblenDSum = undefined
 
 -- | Refuse to derive an instance for an empty data type.
-instance TypeError ERefuseEmpty => GBLenDSum V1 where
+instance TypeError ENoEmpty => GBLenDSum V1 where
     gblenDSum = undefined
 
 -- | Generic measurer (constructor sum level).
@@ -83,5 +84,5 @@ instance GBLenC f => GBLenDNonSum (C1 c f) where
     gblenDNonSum (M1 a) = gblenC a
 
 -- | Refuse to derive an instance for an empty data type.
-instance TypeError ERefuseEmpty => GBLenDNonSum V1 where
+instance TypeError ENoEmpty => GBLenDNonSum V1 where
     gblenDNonSum = undefined

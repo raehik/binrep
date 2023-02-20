@@ -60,6 +60,7 @@ library
       Binrep.Type.Text.Encoding.Utf8
       Binrep.Type.Text.Internal
       Binrep.Util
+      Binrep.Util.Class
       Binrep.Util.Generic
       Binrep.Via
       Bytezap
