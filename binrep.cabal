@@ -97,7 +97,6 @@ library
     , bytestring ==0.11.*
     , either >=5.0.1.1 && <5.1
     , flatparse >=0.4.0.1 && <0.5
-    , mason >=0.2.5 && <0.3
     , megaparsec >=9.2.0 && <9.3
     , parser-combinators >=1.3.0 && <1.4
     , refined >=0.7 && <0.9
@@ -145,7 +144,6 @@ test-suite spec
     , flatparse >=0.4.0.1 && <0.5
     , generic-random >=1.5.0.1 && <1.6
     , hspec >=2.7 && <2.10
-    , mason >=0.2.5 && <0.3
     , megaparsec >=9.2.0 && <9.3
     , parser-combinators >=1.3.0 && <1.4
     , quickcheck-instances >=0.3.26 && <0.4
@@ -188,7 +186,6 @@ benchmark bench
     , either >=5.0.1.1 && <5.1
     , flatparse >=0.4.0.1 && <0.5
     , gauge
-    , mason >=0.2.5 && <0.3
     , megaparsec >=9.2.0 && <9.3
     , parser-combinators >=1.3.0 && <1.4
     , refined >=0.7 && <0.9
