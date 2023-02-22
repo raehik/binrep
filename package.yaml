@@ -64,6 +64,7 @@ dependencies:
 - either ^>= 5.0.1.1
 - megaparsec ^>= 9.2.0 # for HexByteString
 - aeson >= 2.0 && < 2.2 # because we use refined which uses it (also for HexByteString)
+- deepseq ^>= 1.4.8.0
 
 library:
   source-dirs: src

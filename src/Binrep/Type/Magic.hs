@@ -25,6 +25,7 @@ module Binrep.Type.Magic where
 import Binrep
 import Binrep.Type.Byte
 import FlatParse.Basic qualified as FP
+import Data.ByteString qualified as B
 
 import GHC.TypeLits
 
@@ -65,10 +66,13 @@ instance (bs ~ MagicBytes a, ReifyBytes bs, KnownNat (Length bs))
     -- TODO silly optimization: we _could_ skip comparing BS lengths because we
     -- know they have to be the same. lmao
     get = do
+        -- Nice case where we _want_ flatparse's no-copy behaviour, because
+        -- 'actual' is only in scope for this parser. Except, of course, if we
+        -- error, in which case _now_ we copy. Efficient!
         actual <- FP.take (blen magic)
         if   actual == expected
         then pure Magic
-        else eBase $ EExpected expected actual
+        else eBase $ EExpected expected (B.copy actual)
       where
         expected = runPut magic
         magic = Magic :: Magic a

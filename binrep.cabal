@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.1.
+-- This file has been generated from package.yaml by hpack version 0.35.2.
 --
 -- see: https://github.com/sol/hpack
 
@@ -61,6 +61,7 @@ library
       Binrep.Type.Text.Encoding.Utf32
       Binrep.Type.Text.Encoding.Utf8
       Binrep.Type.Text.Internal
+      Binrep.Type.Thin
       Binrep.Util
       Binrep.Util.Class
       Binrep.Util.Generic
@@ -98,6 +99,7 @@ library
       aeson >=2.0 && <2.2
     , base >=4.14 && <5
     , bytestring ==0.11.*
+    , deepseq >=1.4.8.0 && <1.5
     , either >=5.0.1.1 && <5.1
     , flatparse >=0.4.0.1 && <0.5
     , megaparsec >=9.2.0 && <9.3
@@ -143,6 +145,7 @@ test-suite spec
     , base >=4.14 && <5
     , binrep
     , bytestring ==0.11.*
+    , deepseq >=1.4.8.0 && <1.5
     , either >=5.0.1.1 && <5.1
     , flatparse >=0.4.0.1 && <0.5
     , generic-random >=1.5.0.1 && <1.6
@@ -186,6 +189,7 @@ benchmark bench
     , base >=4.14 && <5
     , binrep
     , bytestring ==0.11.*
+    , deepseq >=1.4.8.0 && <1.5
     , either >=5.0.1.1 && <5.1
     , flatparse >=0.4.0.1 && <0.5
     , gauge

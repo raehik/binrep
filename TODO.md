@@ -1,4 +1,8 @@
 # To-dos
+## Check every flatparse `take` family use site
+Because `take` parse results which escape their scope (i.e. most) should be
+wrapped with `B.copy`.
+
 ## Intermediate types should use the bytestring builder type, not a bytestring
 Saves on allocations if you're just gonna serialize. Specifically, the text
 modules probably want this. Not sure how to do it exactly to retain maximum
