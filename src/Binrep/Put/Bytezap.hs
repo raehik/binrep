@@ -28,6 +28,11 @@ instance Put Write where
     {-# INLINE put #-}
     put = writePoke
 
+-- | Fairly useless because 'Poke' doesn't have a 'BLen' instance.
+instance Put Poke where
+    {-# INLINE put #-}
+    put = id
+
 -- | Unit type serializes to nothing. How zen.
 instance Put () where
     {-# INLINE put #-}

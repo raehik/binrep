@@ -18,6 +18,8 @@ But this just doesn't fly, because it would invert the behaviour.
 
 -}
 
+{-# LANGUAGE UndecidableInstances #-} -- for strongweak derivingvia
+
 module Binrep.Type.Thin where
 
 import Binrep
@@ -37,15 +39,16 @@ import Strongweak
 import Data.ByteString qualified as B
 
 newtype Thin a = Thin { unThin :: a }
-    deriving stock (Generic, Data, Show)
+    -- derive all instances that 'Data.ByteString.ByteString' has
+    deriving stock (Generic, Data, Show, Read)
     deriving
-      ( Eq, Ord, Semigroup, Monoid, Read
-      , NFData, IsString, IsList
-      , BLen, Put
+      ( Eq, Ord, Semigroup, Monoid -- simple
+      , NFData, IsString, IsList -- weird
+      , BLen, Put -- binrep
       ) via a
-    deriving (Weaken, Strengthen) via (Identity a)
 
--- TODO strongweak. might be a derivingvia wrapper to write.
+    -- at the end of the day, we are the identity functor
+    deriving (Weaken, Strengthen) via Identity a
 
 instance Get (Thin B.ByteString) where get = Thin <$> FP.takeRest
 instance Get (Thin BZ.Write) where
