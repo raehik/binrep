@@ -4,6 +4,7 @@
 module Binrep.Type.Prefix.Size where
 
 import Binrep.Type.Prefix
+import Binrep.Type.Thin
 import Binrep
 import FlatParse.Basic qualified as FP
 
@@ -40,7 +41,8 @@ instance (Prefix pfx, BLen a, Put pfx, Put a)
       where a = unrefine ra
 
 class GetSize a where getSize :: Int -> Getter a
-instance GetSize B.ByteString where getSize = FP.take
+instance GetSize       B.ByteString  where getSize = fmap B.copy . FP.take
+instance GetSize (Thin B.ByteString) where getSize = fmap Thin . FP.take
 
 instance (Prefix pfx, GetSize a, Get pfx)
   => Get (SizePrefixed pfx a) where

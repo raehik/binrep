@@ -99,17 +99,14 @@ runGetter g bs = case FP.runParser g bs of
                    FP.Fail     -> Left $ EBase EFail
                    FP.Err e    -> Left e
 
--- | TODO add a prim in flatparse
+-- | Parse a bytestring and... immediate reserialize it.
+--
+-- Note that this _does_ perform work: we make a new bytestring so we don't rely
+-- on the input bytestring. To use the input bytestring directly, see
+-- "Binrep.Type.Thin".
 instance Get Write where
     {-# INLINE get #-}
-    get = BZ.byteString <$> FP.takeRest
-
-{-
-asdf :: (Getter (Int, Addr# -> IO ())) -> Getter Write
-asdf f = do
-    (size, poke) <- f
-    pure $ Write size (_ poke)
--}
+    get = fmap BZ.byteString $ fmap B.copy $ FP.takeRest
 
 -- | Unit type parses nothing.
 instance Get () where
@@ -138,9 +135,13 @@ instance Get a => Get [a] where
 --
 -- A plain unannotated bytestring isn't very useful -- you'll usually want to
 -- null-terminate or length-prefix it.
+--
+-- Note that this _does_ perform work: we make a new bytestring so we don't rely
+-- on the input bytestring. To use the input bytestring directly, see
+-- "Binrep.Type.Thin".
 instance Get B.ByteString where
     {-# INLINE get #-}
-    get = FP.takeRest
+    get = B.copy <$> FP.takeRest
 
 -- | Unsigned byte.
 instance Get Word8 where get = cutEBase FP.anyWord8 (ERanOut 1)
