@@ -18,17 +18,16 @@ import Refined.Unsafe
 import Data.ByteString qualified as B
 import Data.Word ( Word8 )
 
-import Data.Typeable ( typeRep )
-
 -- | Null-terminated data. Arbitrary length terminated with a null byte.
 --   Permits no null bytes inside the data.
 data NullTerminate
+instance Pred NullTerminate
 type NullTerminated = Refined NullTerminate
 
 -- | Null-terminated data may not contain any null bytes.
-instance NullCheck a => Predicate NullTerminate a where
+instance NullCheck a => ApplyPred NullTerminate a where
     validate p a
-     | hasNoNulls a = throwRefineOtherException (typeRep p) $
+     | hasNoNulls a = throwRefineOtherException p $
         "null byte not permitted in null-terminated data"
      | otherwise = success
 

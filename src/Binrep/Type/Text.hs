@@ -47,7 +47,7 @@ encode = encode' @enc . unrefine
 -- bs :: Refined 'C Bytes
 encodeToRep
     :: forall rep enc
-    .  (Encode enc, Predicate rep Bytes)
+    .  (Encode enc, ApplyPred rep Bytes)
     => AsText enc
     -> Either RefineException (Refined rep Bytes)
 encodeToRep = refine . encode

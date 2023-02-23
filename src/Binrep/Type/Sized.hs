@@ -11,19 +11,19 @@ import Binrep.Util ( tshow )
 
 import Refined
 import Refined.Unsafe
-import Data.Typeable ( typeRep )
 
 import GHC.TypeNats
 import Util.TypeNats ( natValInt )
 
 -- | Essentially reflects a 'BLen' type to 'CBLen'.
 data Size (n :: Natural)
+instance KnownNat n => Pred (Size n)
 type Sized n = Refined (Size n)
 
-instance (BLen a, KnownNat n) => Predicate (Size n) a where
+instance (BLen a, KnownNat n) => ApplyPred (Size n) a where
     validate p a
      | len /= n
-        = throwRefineOtherException (typeRep p) $
+        = throwRefineOtherException p $
             "not correctly sized: "<>tshow len<>" /= "<>tshow n
      | otherwise = success
       where

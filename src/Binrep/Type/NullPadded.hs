@@ -11,12 +11,12 @@ import Binrep.Util ( tshow )
 
 import Refined
 import Refined.Unsafe
-import Data.Typeable ( typeRep )
 
 import GHC.TypeNats
 import Util.TypeNats ( natValInt )
 
 data NullPad (n :: Natural)
+instance KnownNat n => Pred (NullPad n)
 
 -- | A type which is to be null-padded to a given total length.
 --
@@ -37,11 +37,11 @@ data NullPad (n :: Natural)
 -- The binrep instances are careful not to construct bytestrings unnecessarily.
 type NullPadded n a = Refined (NullPad n) a
 
-instance (BLen a, KnownNat n) => Predicate (NullPad n) a where
+instance (BLen a, KnownNat n) => ApplyPred (NullPad n) a where
     validate p a
       | len <= n = success
       | otherwise
-          = throwRefineOtherException (typeRep p) $
+          = throwRefineOtherException p $
                    "too long: " <> tshow len <> " > " <> tshow n
       where
         n = natValInt @n

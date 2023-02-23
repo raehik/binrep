@@ -15,9 +15,10 @@ import Binrep.Type.Text.Internal
 #endif
 
 data ShiftJis
+instance Pred ShiftJis
 
 -- | TODO Unsafely assume all 'Text's are valid Shift-JIS.
-instance Predicate ShiftJis Text where validate _ _ = success
+instance ApplyPred ShiftJis Text where validate _ _ = success
 
 #ifdef HAVE_ICU
 instance Encode ShiftJis where encode' = encodeViaTextICU' "Shift-JIS"
