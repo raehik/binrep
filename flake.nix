@@ -7,6 +7,14 @@
       url = "github:AndrasKovacs/flatparse";
       flake = false;
     };
+    strongweak = {
+      url = "github:raehik/strongweak/refined1-smaller-contexts";
+      flake = false;
+    };
+    refined = {
+      url = "github:raehik/refined/shift-typeable";
+      flake = false;
+    };
   };
   outputs = inputs@{ self, nixpkgs, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
@@ -23,6 +31,8 @@
           # packages.example.root = ./.;  # This value is detected based on .cabal files
           overrides = self: super: with pkgs.haskell.lib; {
             flatparse = self.callCabal2nix "flatparse" inputs.flatparse {};
+            strongweak = self.callCabal2nix "strongweak" inputs.strongweak {};
+            refined = self.callCabal2nix "refined" inputs.refined {};
           };
           devShell = {
             tools = hp: {

@@ -7,47 +7,53 @@ import Binrep.Type.Prefix
 import Binrep
 import Control.Monad.Combinators qualified as Monad
 
+import Refined.Refined1
+
 import GHC.TypeNats
 import Util.TypeNats ( natValInt )
 import Refined hiding ( Weaken(..), strengthen )
-import Refined.Unsafe
 
-import Data.Typeable ( Typeable, typeRep )
+import Data.Typeable ( Typeable )
+import Data.Kind
 
 import Data.Foldable qualified as Foldable
 
-data CountPrefix pfx
-type CountPrefixed pfx = Refined (CountPrefix pfx)
+data CountPrefix (pfx :: Type)
+instance Typeable pfx => Pred (CountPrefix pfx)
+type CountPrefixed pfx = Refined1 (CountPrefix pfx)
 
 instance (KnownNat (Max pfx), Foldable f, Typeable pfx)
-  => Predicate (CountPrefix pfx) (f a) where
-    validate p a
-      | Foldable.length a <= natValInt @(Max pfx) = Nothing
-      | otherwise = throwRefineOtherException (typeRep p) $
-          "thing too big for length prefix type"
+  => ApplyPred1 (CountPrefix pfx) f where
+    validate1 p fa
+      | Foldable.length fa <= natValInt @(Max pfx) = success
+      | otherwise = throwRefineOtherException p "TODO bad"
+
+instance (KnownNat (Max pfx), Foldable f, Typeable pfx)
+  => ApplyPred (CountPrefix pfx) (f a) where
+    validate p fa
+      | Foldable.length fa <= natValInt @(Max pfx) = success
+      | otherwise = throwRefineOtherException p "TODO bad"
 
 -- TODO no idea if this is sensible
-instance IsCBLen (CountPrefixed pfx a) where
-    type CBLen (CountPrefixed pfx a) = CBLen pfx + CBLen a
+instance IsCBLen (CountPrefixed pfx f a) where
+    type CBLen (CountPrefixed pfx f a) = CBLen pfx + CBLen (f a)
 
 instance (Prefix pfx, Foldable f, BLen pfx, BLen (f a))
-  => BLen (CountPrefixed pfx (f a)) where
-    blen ra = blen (lenToPfx @pfx (Foldable.length a)) + blen a
-      where a = unrefine ra
+  => BLen (CountPrefixed pfx f a) where
+    blen rfa = blen (lenToPfx @pfx (Foldable.length fa)) + blen fa
+      where fa = unrefine1 rfa
 
 instance (Prefix pfx, Foldable f, Put pfx, Put (f a))
-  => Put (CountPrefixed pfx (f a)) where
-    put ra = put (lenToPfx @pfx (Foldable.length a)) <> put a
-      where a = unrefine ra
+  => Put (CountPrefixed pfx f a) where
+    put rfa = put (lenToPfx @pfx (Foldable.length fa)) <> put fa
+      where fa = unrefine1 rfa
 
--- Fucking lol dude this is wicked
 class GetCount f where getCount :: Get a => Int -> Getter (f a)
 instance GetCount [] where getCount n = Monad.count n get
 
--- Suck my nuts
 instance (Prefix pfx, GetCount f, Get pfx, Get a)
-  => Get (CountPrefixed pfx (f a)) where
+  => Get (CountPrefixed pfx f a) where
     get = do
         pfx <- get @pfx
-        a <- getCount (pfxToLen pfx)
-        pure $ reallyUnsafeRefine a
+        fa <- getCount (pfxToLen pfx)
+        pure $ unsafeRefine1 fa

@@ -7,7 +7,6 @@ import Binrep.Type.Text.Internal
 import Binrep.Type.Text.Encoding.Utf8
 
 import Refined
-import Data.Typeable ( typeRep )
 
 import Data.Char qualified as Char
 import Data.Text qualified as Text
@@ -19,6 +18,7 @@ import System.IO.Unsafe qualified
 
 -- | 7-bit
 data Ascii
+instance Pred Ascii
 
 -- | We reuse UTF-8 encoding for ASCII, since it is a subset of UTF-8.
 instance Encode Ascii where encode' = encode' @Utf8
@@ -41,7 +41,7 @@ catchErrorCall f a = System.IO.Unsafe.unsafeDupablePerformIO $ do
 --
 -- TODO there should be a MUCH faster check here in text-2.0. text-short has it,
 -- text doesn't yet. see: https://github.com/haskell/text/issues/496
-instance Predicate Ascii Text where
+instance ApplyPred Ascii Text where
     validate p t = if   Text.all Char.isAscii t
                    then success
-                   else throwRefineOtherException (typeRep p) "not valid 7-bit ASCII"
+                   else throwRefineOtherException p "not valid 7-bit ASCII"
