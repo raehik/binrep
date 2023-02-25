@@ -7,32 +7,28 @@ import Binrep.Type.Prefix
 import Binrep
 import Control.Monad.Combinators qualified as Monad
 
-import Refined.Refined1
-
 import GHC.TypeNats
 import Util.TypeNats ( natValInt )
 import Refined hiding ( Weaken(..), strengthen )
+import Refined.Unsafe ( reallyUnsafeRefine1 )
 
-import Data.Typeable ( Typeable )
+import Data.Typeable ( Typeable, typeRep )
 import Data.Kind
 
 import Data.Foldable qualified as Foldable
 
 data CountPrefix (pfx :: Type)
-instance Typeable pfx => Pred (CountPrefix pfx)
 type CountPrefixed pfx = Refined1 (CountPrefix pfx)
 
 instance (KnownNat (Max pfx), Foldable f, Typeable pfx)
-  => ApplyPred1 (CountPrefix pfx) f where
+  => Predicate1 (CountPrefix pfx) f where
     validate1 p fa
       | Foldable.length fa <= natValInt @(Max pfx) = success
-      | otherwise = throwRefineOtherException p "TODO bad"
+      | otherwise = throwRefineOtherException (typeRep p) "TODO bad"
 
 instance (KnownNat (Max pfx), Foldable f, Typeable pfx)
-  => ApplyPred (CountPrefix pfx) (f a) where
-    validate p fa
-      | Foldable.length fa <= natValInt @(Max pfx) = success
-      | otherwise = throwRefineOtherException p "TODO bad"
+  => Predicate (CountPrefix pfx) (f a) where
+    validate = validate1
 
 -- TODO no idea if this is sensible
 instance IsCBLen (CountPrefixed pfx f a) where
@@ -56,4 +52,4 @@ instance (Prefix pfx, GetCount f, Get pfx, Get a)
     get = do
         pfx <- get @pfx
         fa <- getCount (pfxToLen pfx)
-        pure $ unsafeRefine1 fa
+        pure $ reallyUnsafeRefine1 fa

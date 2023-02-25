@@ -8,11 +8,11 @@
       flake = false;
     };
     strongweak = {
-      url = "github:raehik/strongweak/refined1-smaller-contexts";
+      url = "github:raehik/strongweak/refined1";
       flake = false;
     };
     refined = {
-      url = "github:raehik/refined/shift-typeable";
+      url = "github:raehik/refined/refined1";
       flake = false;
     };
   };

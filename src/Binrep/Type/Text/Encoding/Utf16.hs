@@ -10,7 +10,6 @@ import Data.Text.Encoding qualified as Text
 import Data.Text ( Text )
 
 data Utf16 (end :: Endianness)
-instance Typeable end => Pred (Utf16 end)
 
 instance Encode (Utf16 'BE) where encode' = Text.encodeUtf16BE
 instance Encode (Utf16 'LE) where encode' = Text.encodeUtf16LE
@@ -19,4 +18,4 @@ instance Decode (Utf16 'BE) where decode = decodeText show $ wrapUnsafeDecoder T
 instance Decode (Utf16 'LE) where decode = decodeText show $ wrapUnsafeDecoder Text.decodeUtf16LE
 
 -- | Any 'Text' value is always valid UTF-16.
-instance Typeable end => ApplyPred (Utf16 end) Text where validate _ _ = success
+instance Typeable end => Predicate (Utf16 end) Text where validate _ _ = success
