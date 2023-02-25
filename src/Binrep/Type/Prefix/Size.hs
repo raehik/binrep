@@ -14,18 +14,17 @@ import Data.ByteString qualified as B
 import Refined hiding ( Weaken(..), strengthen )
 import Refined.Unsafe
 
-import Data.Typeable ( Typeable )
+import Data.Typeable ( Typeable, typeRep )
 import Data.Kind
 
 data SizePrefix (pfx :: Type)
-instance Typeable pfx => Pred (SizePrefix pfx)
 type SizePrefixed pfx = Refined (SizePrefix pfx)
 
 instance (KnownNat (Max pfx), BLen a, Typeable pfx)
-  => ApplyPred (SizePrefix pfx) a where
+  => Predicate (SizePrefix pfx) a where
     validate p a
       | blen a <= natValInt @(Max pfx) = Nothing
-      | otherwise = throwRefineOtherException p $
+      | otherwise = throwRefineOtherException (typeRep p) $
           "thing too big for length prefix type"
 
 -- TODO no idea if this is sensible
