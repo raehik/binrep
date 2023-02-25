@@ -7,8 +7,8 @@ import Gauge
 
 import Binrep
 import Binrep.Generic
-import Binrep.Put.WithBLen
-import Binrep.Type.ByteString
+import Binrep.Type.NullTerminated
+import Data.ByteString qualified as B
 import Refined
 
 import GHC.Generics ( Generic )
@@ -28,28 +28,11 @@ instance BLen X where blen _ = 4
 data X3
     = X31 Word8
     | X32 Word8
-    | X33 Word8 (AsByteString 'C) X3
+    | X33 Word8 (NullTerminated B.ByteString) X3
     deriving stock (Generic)
 
---instance Put X3 where put = putGeneric cDef
-instance Put X3 where put x3 = put'ToMason blen put' x3
-instance BLen X3 where blen = blenGeneric cDef
-
---instance Put' X3 where put' = put'Generic cDef
-instance Put' X3 where
-    put' x3 p =
-        case x3 of
-          X31 w8 -> do
-            put'CString "X31" p
-            put' w8 (p `plusPtr` 4)
-          X32 w8 -> do
-            put'CString "X32" p
-            put' w8 (p `plusPtr` 4)
-          X33 w8 bs x3' -> do
-            put'CString "X33" p
-            put' w8 (p `plusPtr` 4)
-            put' bs (p `plusPtr` 5)
-            put' x3' (p `plusPtr` (5 + blen bs))
+instance BLen X3 where blen = blenGenericSum cDef
+instance Put  X3 where put  = putGenericSum  cDef
 
 x33 :: X3
 x33 =
@@ -318,6 +301,5 @@ main :: IO ()
 main = defaultMain
   [ bgroup "tiny"
     [ bench "put"  $ whnf Binrep.runPut               x33
-    , bench "put'" $ whnf Binrep.Put.WithBLen.runPut' x33
     ]
   ]
