@@ -1,7 +1,28 @@
 # To-dos
-## Check every flatparse `take` family use site
-Because `take` parse results which escape their scope (i.e. most) should be
-wrapped with `B.copy`.
+## Challenges with unbuffered serialization
+### Floats to decimal ASCII
+Serializing floats to ASCII efficiently is hard. Most of the recent fast
+algorithms `malloc` ~25 bytes at the start then tell you how long it actually
+was. I see little in the way of "figure out for cheap how many characters long
+this float will be once serialized".
+
+mason wins with its builtin grisu3. I think beating that is Hard. bytestring
+actually uses ryu internally! But via a Haskell implementation.
+[ryu](https://github.com/ulfjack/ryu/blob/master/ryu/d2s.c) has some stuff.
+[Dragonbox](https://github.com/jk-jeon/dragonbox) is better, but it's C++. Most
+likely I am on my own here. Perhaps I can figure out some shortcuts in grisu3 to
+calculate serialized length without doing *all* the work. If I can avoid
+`malloc`ing, it would be a winner.
+
+Perhaps I simply pray to SPJ for good caching behaviour. Running the inner
+serializer in `blen` *should* mean it can be reused for `put`, and providing
+they occur close to each other (which they do in `runPut`), I could see it
+happening.
+
+### Ints to decimal ASCII
+This should be OK I think? I wonder how fast we can go, though. Cool C++ lib at
+[jeaiii/itoa](https://github.com/jeaiii/itoa). Probably a waste of time, use
+bytestring's prims along with a fast `BLen` check (I wrote one before I think).
 
 ## Intermediate types should use the bytestring builder type, not a bytestring
 Saves on allocations if you're just gonna serialize. Specifically, the text
@@ -17,22 +38,6 @@ need some extra definitions.
 ## Serialize with bytezap
 All change!
 
-## ~Special static parser like peeky-blinders~
-How about
-
-```haskell
-newtype Peek a = Addr# -> State# RealWorld -> (# State# RealWorld, a, Addr# #)
-```
-
-The problem is that it's just a shitty flatparse, where all you can do is march
-on forward. No errors other than the length check at the start (which is
-separate, handled by `CBLen`). Which is sad, because the fancy parsing is a
-feature of binrep. Sure, I could replace the low-level parsers with this
-peeky-blinders-style parser, but then I lose the error handling.
-
-Changing this ever so slightly to support more features simply ends up
-approximating flatparse, which is stupid. No, I'm settled: flatparse-only, baby.
-
 ## Octet instead of byte?
 Is it better to refer to octets instead of bytes? An octet is always 8 bits,
 while a byte is kind of "not necessarily".
@@ -45,10 +50,6 @@ Consider implementing "practical maxes" for various types.
     https://hackage.haskell.org/package/protocol-buffers-2.4.17/docs/src/Text.ProtocolBuffers.Get.html#decode7unrolled
 
 May help prevent unexpected OOMs?
-
-## Structured parse errors like strongweak
-It means lots of work wrapping flatparse and making my own various combinators,
-but otherwise everything's already there.
 
 ## More primitives
   * Varint
@@ -86,18 +87,3 @@ pretty string, write to a JSON doc, write to some description language...
 
 Actually, I think you send a bunch of functions along. So that's why people use
 a typeclass instead, for this "no middle man" thing. Should be fun.
-
-## Provide "deriving via" generic derivers
-Seems to be all the craze lately. See generic-random:
-https://hackage.haskell.org/package/generic-random-1.5.0.1/docs/Generic-Random-DerivingVia.html
-
-This would let me do something rather interesting -- instead of use newtypes all
-over and forcing the user to endlessly wrap and unwrap, I could perhaps let them
-use the regular old type, but derive a specialized instance through a newtype.
-
-Doesn't work with `WithRefine`, since the user needs to handle those themselves
-(that's the point). But neat idea.
-
-Ah - also means no user-supplied functions, because no type-level function
-passing. See fumieval's
-[deriving-aeson](https://hackage.haskell.org/package/deriving-aeson).
