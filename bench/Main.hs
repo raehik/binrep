@@ -14,8 +14,6 @@ import Refined
 import GHC.Generics ( Generic )
 import Data.Word
 
-import Foreign
-
 {-
 data X = X Word8 Word16 Word8
     deriving stock (Generic)
