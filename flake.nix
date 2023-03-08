@@ -21,14 +21,9 @@
       systems = nixpkgs.lib.systems.flakeExposed;
       imports = [ inputs.haskell-flake.flakeModule ];
       perSystem = { self', pkgs, ... }: {
+        packages.default = self'.packages.binrep;
         haskellProjects.default = {
-          # GHC 9.4 is bust on Nix, fix
-          basePackages = pkgs.haskell.packages.ghc94.override {
-            overrides = self: super: {
-              ormolu = self.ormolu_0_5_3_0;
-            };
-          };
-          # packages.example.root = ./.;  # This value is detected based on .cabal files
+          basePackages = pkgs.haskell.packages.ghc94;
           overrides = self: super: with pkgs.haskell.lib; {
             flatparse = self.callCabal2nix "flatparse" inputs.flatparse {};
             strongweak = self.callCabal2nix "strongweak" inputs.strongweak {};
@@ -41,8 +36,6 @@
             };
           };
         };
-        # haskell-flake doesn't set the default package, but you can do it here.
-        packages.default = self'.packages.binrep;
       };
     };
 }
