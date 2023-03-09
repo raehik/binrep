@@ -18,5 +18,4 @@ jobs:
       with:
         name: raehik
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-    - run: nix flake check
     - run: nix build
