@@ -3,16 +3,12 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     haskell-flake.url = "github:srid/haskell-flake";
-    flatparse = {
-      url = "github:AndrasKovacs/flatparse";
+    refined1 = {
+      url = "github:raehik/refined/refined1-hackage";
       flake = false;
     };
     strongweak = {
-      url = "github:raehik/strongweak/refined1";
-      flake = false;
-    };
-    refined = {
-      url = "github:raehik/refined/refined1";
+      url = "github:raehik/strongweak";
       flake = false;
     };
   };
@@ -20,19 +16,23 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = nixpkgs.lib.systems.flakeExposed;
       imports = [ inputs.haskell-flake.flakeModule ];
-      perSystem = { self', pkgs, ... }: {
+      perSystem = { self', pkgs, config, ... }: {
         packages.default = self'.packages.binrep;
+        haskellProjects.ghc96 = import ./haskell-flake-ghc96.nix pkgs;
         haskellProjects.default = {
-          basePackages = pkgs.haskell.packages.ghc94;
+          basePackages = config.haskellProjects.ghc96.outputs.finalPackages;
+          source-overrides = {
+            refined1 = inputs.refined1; # 2023-05-11: not on Nix Hackage yet
+            strongweak = inputs.strongweak;
+          };
           overrides = self: super: with pkgs.haskell.lib; {
-            flatparse = self.callCabal2nix "flatparse" inputs.flatparse {};
-            strongweak = self.callCabal2nix "strongweak" inputs.strongweak {};
-            refined = self.callCabal2nix "refined" inputs.refined {};
+            flatparse = super.flatparse_0_4_1_0;
           };
           devShell = {
             tools = hp: {
-              ghcid = null; # ghcid broken on Nix for GHC 9.4
-              haskell-language-server = null; # needs a massive system to build
+              ghcid = null; # broken on GHC 9.6? fsnotify
+              hlint = null; # broken on GHC 9.6?
+              haskell-language-server = null; # TAKES AGES TO BUILD FFS
             };
           };
         };
