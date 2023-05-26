@@ -19,11 +19,11 @@ use these with GHC's automatically derived 'Generic' instances.
 -}
 
 module Senserial.Sequential
-  ( type Senserial.Sequential.Sum.SeqSerSum
-  ,      Senserial.Sequential.Sum.seqSerSum
-  , type Senserial.Sequential.NonSum.SeqSerNonSum
-  ,      Senserial.Sequential.NonSum.seqSerNonSum
+  ( type Senserial.Sequential.Serialize.Sum.SeqSerSum
+  ,      Senserial.Sequential.Serialize.Sum.seqSerSum
+  , type Senserial.Sequential.Serialize.NonSum.SeqSerNonSum
+  ,      Senserial.Sequential.Serialize.NonSum.seqSerNonSum
   ) where
 
-import Senserial.Sequential.Sum qualified
-import Senserial.Sequential.NonSum qualified
+import Senserial.Sequential.Serialize.Sum qualified
+import Senserial.Sequential.Serialize.NonSum qualified

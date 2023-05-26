@@ -26,9 +26,9 @@ import Data.Word
 import Data.Int
 
 import GHC.Generics ( type Generic, type Rep )
-import Senserial.Sequential.NonSum qualified as Senserial
-import Senserial.Sequential.Sum qualified as Senserial
-import Senserial.Sequential.Internal.Builder qualified as Senserial
+import Senserial.Sequential.Serialize.NonSum qualified as Senserial
+import Senserial.Sequential.Serialize.Sum qualified as Senserial
+import Senserial.Sequential.Serialize.Internal.Builder qualified as Senserial
 
 class Put a where put :: a -> Poke
 
@@ -39,7 +39,7 @@ runPut a = runPoke (blen a) (put a)
 -- v TODO provide a clear type error if such instances are missing. v
 instance Senserial.SeqBuilder Poke where
     type SeqBuilderC Poke = Put
-    toSeqBuilder = put
+    seqBuild = put
 
 type GPutVia f a = f Poke (Rep a)
 

@@ -1,11 +1,11 @@
-module Senserial.Sequential.Sum where
+module Senserial.Sequential.Serialize.Sum where
 
 import GHC.Generics
 import GHC.TypeError ( TypeError )
 import Util.Generic ( conName' )
 import Senserial.Internal.Error ( type ENoEmpty, type EUnexpectedNonSum )
-import Senserial.Sequential.Internal.Field ( GSeqSerC(gSeqSerC) )
-import Senserial.Sequential.Internal.Builder ( SeqBuilder)
+import Senserial.Sequential.Serialize.Internal.Field ( GSeqSerC(gSeqSerC) )
+import Senserial.Sequential.Serialize.Internal.Builder ( SeqBuilder)
 
 -- | Sequentially serialize a term of the sum type @a@ generically.
 seqSerSum

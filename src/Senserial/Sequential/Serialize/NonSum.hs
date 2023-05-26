@@ -1,9 +1,9 @@
-module Senserial.Sequential.NonSum where
+module Senserial.Sequential.Serialize.NonSum where
 
 import GHC.Generics
 import GHC.TypeError ( TypeError )
 import Senserial.Internal.Error ( type ENoEmpty, type EUnexpectedSum )
-import Senserial.Sequential.Internal.Field ( GSeqSerC(gSeqSerC) )
+import Senserial.Sequential.Serialize.Internal.Field ( GSeqSerC(gSeqSerC) )
 
 -- | Sequentially serialize a term of the non-sum type @a@ generically.
 seqSerNonSum
