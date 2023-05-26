@@ -9,8 +9,8 @@ import Data.Int
 import Data.Void ( Void, absurd )
 
 import GHC.Generics ( type Generic, type Rep )
-import Senserial.Sequential.NonSum qualified as Senserial
-import Senserial.Sequential.Sum qualified as Senserial
+import Senserial.Sequential.Serialize.NonSum qualified as Senserial
+import Senserial.Sequential.Serialize.Sum qualified as Senserial
 
 type Builder = Mason.BuilderFor Mason.StrictByteStringBackend
 

@@ -14,7 +14,7 @@ use these with GHC's automatically derived 'Generic' instances.
 {-# LANGUAGE UndecidableInstances #-} -- required for TypeError >:(
 {-# LANGUAGE AllowAmbiguousTypes #-} -- required due to generic typeclass design
 
-module Binrep.Get.Flatparse.Generic where
+module Senserial.Sequential.Parse.Wip where
 
 import GHC.Generics
 import GHC.TypeError ( TypeError )
@@ -30,25 +30,86 @@ import Util.TypeNats ( natVal'' )
 import FlatParse.Basic qualified as FP
 import Control.Applicative ( (<|>), liftA2 )
 
+import Data.Kind ( type Type, type Constraint )
 
-data Cfg a = Cfg
-  { cSumTag :: String -> a
-  -- ^ How to turn a constructor name into a prefix tag.
+{- | Sequential parsers.
 
-  , cSumTagEq   :: a -> a -> Bool
-  -- ^ How to compare prefix tags for equality.
-  --
-  -- By shoving this into our generic derivation config, we can avoid adding an
-  -- insidious 'Eq' constraint. In general, you will want to set this to '(==)'.
+A type may be used as a sequential parser provided it is a 'Monad' and has a
+class for parsing from compatible types.
 
-  , cSumTagShow :: a -> Text
-  }
+This is an sort of "enumeration" type class, which enables selecting a class
+to use in a generic instance @S1@ base case.
+-}
+class Monad prs => SeqParser prs where
+    -- | Parser type class.
+    type SeqParserC prs :: Type -> Constraint
 
-getGenericSum :: (Generic a, GGetDSum (Rep a), Get w) => Cfg w -> Getter a
-getGenericSum cfg = to <$> ggetDSum cfg
+    -- | Parse using the selected parser's type class.
+    --
+    -- This should be set to the appropriate function in the parser type class.
+    seqParse :: SeqParserC prs a => prs a
 
-getGenericNonSum :: (Generic a, GGetDNonSum (Rep a)) => Getter a
-getGenericNonSum = to <$> ggetDNonSum
+{-
+-- | Generic sum type parser (data type/top level).
+class GSeqParseDSum prs f where
+    gSeqParseDSum :: Get w => Cfg w -> Getter (f p)
+-}
+
+-- | Generic non-sum type parser (data type/top level).
+class GSeqParseDNonSum prs f where gSeqParseDNonSum :: prs (f p)
+
+-- | Unwrap meta (data type/top level).
+instance (SeqParser prs, GSeqParseDNonSum' cd prs f) => GSeqParseDNonSum prs (D1 cd f) where
+    gSeqParseDNonSum = M1 <$> gSeqParseDNonSum' @cd
+
+-- | Generic non-sum type parser (data type/top level, unwrapped meta).
+class GSeqParseDNonSum' cd prs f where gSeqParseDNonSum' :: prs (f p)
+
+-- | Refuse to derive a sum instance if we expected a non-sum data type.
+instance TypeError EUnexpectedSum => GSeqParseDNonSum' cd prs (l :+: r) where
+    gSeqParseDNonSum' = undefined
+
+-- | Parse the single constructor of a non-sum data type.
+instance GGetC cd cc 0 f => GSeqParseDNonSum' cd prs (C1 cc f) where
+    gSeqParseDNonSum' = M1 <$> ggetC @cd @cc @0
+
+-- | Refuse to derive an instance for an empty data type.
+instance TypeError ENoEmpty => GSeqParseDNonSum' cd prs V1 where
+    gSeqParseDNonSum' = undefined
+
+-- | Generic getter (constructor level).
+class GGetC cd cc (si :: Natural) f where ggetC :: Getter (f p)
+
+-- | Parse fields left to right.
+instance (GGetC cd cc si l, GGetC cd cc (si + ProdArity r) r)
+  => GGetC cd cc si (l :*: r) where
+    ggetC = liftA2 (:*:)
+                   (ggetC @cd @cc @si @l)
+                   (ggetC @cd @cc @(si + ProdArity r))
+
+-- | Parse a field using its existing 'Get' instance.
+--
+-- Fills out detailed error information by reflecting bits from the various
+-- generic meta types ferried through from above type classes.
+instance (Get a, KnownNat si, Selector cs, Constructor cc, Datatype cd)
+  => GGetC cd cc si (S1 cs (Rec0 a)) where
+    ggetC = do
+        a <- getEWrap $ EGeneric cd . EGenericField cc cs si
+        pure $ M1 $ K1 a
+      where
+        cs = selName'' @cs
+        cd = datatypeName' @cd
+        cc = conName' @cc
+        si = natVal'' @si
+
+-- | Wow, look! Nothing!
+instance GGetC cd cc 0 U1 where ggetC = pure U1
+
+type family ProdArity (f :: Type -> Type) :: Natural where
+    ProdArity (S1 c f)  = 1
+    ProdArity (l :*: r) = ProdArity l + ProdArity r
+
+{-
 
 -- | Generic sum type getter (data type/top level).
 class GGetDSum f where ggetDSum :: Get w => Cfg w -> Getter (f p)
@@ -103,56 +164,4 @@ instance (GGetC cd cc 0 f, Constructor cc) => GGetCSum cd (C1 cc f) where
       where
         cTag = (cSumTag cfg) (conName' @cc)
 
--- | Generic getter (constructor level).
-class GGetC cd cc (si :: Natural) f where ggetC :: Getter (f p)
-
--- | Parse fields left to right.
-instance (GGetC cd cc si l, GGetC cd cc (si + ProdArity r) r)
-  => GGetC cd cc si (l :*: r) where
-    ggetC = liftA2 (:*:)
-                   (ggetC @cd @cc @si @l)
-                   (ggetC @cd @cc @(si + ProdArity r))
-
--- | Parse a field using its existing 'Get' instance.
---
--- Fills out detailed error information by reflecting bits from the various
--- generic meta types ferried through from above type classes.
-instance (Get a, KnownNat si, Selector cs, Constructor cc, Datatype cd)
-  => GGetC cd cc si (S1 cs (Rec0 a)) where
-    ggetC = do
-        a <- getEWrap $ EGeneric cd . EGenericField cc cs si
-        pure $ M1 $ K1 a
-      where
-        cs = selName'' @cs
-        cd = datatypeName' @cd
-        cc = conName' @cc
-        si = natVal'' @si
-
--- | Wow, look! Nothing!
-instance GGetC cd cc 0 U1 where ggetC = pure U1
-
-type family ProdArity (f :: Type -> Type) :: Natural where
-    ProdArity (S1 c f)  = 1
-    ProdArity (l :*: r) = ProdArity l + ProdArity r
-
--- | Generic non-sum type getter (data type/top level).
-class GGetDNonSum f where ggetDNonSum :: Getter (f p)
-
--- | Unwrap meta (data type/top level).
-instance GGetDNonSum' cd f => GGetDNonSum (D1 cd f) where
-    ggetDNonSum = M1 <$> ggetDNonSum' @cd
-
--- | Generic non-sum type getter (data type/top level, unwrapped meta).
-class GGetDNonSum' cd f where ggetDNonSum' :: Getter (f p)
-
--- | Refuse to derive a sum instance if we expected a non-sum data type.
-instance TypeError EUnexpectedSum => GGetDNonSum' cd (l :+: r) where
-    ggetDNonSum' = undefined
-
--- | Parse the single constructor of a non-sum data type.
-instance GGetC cd cc 0 f => GGetDNonSum' cd (C1 cc f) where
-    ggetDNonSum' = M1 <$> ggetC @cd @cc @0
-
--- | Refuse to derive an instance for an empty data type.
-instance TypeError ENoEmpty => GGetDNonSum' cd V1 where
-    ggetDNonSum' = undefined
+-}

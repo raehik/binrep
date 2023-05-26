@@ -7,7 +7,7 @@ module Binrep.Generic
   -- * Put
   , putGenericSum', Put.putGenericNonSum
   -- * Get
-  , Get.getGenericSum, Get.getGenericNonSum
+  -- , Get.getGenericSum, Get.getGenericNonSum
   -- * CBLen
   , type CBLen.CBLenGeneric
   ) where
@@ -16,8 +16,6 @@ import Binrep
 import Bytezap ( Poke )
 import Binrep.BLen.Simple.Generic qualified as BLen
 import Binrep.Put.Bytezap qualified as Put
-import Binrep.Get.Flatparse.Generic qualified as Get
-import Binrep.Get.Flatparse.Generic ( Cfg(..) )
 import Binrep.CBLen.Generic qualified as CBLen
 
 import Binrep.Type.NullTerminated
@@ -29,7 +27,9 @@ import Numeric ( readHex )
 import Binrep.Util ( tshow )
 
 import GHC.Generics ( type Generic, type Rep )
-import Senserial.Sequential.Sum qualified as Senserial
+import Senserial.Sequential.Serialize.Sum qualified as Senserial
+
+import Data.Text ( Text )
 
 putGenericSum'
     :: (Generic a, Put.GPutVia Senserial.GSeqSerDSum a, Put w) => Cfg w -> a -> Poke
@@ -38,6 +38,19 @@ putGenericSum' c = Put.putGenericSum (put . cSumTag c)
 blenGenericSum
     :: (Generic a, BLen.GBLenDSum (Rep a), BLen w) => Cfg w -> a -> Int
 blenGenericSum c = BLen.blenGenericSum (blen . cSumTag c)
+
+data Cfg a = Cfg
+  { cSumTag :: String -> a
+  -- ^ How to turn a constructor name into a prefix tag.
+
+  , cSumTagEq   :: a -> a -> Bool
+  -- ^ How to compare prefix tags for equality.
+  --
+  -- By shoving this into our generic derivation config, we can avoid adding an
+  -- insidious 'Eq' constraint. In general, you will want to set this to '(==)'.
+
+  , cSumTagShow :: a -> Text
+  }
 
 -- | Construct a binrep generic deriving config, filling out the relevant
 --   records using 'Eq' and 'Show'.

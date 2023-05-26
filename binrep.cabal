@@ -41,7 +41,6 @@ library
       Binrep.Extra.HexByteString
       Binrep.Generic
       Binrep.Get.Flatparse
-      Binrep.Get.Flatparse.Generic
       Binrep.Put.Bytezap
       Binrep.Put.Mason
       Binrep.Type.Byte
@@ -79,10 +78,14 @@ library
       Data.Aeson.Extra.SizedVector
       Senserial.Internal.Error
       Senserial.Sequential
-      Senserial.Sequential.Internal.Builder
-      Senserial.Sequential.Internal.Field
-      Senserial.Sequential.NonSum
-      Senserial.Sequential.Sum
+      Senserial.Sequential.Parse.Internal.Field
+      Senserial.Sequential.Parse.Internal.Parser
+      Senserial.Sequential.Parse.NonSum
+      Senserial.Sequential.Parse.Sum
+      Senserial.Sequential.Serialize.Internal.Builder
+      Senserial.Sequential.Serialize.Internal.Field
+      Senserial.Sequential.Serialize.NonSum
+      Senserial.Sequential.Serialize.Sum
       Util.Generic
       Util.TypeNats
   other-modules:
