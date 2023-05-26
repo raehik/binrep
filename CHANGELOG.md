@@ -1,4 +1,4 @@
-## Unreleased
+## 0.5.0 (2023-05-11)
   * refactor `Binrep.Type.Text`: users can now add extend to add their own
     encodings
 

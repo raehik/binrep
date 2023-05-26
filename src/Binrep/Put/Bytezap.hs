@@ -1,3 +1,13 @@
+{- | Serialization using the bytezap library.
+
+bytezap serializers ("pokes") work by writing bytes into a pointer, which is
+assumed to have _precisely_ the space required. The user must determine the
+post-serialize length before the fact. For that reason, this module requires
+that types to be serialized have a 'BLen' instance. In general, we are happy
+about this, because a binrep type should always have an efficient and preferably
+simple 'BLen' instance (and if not, it shouldn't be a binrep type).
+-}
+
 {-# LANGUAGE UndecidableInstances #-} -- for 'TypeError'
 
 module Binrep.Put.Bytezap where
@@ -15,14 +25,42 @@ import Data.Void
 import Data.Word
 import Data.Int
 
-class Put a where put :: a -> Poke
+import GHC.Generics ( type Generic, type Rep )
+import Senserial.Sequential.NonSum qualified as Senserial
+import Senserial.Sequential.Sum qualified as Senserial
+import Senserial.Sequential.Internal.Builder qualified as Senserial
 
-instance TypeError ENoEmpty => Put Void where put = undefined
-instance TypeError ENoSum => Put (Either a b) where put = undefined
+class Put a where put :: a -> Poke
 
 runPut :: (BLen a, Put a) => a -> B.ByteString
 runPut a = runPoke (blen a) (put a)
 {-# INLINE runPut #-}
+
+-- v TODO provide a clear type error if such instances are missing. v
+instance Senserial.SeqBuilder Poke where
+    type SeqBuilderC Poke = Put
+    toSeqBuilder = put
+
+type GPutVia f a = f Poke (Rep a)
+
+-- | Serialize a term of the sum type @a@ via its 'Generic' instance.
+--
+-- You must provide a serializer for @a@'s constructors. This is regrettably
+-- inefficient due to having to use 'String's. Alas. Do write your own instance
+-- if you want better performance!
+putGenericSum
+    :: (Generic a, GPutVia Senserial.SeqSerSum a)
+    => (String -> Poke) -> a -> Poke
+putGenericSum = Senserial.seqSerSum
+
+-- | Serialize a term of the non-sum type @a@ via its 'Generic' instance.
+putGenericNonSum
+    :: (Generic a, GPutVia Senserial.SeqSerNonSum a)
+    => a -> Poke
+putGenericNonSum = Senserial.seqSerNonSum
+
+instance TypeError ENoEmpty => Put Void where put = undefined
+instance TypeError ENoSum => Put (Either a b) where put = undefined
 
 instance Put Write where
     {-# INLINE put #-}
