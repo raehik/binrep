@@ -5,18 +5,17 @@ module Binrep.Generic
   -- * BLen
   , blenGenericSum, BLen.blenGenericNonSum
   -- * Put
-  , putGenericSum, Put.putGenericNonSum
+  , putGenericSum', Put.putGenericNonSum
   -- * Get
   , Get.getGenericSum, Get.getGenericNonSum
   -- * CBLen
   , type CBLen.CBLenGeneric
   ) where
 
-import GHC.Generics
 import Binrep
 import Bytezap ( Poke )
 import Binrep.BLen.Simple.Generic qualified as BLen
-import Binrep.Put.Bytezap.Generic qualified as Put
+import Binrep.Put.Bytezap qualified as Put
 import Binrep.Get.Flatparse.Generic qualified as Get
 import Binrep.Get.Flatparse.Generic ( Cfg(..) )
 import Binrep.CBLen.Generic qualified as CBLen
@@ -29,9 +28,12 @@ import Refined.Unsafe
 import Numeric ( readHex )
 import Binrep.Util ( tshow )
 
-putGenericSum
-    :: (Generic a, Put.GPutDSum (Rep a), Put w) => Cfg w -> a -> Poke
-putGenericSum c = Put.putGenericSum (put . cSumTag c)
+import GHC.Generics ( type Generic, type Rep )
+import Senserial.Sequential.Sum qualified as Senserial
+
+putGenericSum'
+    :: (Generic a, Put.GPutVia Senserial.GSeqSerDSum a, Put w) => Cfg w -> a -> Poke
+putGenericSum' c = Put.putGenericSum (put . cSumTag c)
 
 blenGenericSum
     :: (Generic a, BLen.GBLenDSum (Rep a), BLen w) => Cfg w -> a -> Int

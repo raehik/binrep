@@ -43,7 +43,7 @@ library
       Binrep.Get.Flatparse
       Binrep.Get.Flatparse.Generic
       Binrep.Put.Bytezap
-      Binrep.Put.Bytezap.Generic
+      Binrep.Put.Mason
       Binrep.Type.Byte
       Binrep.Type.Common
       Binrep.Type.Int
@@ -77,6 +77,12 @@ library
       Bytezap.Poke.Int
       Bytezap.Text
       Data.Aeson.Extra.SizedVector
+      Senserial.Internal.Error
+      Senserial.Sequential
+      Senserial.Sequential.Internal.Builder
+      Senserial.Sequential.Internal.Field
+      Senserial.Sequential.NonSum
+      Senserial.Sequential.Sum
       Util.Generic
       Util.TypeNats
   other-modules:
@@ -100,8 +106,8 @@ library
     , base >=4.14 && <5
     , bytestring ==0.11.*
     , deepseq >=1.4.8.0 && <1.5
-    , either >=5.0.1.1 && <5.1
     , flatparse >=0.4.0.1 && <0.5
+    , mason
     , megaparsec >=9.2.0 && <9.3
     , parser-combinators >=1.3.0 && <1.4
     , refined1 ==0.9.*
@@ -146,10 +152,10 @@ test-suite spec
     , binrep
     , bytestring ==0.11.*
     , deepseq >=1.4.8.0 && <1.5
-    , either >=5.0.1.1 && <5.1
     , flatparse >=0.4.0.1 && <0.5
     , generic-random >=1.5.0.1 && <1.6
     , hspec >=2.7 && <2.10
+    , mason
     , megaparsec >=9.2.0 && <9.3
     , parser-combinators >=1.3.0 && <1.4
     , quickcheck-instances >=0.3.26 && <0.4
@@ -189,9 +195,9 @@ benchmark bench
     , binrep
     , bytestring ==0.11.*
     , deepseq >=1.4.8.0 && <1.5
-    , either >=5.0.1.1 && <5.1
     , flatparse >=0.4.0.1 && <0.5
     , gauge
+    , mason
     , megaparsec >=9.2.0 && <9.3
     , parser-combinators >=1.3.0 && <1.4
     , refined1 ==0.9.*

@@ -10,7 +10,7 @@ import Refined.Unsafe ( reallyUnsafeRefine )
 import System.IO.Unsafe qualified
 import Control.Exception qualified
 import Data.Text.Encoding.Error qualified
-import Data.Either.Combinators qualified as Either
+import Data.Bifunctor ( bimap )
 
 type Bytes = B.ByteString
 
@@ -40,7 +40,7 @@ decodeText
     :: forall enc e
     .  (e -> String) -> (Bytes -> Either e Text) -> Bytes
     -> Either String (AsText enc)
-decodeText g f = Either.mapBoth g reallyUnsafeRefine . f
+decodeText g f = bimap g reallyUnsafeRefine . f
 
 -- | Run an unsafe decoder safely.
 --

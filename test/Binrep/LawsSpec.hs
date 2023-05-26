@@ -50,7 +50,7 @@ dCfg :: Cfg (NullTerminated B.ByteString)
 dCfg = cfg cSumTagNullTerm
 
 instance BLen D where blen = blenGenericSum dCfg
-instance Put  D where put  = putGenericSum  dCfg
+instance Put  D where put  = putGenericSum'  dCfg
 instance Get  D where get  = getGenericSum  dCfg
 
 data DNoSum = DNoSum Word8 W1 W2LE W8BE
