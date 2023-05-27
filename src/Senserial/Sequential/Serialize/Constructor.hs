@@ -1,14 +1,14 @@
 {-# LANGUAGE UndecidableInstances #-} -- due to type class design
 
-{- | Generic sequential field serialization.
+{- | Generic sequential constructor serialization.
 
 Reusable between sum and non-sum types, so we write it once here.
 -}
 
-module Senserial.Sequential.Serialize.Internal.Field where
+module Senserial.Sequential.Serialize.Constructor where
 
 import GHC.Generics
-import Senserial.Sequential.Serialize.Internal.Builder ( SeqBuilder(..) )
+import Senserial.Sequential.Serialize.Builder ( SeqBuilder(..) )
 
 -- | Generic sequential serializer (constructor level).
 class GSeqSerC bld f where gSeqSerC :: f p -> bld

@@ -1,4 +1,4 @@
-module Senserial.Sequential.Parse.Internal.Parser where
+module Senserial.Sequential.Parse.Parser where
 
 import Data.Kind ( type Type, type Constraint )
 import Numeric.Natural ( Natural )
@@ -11,7 +11,7 @@ class for parsing from compatible types.
 This is an sort of "enumeration" type class, which enables selecting a class
 to use in a generic instance @S1@ base case.
 -}
-class Monad prs => SeqParser prs where
+class SeqParser prs where
     -- | Parser type class.
     type SeqParserC prs :: Type -> Constraint
 

@@ -1,18 +1,23 @@
+{- | Generic sequential non-sum type serialization.
+
+All we do here is unwrap, then pass to the constructor serializer.
+-}
+
 module Senserial.Sequential.Serialize.NonSum where
 
 import GHC.Generics
 import GHC.TypeError ( TypeError )
 import Senserial.Internal.Error ( type ENoEmpty, type EUnexpectedSum )
-import Senserial.Sequential.Serialize.Internal.Field ( GSeqSerC(gSeqSerC) )
+import Senserial.Sequential.Serialize.Constructor ( GSeqSerC(gSeqSerC) )
 
 -- | Sequentially serialize a term of the non-sum type @a@ generically.
 seqSerNonSum
     :: forall bld a
-    .  (Generic a, GSeqSerDNonSum bld (Rep a))
+    .  (Generic a, SeqSerNonSum bld (Rep a))
     => a -> bld
 seqSerNonSum = gSeqSerDNonSum . from
 
--- | Easier user shorthand for the top-level serializer.
+-- | Easier user shorthand for the top-level generic function.
 type SeqSerNonSum = GSeqSerDNonSum
 
 -- | Generic non-sum type serializer (data type/top level).
