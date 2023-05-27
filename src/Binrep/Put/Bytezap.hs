@@ -25,7 +25,7 @@ import Data.Void
 import Data.Word
 import Data.Int
 
-import GHC.Generics ( type Generic, type Rep )
+import GHC.Generics ( Generic, type Rep )
 import Senserial.Sequential.Serialize.NonSum qualified as Senserial
 import Senserial.Sequential.Serialize.Sum qualified as Senserial
 import Senserial.Sequential.Serialize.Internal.Builder qualified as Senserial

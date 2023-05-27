@@ -16,12 +16,21 @@ use these with GHC's automatically derived 'Generic' instances.
 
 module Senserial.Sequential.Parse.NonSum where
 
+import Senserial.Sequential.Parse.Internal.Field
+import Senserial.Internal.Error ( type ENoEmpty, type EUnexpectedSum )
+
 import GHC.Generics
 import GHC.TypeError ( TypeError )
-import Binrep.Util.Class
-import Binrep.Util.Generic
 
-import Senserial.Sequential.Parse.Internal.Field
+-- | Sequentially parse a term of the non-sum type @a@ generically.
+seqParseNonSum
+    :: forall prs a
+    .  (Generic a, GSeqParseDNonSum prs (Rep a), Functor prs)
+    => prs a
+seqParseNonSum = to <$> gSeqParseDNonSum
+
+-- | Easier user shorthand for the top-level parser.
+type SeqParseNonSum = GSeqParseDNonSum
 
 -- | Generic non-sum sequential parser (data type/top level).
 class GSeqParseDNonSum prs f where gSeqParseDNonSum :: prs (f p)
