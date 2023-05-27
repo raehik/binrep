@@ -7,6 +7,7 @@ module Binrep.Get.Flatparse
   , getEWrap, getEBase
   , cutEBase
   -- , GetWith(..), runGetWith
+  , getGenericNonSum, getGenericSum
   ) where
 
 import FlatParse.Basic qualified as FP
@@ -21,11 +22,14 @@ import Data.Int
 import Bytezap
 import Bytezap.Bytes qualified as BZ
 
-import GHC.Generics ( Generic )
-
 import Data.Text ( Text )
 
 import Numeric.Natural
+
+import GHC.Generics ( Generic, type Rep )
+import Senserial.Sequential.Parse.NonSum qualified as Senserial
+import Senserial.Sequential.Parse.Sum qualified as Senserial
+import Senserial.Sequential.Parse.Internal.Parser qualified as Senserial
 
 type Getter a = FP.Parser E a
 
@@ -87,9 +91,6 @@ class Get a where
     -- | Parse from binary.
     get :: Getter a
 
-instance TypeError ENoEmpty => Get Void where get = undefined
-instance TypeError ENoSum => Get (Either a b) where get = undefined
-
 runGet :: Get a => B.ByteString -> Either E (a, B.ByteString)
 runGet = runGetter get
 
@@ -98,6 +99,32 @@ runGetter g bs = case FP.runParser g bs of
                    FP.OK a bs' -> Right (a, bs')
                    FP.Fail     -> Left $ EBase EFail
                    FP.Err e    -> Left e
+
+instance Senserial.SeqParser (FP.Parser E) where
+    type SeqParserC (FP.Parser E) = Get
+    seqParse cd cc mcs si = getEWrap $ EGeneric cd . EGenericField cc mcs si
+
+instance Senserial.SeqParserSum (FP.Parser E) where
+    seqParserSumParsePfxTag cd =
+        getEWrap $ EGeneric cd . EGenericSum . EGenericSumTag
+    seqParserSumErrNoMatchingCstr cd cstrs ptText =
+        FP.err $ EGeneric cd $ EGenericSum $ EGenericSumTagNoMatch cstrs ptText
+
+type GGetVia f a = f (FP.Parser E) (Rep a)
+
+getGenericSum
+    :: forall pt a
+    .  (Generic a, GGetVia Senserial.SeqParseSum a, Get pt)
+    => Senserial.PfxTagCfg pt -> Getter a
+getGenericSum = Senserial.seqParseSum
+
+getGenericNonSum
+    :: (Generic a, GGetVia Senserial.SeqParseNonSum a)
+    => Getter a
+getGenericNonSum = Senserial.seqParseNonSum
+
+instance TypeError ENoEmpty => Get Void where get = undefined
+instance TypeError ENoSum => Get (Either a b) where get = undefined
 
 -- | Parse a bytestring and... immediate reserialize it.
 --

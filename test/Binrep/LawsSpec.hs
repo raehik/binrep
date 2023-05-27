@@ -18,6 +18,8 @@ import Data.Word
 import Data.ByteString qualified as B
 import GHC.Generics ( Generic )
 
+import Senserial.Sequential.Parse.Sum qualified as Senserial
+
 spec :: Spec
 spec = do
     prop "put is identity on ByteString" $ do
@@ -49,9 +51,12 @@ deriving via (GenericArbitraryU `AndShrinking` D) instance Arbitrary D
 dCfg :: Cfg (NullTerminated B.ByteString)
 dCfg = cfg cSumTagNullTerm
 
+dCfg' :: Senserial.PfxTagCfg (NullTerminated B.ByteString)
+dCfg' = Senserial.eqShowPfxTagCfg cSumTagNullTerm
+
 instance BLen D where blen = blenGenericSum dCfg
 instance Put  D where put  = putGenericSum'  dCfg
-instance Get  D where get  = getGenericSum  dCfg
+instance Get  D where get  = getGenericSum  dCfg'
 
 data DNoSum = DNoSum Word8 W1 W2LE W8BE
     deriving stock (Generic, Eq, Show)

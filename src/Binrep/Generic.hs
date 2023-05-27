@@ -7,7 +7,7 @@ module Binrep.Generic
   -- * Put
   , putGenericSum', Put.putGenericNonSum
   -- * Get
-  -- , Get.getGenericSum, Get.getGenericNonSum
+  , Get.getGenericSum, Get.getGenericNonSum
   -- * CBLen
   , type CBLen.CBLenGeneric
   ) where
@@ -16,6 +16,7 @@ import Binrep
 import Bytezap ( Poke )
 import Binrep.BLen.Simple.Generic qualified as BLen
 import Binrep.Put.Bytezap qualified as Put
+import Binrep.Get.Flatparse qualified as Get
 import Binrep.CBLen.Generic qualified as CBLen
 
 import Binrep.Type.NullTerminated
@@ -26,7 +27,7 @@ import Refined.Unsafe
 import Numeric ( readHex )
 import Binrep.Util ( tshow )
 
-import GHC.Generics ( type Generic, type Rep )
+import GHC.Generics ( Generic, type Rep )
 import Senserial.Sequential.Serialize.Sum qualified as Senserial
 
 import Data.Text ( Text )
