@@ -26,9 +26,7 @@ import Data.Word
 import Data.Int
 
 import GHC.Generics ( Generic, type Rep )
-import Senserial.Sequential.Serialize.NonSum qualified as Senserial
-import Senserial.Sequential.Serialize.Sum qualified as Senserial
-import Senserial.Sequential.Serialize.Internal.Builder qualified as Senserial
+import Senserial.Sequential.Serialize qualified as Senserial
 
 class Put a where put :: a -> Poke
 

@@ -16,7 +16,7 @@ use these with GHC's automatically derived 'Generic' instances.
 
 module Senserial.Sequential.Parse.NonSum where
 
-import Senserial.Sequential.Parse.Internal.Field
+import Senserial.Sequential.Parse.Constructor
 import Senserial.Internal.Error ( type ENoEmpty, type EUnexpectedSum )
 
 import GHC.Generics

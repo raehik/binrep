@@ -1,9 +1,9 @@
 {-# LANGUAGE UndecidableInstances #-} -- due to type class design
 {-# LANGUAGE AllowAmbiguousTypes #-}  -- due to type class design
 
-module Senserial.Sequential.Parse.Internal.Field where
+module Senserial.Sequential.Parse.Constructor where
 
-import Senserial.Sequential.Parse.Internal.Parser
+import Senserial.Sequential.Parse.Parser
 
 import GHC.Generics
 import GHC.TypeNats ( Natural, KnownNat, type (+) )
@@ -25,7 +25,7 @@ instance (Applicative prs, GSeqParseC cd cc si prs l, GSeqParseC cd cc (si + Pro
 --
 -- Fills out detailed error information by reflecting bits from the various
 -- generic meta types ferried through from above type classes.
-instance (SeqParser prs, SeqParserC prs a, KnownNat si, Selector cs, Constructor cc, Datatype cd)
+instance (SeqParser prs, SeqParserC prs a, Monad prs, KnownNat si, Selector cs, Constructor cc, Datatype cd)
   => GSeqParseC cd cc si prs (S1 cs (Rec0 a)) where
     gSeqParseC = do
         a <- seqParse cd cc cs si

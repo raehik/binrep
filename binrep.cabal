@@ -78,12 +78,14 @@ library
       Data.Aeson.Extra.SizedVector
       Senserial.Internal.Error
       Senserial.Sequential
-      Senserial.Sequential.Parse.Internal.Field
-      Senserial.Sequential.Parse.Internal.Parser
+      Senserial.Sequential.Parse
+      Senserial.Sequential.Parse.Constructor
       Senserial.Sequential.Parse.NonSum
+      Senserial.Sequential.Parse.Parser
       Senserial.Sequential.Parse.Sum
-      Senserial.Sequential.Serialize.Internal.Builder
-      Senserial.Sequential.Serialize.Internal.Field
+      Senserial.Sequential.Serialize
+      Senserial.Sequential.Serialize.Builder
+      Senserial.Sequential.Serialize.Constructor
       Senserial.Sequential.Serialize.NonSum
       Senserial.Sequential.Serialize.Sum
       Util.Generic

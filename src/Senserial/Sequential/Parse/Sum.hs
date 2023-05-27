@@ -19,8 +19,8 @@ use these with GHC's automatically derived 'Generic' instances.
 
 module Senserial.Sequential.Parse.Sum where
 
-import Senserial.Sequential.Parse.Internal.Parser
-import Senserial.Sequential.Parse.Internal.Field
+import Senserial.Sequential.Parse.Parser
+import Senserial.Sequential.Parse.Constructor
 import Senserial.Internal.Error ( type ENoEmpty, type EUnexpectedNonSum )
 
 import GHC.Generics

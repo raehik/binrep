@@ -27,9 +27,7 @@ import Data.Text ( Text )
 import Numeric.Natural
 
 import GHC.Generics ( Generic, type Rep )
-import Senserial.Sequential.Parse.NonSum qualified as Senserial
-import Senserial.Sequential.Parse.Sum qualified as Senserial
-import Senserial.Sequential.Parse.Internal.Parser qualified as Senserial
+import Senserial.Sequential.Parse qualified as Senserial
 
 type Getter a = FP.Parser E a
 

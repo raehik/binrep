@@ -1,4 +1,4 @@
-module Senserial.Sequential.Serialize.Internal.Builder where
+module Senserial.Sequential.Serialize.Builder where
 
 import Data.Kind ( type Type, type Constraint )
 
@@ -10,7 +10,7 @@ class for purely converting from compatible types.
 This is an sort of "enumeration" type class, which enables selecting a class
 to use in a generic instance @S1@ base case.
 -}
-class Monoid bld => SeqBuilder bld where
+class SeqBuilder bld where
     -- | Builder type class.
     type SeqBuilderC bld :: Type -> Constraint
 
