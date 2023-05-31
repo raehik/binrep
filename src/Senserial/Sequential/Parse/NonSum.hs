@@ -1,18 +1,9 @@
-{-| Generic binrep parsers via flatparse.
+{-| Generic sequential non-sum type parsing.
 
-Parser construction is split into multiple classes to allow gathering data type
-metadata, to be inserted into parse errors should they arise. As we move down
-the SOP tree, we reflect data type metadata and ferry it through the "lower"
-parsers.
-
-Tuned for binrep-style parsing: sum types must be handled explicitly. TODO
-
-Note your type's 'Generic' instance _must_ be decorated with metadata. So only
-use these with GHC's automatically derived 'Generic' instances.
+All we do here is unwrap, then pass to the constructor parser.
 -}
 
-{-# LANGUAGE UndecidableInstances #-} -- required for TypeError >:(
-{-# LANGUAGE AllowAmbiguousTypes #-} -- required due to generic typeclass design
+{-# LANGUAGE AllowAmbiguousTypes #-} -- due to type class design
 
 module Senserial.Sequential.Parse.NonSum where
 

@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-} -- for senserial instance
+
 {- | Serialization using the bytezap library.
 
 bytezap serializers ("pokes") work by writing bytes into a pointer, which is
@@ -7,8 +9,6 @@ that types to be serialized have a 'BLen' instance. In general, we are happy
 about this, because a binrep type should always have an efficient and preferably
 simple 'BLen' instance (and if not, it shouldn't be a binrep type).
 -}
-
-{-# LANGUAGE UndecidableInstances #-} -- for 'TypeError'
 
 module Binrep.Put.Bytezap where
 
@@ -34,7 +34,6 @@ runPut :: (BLen a, Put a) => a -> B.ByteString
 runPut a = runPoke (blen a) (put a)
 {-# INLINE runPut #-}
 
--- v TODO provide a clear type error if such instances are missing. v
 instance Senserial.SeqBuilder Poke where
     type SeqBuilderC Poke = Put
     seqBuild = put

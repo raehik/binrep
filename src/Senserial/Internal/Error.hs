@@ -1,8 +1,6 @@
--- | TODO 1 Nice type errors for generic instance derivation failures.
+-- | Common descriptions for generic instance derivation errors.
 
 module Senserial.Internal.Error where
-
--- | TODO 2 Nice type errors for generic instance derivation failures.
 
 import GHC.TypeLits ( ErrorMessage(Text) )
 

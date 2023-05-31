@@ -1,20 +1,9 @@
-{-| Generic binrep parsers via flatparse.
+{- | Generic sequential sum type parsing.
 
-Parser construction is split into multiple classes to allow gathering data type
-metadata, to be inserted into parse errors should they arise. As we move down
-the SOP tree, we reflect data type metadata and ferry it through the "lower"
-parsers.
-
-Tuned for binrep-style parsing: sum types must be handled explicitly. TODO
-
-Note your type's 'Generic' instance _must_ be decorated with metadata. So only
-use these with GHC's automatically derived 'Generic' instances.
+Here, we use the the provided function to turn the given value's constructor
+name into a prefix tag, then pass to the constructor serializer.
 -}
 
--- TODO really granular constraints. maybe clean up. Probably do
--- @SeqParser prs => SeqParserSum prs@. Maybe also @Applicative prs@ in there.
-
-{-# LANGUAGE UndecidableInstances #-} -- required for TypeError >:(
 {-# LANGUAGE AllowAmbiguousTypes #-} -- required due to generic typeclass design
 
 module Senserial.Sequential.Parse.Sum where
@@ -41,9 +30,31 @@ seqParseSum ptc = to <$> gSeqParseDSum ptc
 -- | Easier user shorthand for the top-level parser.
 type SeqParseSum = GSeqParseDSum
 
-class SeqParserSum prs where
-    seqParserSumParsePfxTag :: SeqParserC prs pt => String -> prs pt
-    seqParserSumErrNoMatchingCstr :: String -> [String] -> Text -> prs a
+{- | Sequential sum-type parsers.
+
+A type may be used as a sequential parser for a sum type provided it can already
+be used for non-sum types and supports choice (via 'Alternative').
+
+This is an sort of "enumeration" type class, which enables selecting a class
+to use in a generic instance @S1@ base case.
+-}
+class (SeqParser prs, Alternative prs) => SeqParserSum prs where
+    -- | Try to parse a prefix tag of type 'pt'.
+    --
+    -- Relevant metadata is provided as arguments.
+    seqParserSumParsePfxTag
+        :: SeqParserC prs pt
+        => String   -- ^ data type name
+        -> prs pt
+
+    -- | Parse error due to no constructor matching the parsed prefix tag.
+    --
+    -- Relevant metadata is provided as arguments.
+    seqParserSumErrNoMatchingCstr
+        :: String   -- ^ data type name
+        -> [String] -- ^ non-matching constructor names
+        -> Text     -- ^ prefix tag, prettified
+        -> prs a
 
 -- | How to use a type as a prefix tag in a generic sum type parser.
 data PfxTagCfg a = PfxTagCfg
