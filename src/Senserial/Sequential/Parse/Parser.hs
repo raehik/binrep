@@ -11,7 +11,7 @@ class for parsing from compatible types.
 This is an sort of "enumeration" type class, which enables selecting a class
 to use in a generic instance @S1@ base case.
 -}
-class SeqParser prs where
+class Monad prs => SeqParser prs where
     -- | Parser type class.
     type SeqParserC prs :: Type -> Constraint
 
@@ -28,4 +28,6 @@ class SeqParser prs where
     This should be defined using the appropriate function in the parser type
     class.
     -}
-    seqParse :: SeqParserC prs a => String -> String -> Maybe String -> Natural -> prs a
+    seqParse
+        :: SeqParserC prs a
+        => String -> String -> Maybe String -> Natural -> prs a

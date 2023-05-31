@@ -7,6 +7,9 @@ and serializers. No need to muddle through boilerplate generics that look the
 same as everyone else's; just provide a few definitions and senserial can give
 you powerful generic instances.
 
+Currently an unofficial library, distributed as part of binrep. Reader, please
+let the author know if you'd like it released separately.
+
 ## Why?
 It is 2023. There are a number of competing parsing and serialization Haskell
 libraries, and some notable high-performance binary serialization libraries.

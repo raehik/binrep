@@ -1,3 +1,5 @@
+-- | Generic sequential serialization.
+
 module Senserial.Sequential.Serialize
   ( SeqBuilder(..)
   , seqSerSum, type SeqSerSum

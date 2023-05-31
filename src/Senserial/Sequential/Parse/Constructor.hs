@@ -1,6 +1,11 @@
 {-# LANGUAGE UndecidableInstances #-} -- due to type class design
 {-# LANGUAGE AllowAmbiguousTypes #-}  -- due to type class design
 
+{- | Generic sequential constructor parsing.
+
+Reusable between sum and non-sum types, so we write it once here.
+-}
+
 module Senserial.Sequential.Parse.Constructor where
 
 import Senserial.Sequential.Parse.Parser

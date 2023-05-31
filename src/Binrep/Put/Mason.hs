@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-} -- for senserial instance
+
 module Binrep.Put.Mason where
 
 import Mason.Builder qualified as Mason
@@ -8,9 +10,8 @@ import Data.Word
 import Data.Int
 import Data.Void ( Void, absurd )
 
-import GHC.Generics ( type Generic, type Rep )
-import Senserial.Sequential.Serialize.NonSum qualified as Senserial
-import Senserial.Sequential.Serialize.Sum qualified as Senserial
+import GHC.Generics ( Generic, type Rep )
+import Senserial.Sequential.Serialize qualified as Senserial
 
 type Builder = Mason.BuilderFor Mason.StrictByteStringBackend
 
@@ -25,7 +26,9 @@ runPut = runBuilder . put
 runBuilder :: Builder -> B.ByteString
 runBuilder = Mason.toStrictByteString
 
-type GPutVia f a = f Builder (Rep a)
+instance Senserial.SeqBuilder Builder where
+    type SeqBuilderC Builder = Put
+    seqBuild = put
 
 -- | Serialize a term of the sum type @a@ via its 'Generic' instance.
 --
@@ -33,13 +36,13 @@ type GPutVia f a = f Builder (Rep a)
 -- inefficient due to having to use 'String's. Alas. Do write your own instance
 -- if you want better performance!
 putGenericSum
-    :: (Generic a, GPutVia Senserial.GSeqSerDSum a)
+    :: (Generic a, Senserial.SeqSerSum Builder (Rep a))
     => (String -> Builder) -> a -> Builder
 putGenericSum = Senserial.seqSerSum
 
 -- | Serialize a term of the non-sum type @a@ via its 'Generic' instance.
 putGenericNonSum
-    :: (Generic a, GPutVia Senserial.GSeqSerDNonSum a)
+    :: (Generic a, Senserial.SeqSerNonSum Builder (Rep a))
     => a -> Builder
 putGenericNonSum = Senserial.seqSerNonSum
 
