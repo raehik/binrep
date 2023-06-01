@@ -119,7 +119,6 @@ class GSeqParseCSum cd prs f where
 
 instance (Functor prs, Alternative prs, GSeqParseCSum cd prs l, GSeqParseCSum cd prs r)
   => GSeqParseCSum cd prs (l :+: r) where
-    -- TODO should I use regular (<|>) or flatparse's re-associated one?
     gSeqParseCSum ptc pt = l <|> r
       where
         l = L1 <$> gSeqParseCSum @cd ptc pt

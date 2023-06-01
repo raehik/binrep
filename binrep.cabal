@@ -88,6 +88,7 @@ library
       Senserial.Sequential.Serialize.Constructor
       Senserial.Sequential.Serialize.NonSum
       Senserial.Sequential.Serialize.Sum
+      Senserial.Util
       Util.Generic
       Util.TypeNats
   other-modules:

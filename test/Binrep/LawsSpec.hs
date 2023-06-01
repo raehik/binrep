@@ -10,7 +10,8 @@ import Test.QuickCheck
 import ArbitraryOrphans()
 
 import Binrep
-import Binrep.Generic
+import Binrep.Generic ( nullTermCstrPfxTag )
+import Binrep.BLen.Simple.Generic ( blenGenericNonSum, blenGenericSum )
 import Binrep.Type.Int
 import Binrep.Type.Common ( Endianness(..) )
 import Binrep.Type.NullTerminated
@@ -48,15 +49,9 @@ data D
     deriving stock (Generic, Eq, Show)
 deriving via (GenericArbitraryU `AndShrinking` D) instance Arbitrary D
 
-dCfg :: Cfg (NullTerminated B.ByteString)
-dCfg = cfg cSumTagNullTerm
-
-dCfg' :: Senserial.PfxTagCfg (NullTerminated B.ByteString)
-dCfg' = Senserial.eqShowPfxTagCfg cSumTagNullTerm
-
-instance BLen D where blen = blenGenericSum dCfg
-instance Put  D where put  = putGenericSum'  dCfg
-instance Get  D where get  = getGenericSum  dCfg'
+instance BLen D where blen = blenGenericSum $ blen . nullTermCstrPfxTag
+instance Put  D where put  = putGenericSum  $ put . nullTermCstrPfxTag
+instance Get  D where get  = getGenericSum  $ Senserial.eqShowPfxTagCfg nullTermCstrPfxTag
 
 data DNoSum = DNoSum Word8 W1 W2LE W8BE
     deriving stock (Generic, Eq, Show)
