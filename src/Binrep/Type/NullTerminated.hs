@@ -10,7 +10,6 @@ encoding is handled in 'Binrep.Type.Text'.
 module Binrep.Type.NullTerminated where
 
 import Binrep
-import FlatParse.Basic qualified as FP
 
 import Refined
 import Refined.Unsafe
@@ -49,8 +48,7 @@ instance Put a => Put (NullTerminated a) where
 -- | Parse a null-terminated bytestring.
 instance Get (NullTerminated B.ByteString) where
     {-# INLINE get #-}
-    get =     reallyUnsafeRefine
-          <$> FP.cut FP.anyCString (EBase (EFailNamed "cstring"))
+    get = undefined
 
 {-
 I don't know how to do @[a]@. Either I nullterm each element, which is weird

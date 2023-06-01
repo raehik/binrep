@@ -38,21 +38,19 @@ instance Senserial.SeqBuilder Poke where
     type SeqBuilderC Poke = Put
     seqBuild = put
 
-type GPutVia f a = f Poke (Rep a)
-
 -- | Serialize a term of the sum type @a@ via its 'Generic' instance.
 --
 -- You must provide a serializer for @a@'s constructors. This is regrettably
 -- inefficient due to having to use 'String's. Alas. Do write your own instance
 -- if you want better performance!
 putGenericSum
-    :: (Generic a, GPutVia Senserial.SeqSerSum a)
+    :: (Generic a, Senserial.SeqSerSum Poke (Rep a))
     => (String -> Poke) -> a -> Poke
 putGenericSum = Senserial.seqSerSum
 
 -- | Serialize a term of the non-sum type @a@ via its 'Generic' instance.
 putGenericNonSum
-    :: (Generic a, GPutVia Senserial.SeqSerNonSum a)
+    :: (Generic a, Senserial.SeqSerNonSum Poke (Rep a))
     => a -> Poke
 putGenericNonSum = Senserial.seqSerNonSum
 
