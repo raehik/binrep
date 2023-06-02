@@ -4,9 +4,8 @@
 [gh-refined]:    https://github.com/nikita-volkov/refined
 
 # binrep
-binrep is a Haskell library for *precisely modelling binary schemas* and working
-with them effectively and efficiently. It is intended as an extensible framework
-for working with structured binary data, especially byte-oriented file formats.
+binrep is a Haskell library for *precisely modelling binary schemas*, especially
+byte-oriented file formats, and working with them effectively and efficiently.
 Here's why it's useful:
 
   * **Explicit:** Define Haskell data types with the binary schema "baked in".
