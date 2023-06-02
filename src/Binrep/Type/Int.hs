@@ -79,7 +79,7 @@ as BSWAP, byte by byte takes lots of MOVs and SHRs)
 flatparseParseEndianMin
     :: Flatparse.Getter a -> Int -> Flatparse.Getter (Endian end a)
 flatparseParseEndianMin f n =
-    Endian <$> Flatparse.cutEBase f (Flatparse.ERanOut n)
+    Endian <$> Flatparse.getEBase f (Flatparse.ERanOut n)
 
 instance Bytezap.Put (Endian 'LE Word16) where put = BZ.w16le . unEndian
 instance Flatparse.Get (Endian 'LE Word16) where
