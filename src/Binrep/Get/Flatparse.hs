@@ -6,7 +6,6 @@ module Binrep.Get.Flatparse
   , E(..), EBase(..), EGeneric(..), EGenericSum(..)
   , eBase
   , getEBase
-  , cutEBase
   -- , GetWith(..), runGetWith
   , getGenericNonSum, getGenericSum
   ) where
@@ -64,58 +63,6 @@ data EMiddle
 
     deriving stock (Eq, Show, Generic)
 
-eBase :: EBase -> Getter a
-eBase = FP.err . E 0 . EBase
-
--- TODO rename. getWrapBase?
-getEBase :: Get a => EBase -> Getter a
-getEBase = getWrapBase' get
-
-getWrapBase' :: Getter a -> EBase -> Getter a
-getWrapBase' (FP.ParserT f) eb =
-    FP.ParserT \fp eob s st ->
-        let os = I# (minusAddr# eob s)
-         in case f fp eob s st of
-              FP.Fail# st'   -> FP.Err# st' (E os $ EBase eb)
-              FP.Err#  st' e -> FP.Err# st' (E os $ EAnd e eb)
-              x -> x
-
---getEBase' :: Get a => EBase -> Getter a
---getEBase' = FP.cut get . EBase 0
-
--- | Parse. On parse error, coat it in a generic context layer.
-getWrapGeneric :: Get a => String -> (E -> EGeneric E) -> Getter a
-getWrapGeneric = getWrapGeneric' get
-
-getWrapGeneric' :: Getter a -> String -> (E -> EGeneric E) -> Getter a
-getWrapGeneric' (FP.ParserT f) cd fe =
-    FP.ParserT \fp eob s st ->
-        let os = I# (minusAddr# eob s)
-         in case f fp eob s st of
-              FP.Fail# st'   -> FP.Err# st' (E os $ EGeneric cd $ fe EFail)
-              FP.Err#  st' e -> FP.Err# st' (E os $ EGeneric cd $ fe e)
-              x -> x
-
-{-
--- | Parse. On parse error, coat it in a generic context layer.
-getWrapGeneric'
-    :: Get a
-    => String {- ^ data type name -}
-    -> (E -> EGeneric E)
-    -> Getter a
-getWrapGeneric' cd f =
-    FP.cutting get (EGeneric 0 cd $ f EFail) (\e _ -> EGeneric 0 cd $ f e)
--}
-
---Getter a -> Getter 
-
---offset :: FP.ParserT st e Int
---offset = ParserT \fp eob s st -> 
-
-
-cutEBase :: Getter a -> EBase -> Getter a
-cutEBase f e = FP.cut f $ E 0 $ EBase e
-
 data EBase
   = EExpectedByte Word8 Word8
   -- ^ expected first, got second
@@ -168,6 +115,33 @@ data EGenericSum e
         [String] -- ^ constructors tested
         Text     -- ^ prettified prefix tag
     deriving stock (Eq, Show, Generic)
+
+eBase :: EBase -> Getter a
+eBase eb = FP.ParserT \fp eob s st ->
+    let os = I# (minusAddr# eob s)
+     in FP.Err# st (E os $ EBase eb)
+
+getEBase :: Getter a -> EBase -> Getter a
+getEBase (FP.ParserT f) eb =
+    FP.ParserT \fp eob s st ->
+        let os = I# (minusAddr# eob s)
+         in case f fp eob s st of
+              FP.Fail# st'   -> FP.Err# st' (E os $ EBase eb)
+              FP.Err#  st' e -> FP.Err# st' (E os $ EAnd e eb)
+              x -> x
+
+-- | Parse. On parse error, coat it in a generic context layer.
+getWrapGeneric :: Get a => String -> (E -> EGeneric E) -> Getter a
+getWrapGeneric = getWrapGeneric' get
+
+getWrapGeneric' :: Getter a -> String -> (E -> EGeneric E) -> Getter a
+getWrapGeneric' (FP.ParserT f) cd fe =
+    FP.ParserT \fp eob s st ->
+        let os = I# (minusAddr# eob s)
+         in case f fp eob s st of
+              FP.Fail# st'   -> FP.Err# st' (E os $ EGeneric cd $ fe EFail)
+              FP.Err#  st' e -> FP.Err# st' (E os $ EGeneric cd $ fe e)
+              x -> x
 
 class Get a where
     -- | Parse from binary.
@@ -254,10 +228,10 @@ instance Get B.ByteString where
     get = B.copy <$> FP.takeRest
 
 -- | Unsigned byte.
-instance Get Word8 where get = cutEBase FP.anyWord8 (ERanOut 1)
+instance Get Word8 where get = getEBase FP.anyWord8 (ERanOut 1)
 
 -- | Signed byte.
-instance Get  Int8 where get = cutEBase FP.anyInt8  (ERanOut 1)
+instance Get  Int8 where get = getEBase FP.anyInt8  (ERanOut 1)
 
 {-
 Multi-byte machine integers require an endianness to use. A common wrapper is
