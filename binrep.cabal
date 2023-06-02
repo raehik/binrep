@@ -35,7 +35,6 @@ library
   exposed-modules:
       Binrep
       Binrep.BLen.Simple
-      Binrep.BLen.Simple.Generic
       Binrep.CBLen
       Binrep.CBLen.Generic
       Binrep.Extra.HexByteString
@@ -76,6 +75,14 @@ library
       Bytezap.Poke.Int
       Bytezap.Text
       Data.Aeson.Extra.SizedVector
+      Generic.Data.FoldMap
+      Generic.Data.FoldMap.Constructor
+      Generic.Data.FoldMap.NonSum
+      Generic.Data.FoldMap.Sum
+      Generic.Data.Traverse
+      Generic.Data.Traverse.Constructor
+      Generic.Data.Traverse.NonSum
+      Generic.Data.Traverse.Sum
       Senserial.Internal.Error
       Senserial.Sequential
       Senserial.Sequential.Parse

@@ -19,7 +19,7 @@ import Data.Word
 import Data.ByteString qualified as B
 import GHC.Generics ( Generic )
 
-import Senserial.Sequential.Parse.Sum qualified as Senserial
+import Generic.Data.Traverse
 
 spec :: Spec
 spec = do
@@ -51,7 +51,7 @@ deriving via (GenericArbitraryU `AndShrinking` D) instance Arbitrary D
 
 instance BLen D where blen = blenGenericSum $ blen . nullTermCstrPfxTag
 instance Put  D where put  = putGenericSum  $ put . nullTermCstrPfxTag
-instance Get  D where get  = getGenericSum  $ Senserial.eqShowPfxTagCfg nullTermCstrPfxTag
+instance Get  D where get  = getGenericSum  $ eqShowPfxTagCfg nullTermCstrPfxTag
 
 data DNoSum = DNoSum Word8 W1 W2LE W8BE
     deriving stock (Generic, Eq, Show)

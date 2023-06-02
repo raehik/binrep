@@ -29,18 +29,24 @@ import Bytezap ( Write(..) )
 
 import Data.Monoid ( Sum(..) )
 import GHC.Generics ( Generic, type Rep )
-import Senserial.Sequential.Serialize qualified as Senserial
+import Generic.Data.FoldMap
 
 class BLen a where blen :: a -> Int
 
--- LMAO TODO. We can re-use the generic serializer for this, no shit. Just use
--- the 'Sum' monoid.
+-- newtype sum monoid for generic foldMap
 newtype BLen' a = BLen' { getBLen' :: a }
     deriving (Semigroup, Monoid) via Sum a
 
-instance Senserial.SeqBuilder (BLen' Int) where
-    type SeqBuilderC (BLen' Int) = BLen
-    seqBuild = BLen' . blen
+instance GenericFoldMap (BLen' Int) where
+    type GenericFoldMapC (BLen' Int) = BLen
+    genericFoldMapF = BLen' . blen
+
+-- | Measure the byte length of a term of the non-sum type @a@ via its 'Generic'
+--   instance.
+blenGenericNonSum
+    :: (Generic a, GFoldMapNonSum (BLen' Int) (Rep a))
+    => a -> Int
+blenGenericNonSum = getBLen' . genericFoldMapNonSum
 
 -- | Measure the byte length of a term of the sum type @a@ via its 'Generic'
 --   instance.
@@ -49,16 +55,9 @@ instance Senserial.SeqBuilder (BLen' Int) where
 -- inspecting the reified constructor names. This is regrettably inefficient.
 -- Alas. Do write your own instance if you want better performance!
 blenGenericSum
-    :: (Generic a, Senserial.SeqSerSum (BLen' Int) (Rep a))
+    :: (Generic a, GFoldMapSum (BLen' Int) (Rep a))
     => (String -> Int) -> a -> Int
-blenGenericSum f = getBLen' . Senserial.seqSerSum (BLen' <$> f)
-
--- | Measure the byte length of a term of the non-sum type @a@ via its 'Generic'
---   instance.
-blenGenericNonSum
-    :: (Generic a, Senserial.SeqSerNonSum (BLen' Int) (Rep a))
-    => a -> Int
-blenGenericNonSum = getBLen' . Senserial.seqSerNonSum
+blenGenericSum f = getBLen' . genericFoldMapSum (BLen' <$> f)
 
 instance TypeError ENoEmpty => BLen Void where blen = undefined
 instance TypeError ENoSum => BLen (Either a b) where blen = undefined

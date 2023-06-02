@@ -27,7 +27,7 @@ import Data.Text ( Text )
 import Numeric.Natural
 
 import GHC.Generics ( Generic, type Rep )
-import Senserial.Sequential.Parse qualified as Senserial
+import Generic.Data.Traverse
 
 import GHC.Exts ( minusAddr#, Int(I#) )
 
@@ -156,29 +156,28 @@ runGetter g bs = case FP.runParser g bs of
                    FP.Fail     -> Left EFail
                    FP.Err e    -> Left e
 
-instance Senserial.SeqParser (FP.Parser E) where
-    type SeqParserC (FP.Parser E) = Get
-    seqParse cd cc mcs si = getWrapGeneric cd $ EGenericField cc mcs si
+instance GenericTraverse (FP.Parser E) where
+    type GenericTraverseC (FP.Parser E) = Get
+    genericTraverseAction cd cc mcs si =
+        getWrapGeneric cd $ EGenericField cc mcs si
 
-instance Senserial.SeqParserSum (FP.Parser E) where
-    seqParserSumParsePfxTag cd =
+instance GenericTraverseSum (FP.Parser E) where
+    genericTraverseSumPfxTagAction cd =
         getWrapGeneric cd $ EGenericSum . EGenericSumTag
     -- TODO proper offset info
-    seqParserSumErrNoMatchingCstr cd cstrs ptText =
+    genericTraverseSumNoMatchingCstrAction cd cstrs ptText =
         FP.err $ E 0 $ EGeneric cd $ EGenericSum $ EGenericSumTagNoMatch cstrs ptText
 
-type GGetVia f a = f (FP.Parser E) (Rep a)
+getGenericNonSum
+    :: (Generic a, GTraverseNonSum (FP.Parser E) (Rep a))
+    => Getter a
+getGenericNonSum = genericTraverseNonSum
 
 getGenericSum
     :: forall pt a
-    .  (Generic a, GGetVia Senserial.SeqParseSum a, Get pt)
-    => Senserial.PfxTagCfg pt -> Getter a
-getGenericSum = Senserial.seqParseSum
-
-getGenericNonSum
-    :: (Generic a, GGetVia Senserial.SeqParseNonSum a)
-    => Getter a
-getGenericNonSum = Senserial.seqParseNonSum
+    .  (Generic a, GTraverseSum (FP.Parser E) (Rep a), Get pt)
+    => PfxTagCfg pt -> Getter a
+getGenericSum = genericTraverseSum
 
 instance TypeError ENoEmpty => Get Void where get = undefined
 instance TypeError ENoSum => Get (Either a b) where get = undefined

@@ -1,4 +1,6 @@
-{-# OPTIONS_GHC -fno-warn-orphans #-} -- for senserial instance
+{-# OPTIONS_GHC -fno-warn-orphans #-} -- for generic data op instance
+
+-- TODO some instances are wrong, Void should be typeerror
 
 module Binrep.Put.Mason where
 
@@ -11,7 +13,7 @@ import Data.Int
 import Data.Void ( Void, absurd )
 
 import GHC.Generics ( Generic, type Rep )
-import Senserial.Sequential.Serialize qualified as Senserial
+import Generic.Data.FoldMap
 
 type Builder = Mason.BuilderFor Mason.StrictByteStringBackend
 
@@ -26,9 +28,15 @@ runPut = runBuilder . put
 runBuilder :: Builder -> B.ByteString
 runBuilder = Mason.toStrictByteString
 
-instance Senserial.SeqBuilder Builder where
-    type SeqBuilderC Builder = Put
-    seqBuild = put
+instance GenericFoldMap Builder where
+    type GenericFoldMapC Builder = Put
+    genericFoldMapF = put
+
+-- | Serialize a term of the non-sum type @a@ via its 'Generic' instance.
+putGenericNonSum
+    :: (Generic a, GFoldMapNonSum Builder (Rep a))
+    => a -> Builder
+putGenericNonSum = genericFoldMapNonSum
 
 -- | Serialize a term of the sum type @a@ via its 'Generic' instance.
 --
@@ -36,15 +44,9 @@ instance Senserial.SeqBuilder Builder where
 -- inefficient due to having to use 'String's. Alas. Do write your own instance
 -- if you want better performance!
 putGenericSum
-    :: (Generic a, Senserial.SeqSerSum Builder (Rep a))
+    :: (Generic a, GFoldMapSum Builder (Rep a))
     => (String -> Builder) -> a -> Builder
-putGenericSum = Senserial.seqSerSum
-
--- | Serialize a term of the non-sum type @a@ via its 'Generic' instance.
-putGenericNonSum
-    :: (Generic a, Senserial.SeqSerNonSum Builder (Rep a))
-    => a -> Builder
-putGenericNonSum = Senserial.seqSerNonSum
+putGenericSum = genericFoldMapSum
 
 -- | Impossible to serialize 'Void'.
 instance Put Void where

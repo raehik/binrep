@@ -1,5 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
-{-# OPTIONS_GHC -fno-warn-orphans #-} -- for senserial instance
+{-# OPTIONS_GHC -fno-warn-orphans #-} -- for generic data op instance
 
 {- | Serialization using the bytezap library.
 
@@ -27,7 +27,7 @@ import Data.Word
 import Data.Int
 
 import GHC.Generics ( Generic, type Rep )
-import Senserial.Sequential.Serialize qualified as Senserial
+import Generic.Data.FoldMap
 
 class Put a where put :: a -> Poke
 
@@ -35,9 +35,15 @@ runPut :: (BLen a, Put a) => a -> B.ByteString
 runPut a = runPoke (blen a) (put a)
 {-# INLINE runPut #-}
 
-instance Senserial.SeqBuilder Poke where
-    type SeqBuilderC Poke = Put
-    seqBuild = put
+instance GenericFoldMap Poke where
+    type GenericFoldMapC Poke = Put
+    genericFoldMapF = put
+
+-- | Serialize a term of the non-sum type @a@ via its 'Generic' instance.
+putGenericNonSum
+    :: (Generic a, GFoldMapNonSum Poke (Rep a))
+    => a -> Poke
+putGenericNonSum = genericFoldMapNonSum
 
 -- | Serialize a term of the sum type @a@ via its 'Generic' instance.
 --
@@ -45,15 +51,9 @@ instance Senserial.SeqBuilder Poke where
 -- inefficient due to having to use 'String's. Alas. Do write your own instance
 -- if you want better performance!
 putGenericSum
-    :: (Generic a, Senserial.SeqSerSum Poke (Rep a))
+    :: (Generic a, GFoldMapSum Poke (Rep a))
     => (String -> Poke) -> a -> Poke
-putGenericSum = Senserial.seqSerSum
-
--- | Serialize a term of the non-sum type @a@ via its 'Generic' instance.
-putGenericNonSum
-    :: (Generic a, Senserial.SeqSerNonSum Poke (Rep a))
-    => a -> Poke
-putGenericNonSum = Senserial.seqSerNonSum
+putGenericSum = genericFoldMapSum
 
 instance TypeError ENoEmpty => Put Void where put = undefined
 instance TypeError ENoSum => Put (Either a b) where put = undefined
