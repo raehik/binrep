@@ -1,4 +1,5 @@
-## 0.5.0 (2023-06-02)
+## 0.5.0 (Unreleased)
+  * support GHC 9.2 - 9.6
   * extract generic serializing & parsing into separate library. yes, I wrote
     generic generics. what are you going to do about it
   * allow using different libraries for parsing and serializing (since I can't
