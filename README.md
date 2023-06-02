@@ -4,21 +4,25 @@
 [gh-refined]:    https://github.com/nikita-volkov/refined
 
 # binrep
-binrep is a library for **precisely modelling binary schemas** and working with
-them effectively and efficiently in Haskell. Here's why it's useful:
+binrep is a Haskell library for *precisely modelling binary schemas* and working
+with them effectively and efficiently. It is intended as an extensible framework
+for working with structured binary data, especially byte-oriented file formats.
+Here's why it's useful:
 
-  * **Explicit:** Binary representation primitives such as C-style bytestrings
-    (null-terminated), sized explicit-endian machine integers, and null-padded
-    data enable defining Haskell data types with the binary schema "baked in".
-  * **Low boilerplate:** Generic parsers and serializers further reduce boilerplate for
-    straightforward schemas. (See [Generic binary
+  * **Explicit:** Define Haskell data types with the binary schema "baked in".
+    Use highly parameterized binary representation primitives including
+    null-terminated data (e.g. C-style strings), Pascal-style data (length
+    prefixed), sized explicit-endian machine integers, null-padded data. Write
+    your own as needed.
+  * **Low boilerplate:** Straightforward schemas can leverage efficient generic
+    parsers and serializers with just a few lines. (See [Generic binary
     representation](#generic-binary-representation) for details.)
-  * **Easy validation:** Goes hand in hand with my [strongweak][gh-strongweak]
-    library to allow working with unwrapped data internally, and enforcing all
-    the binary representation invariants before serializing - no extra
-    definitions required.
-  * **Performant:** Parsing and serialization is low-level and *extremely fast*,
-    using [flatparse][gh-flatparse] and [mason][gh-mason] respectively.
+  * **Easy validation:** Use the [strongweak][gh-strongweak] library design
+    pattern to define an unvalidated data type for easy internal transformation,
+    and get validation code for free.
+  * **Performant:** Parsing and serialization is *extremely fast*, using
+    [flatparse][gh-flatparse] and [mason][gh-mason] respectively. An
+    experimental non-allocating serializer is also provided.
 
 ## Usage
 ### Dependencies
