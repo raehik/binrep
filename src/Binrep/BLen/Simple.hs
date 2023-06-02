@@ -1,6 +1,17 @@
 {-# LANGUAGE UndecidableInstances #-} -- for 'CBLenly', 'TypeError'
 {-# LANGUAGE AllowAmbiguousTypes #-} -- for 'cblen', 'natValInt'
 
+{- | Byte length as a simple pure function, no bells or whistles.
+
+Non-reallocating serializers like store, bytezap or ptr-poker request the
+expected total byte length when serializing. Thus, they need some way to measure
+byte length *before* serializing. This is that.
+
+It should be very efficient to calculate serialized byte length for most
+binrep-compatible Haskell types. If it isn't, consider whether the
+representation is appropriate for binrep.
+-}
+
 module Binrep.BLen.Simple where
 
 import Binrep.CBLen
@@ -16,7 +27,38 @@ import Data.Word
 import Data.Int
 import Bytezap ( Write(..) )
 
+import Data.Monoid ( Sum(..) )
+import GHC.Generics ( Generic, type Rep )
+import Senserial.Sequential.Serialize qualified as Senserial
+
 class BLen a where blen :: a -> Int
+
+-- LMAO TODO. We can re-use the generic serializer for this, no shit. Just use
+-- the 'Sum' monoid.
+newtype BLen' a = BLen' { getBLen' :: a }
+    deriving (Semigroup, Monoid) via Sum a
+
+instance Senserial.SeqBuilder (BLen' Int) where
+    type SeqBuilderC (BLen' Int) = BLen
+    seqBuild = BLen' . blen
+
+-- | Measure the byte length of a term of the sum type @a@ via its 'Generic'
+--   instance.
+--
+-- You must provide a function to obtain the byte length for the prefix tag, via
+-- inspecting the reified constructor names. This is regrettably inefficient.
+-- Alas. Do write your own instance if you want better performance!
+blenGenericSum
+    :: (Generic a, Senserial.SeqSerSum (BLen' Int) (Rep a))
+    => (String -> Int) -> a -> Int
+blenGenericSum f = getBLen' . Senserial.seqSerSum (BLen' <$> f)
+
+-- | Measure the byte length of a term of the non-sum type @a@ via its 'Generic'
+--   instance.
+blenGenericNonSum
+    :: (Generic a, Senserial.SeqSerNonSum (BLen' Int) (Rep a))
+    => a -> Int
+blenGenericNonSum = getBLen' . Senserial.seqSerNonSum
 
 instance TypeError ENoEmpty => BLen Void where blen = undefined
 instance TypeError ENoSum => BLen (Either a b) where blen = undefined

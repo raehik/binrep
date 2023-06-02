@@ -11,7 +11,7 @@ import ArbitraryOrphans()
 
 import Binrep
 import Binrep.Generic ( nullTermCstrPfxTag )
-import Binrep.BLen.Simple.Generic ( blenGenericNonSum, blenGenericSum )
+import Binrep.BLen.Simple ( blenGenericNonSum, blenGenericSum )
 import Binrep.Type.Int
 import Binrep.Type.Common ( Endianness(..) )
 import Binrep.Type.NullTerminated
