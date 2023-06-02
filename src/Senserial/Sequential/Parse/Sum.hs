@@ -1,10 +1,11 @@
+{-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
+{-# LANGUAGE AllowAmbiguousTypes #-} -- required due to generic typeclass design
+
 {- | Generic sequential sum type parsing.
 
 Here, we use the the provided function to turn the given value's constructor
 name into a prefix tag, then pass to the constructor serializer.
 -}
-
-{-# LANGUAGE AllowAmbiguousTypes #-} -- required due to generic typeclass design
 
 module Senserial.Sequential.Parse.Sum where
 
@@ -13,7 +14,7 @@ import Senserial.Sequential.Parse.Constructor
 import Senserial.Internal.Error ( type ENoEmpty, type EUnexpectedNonSum )
 
 import GHC.Generics
-import GHC.TypeError ( TypeError )
+import GHC.TypeLits ( TypeError )
 import Util.Generic ( datatypeName', conName' )
 import Data.Text qualified as Text
 import Data.Text ( Text )

@@ -1,3 +1,5 @@
+{-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
+
 module Binrep.BLen.Simple.Generic where
 
 import GHC.Generics

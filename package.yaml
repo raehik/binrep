@@ -58,10 +58,10 @@ dependencies:
 - bytestring ^>= 0.11
 - strongweak ^>= 0.6.0
 - refined1 ^>= 0.9
-- text ^>= 2
+- text >= 1.2.5.0 && < 2.1
 - vector-sized ^>= 1.5.0
 - vector ^>= 0.12.3.1
-- deepseq ^>= 1.4.8.0
+- deepseq ^>= 1.4.6.1
 
 - megaparsec ^>= 9.2.0 # for HexByteString
 - aeson >= 2.0 && < 2.2 # because we use refined which uses it (also for HexByteString)

@@ -30,7 +30,7 @@ import Bytezap.Bytes qualified as BZ
 
 import GHC.Generics ( Generic )
 import Data.Data ( Data )
-import GHC.IsList
+import GHC.Exts ( IsList )
 import Data.String
 import Control.DeepSeq
 import Data.Functor.Identity

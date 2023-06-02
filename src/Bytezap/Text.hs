@@ -1,12 +1,15 @@
 {-# LANGUAGE UnboxedTuples #-}
+{-# LANGUAGE CPP #-}
 
 module Bytezap.Text where
 
 import Bytezap
-import Bytezap.Bytes
 import Bytezap.Int
 
 import Data.Text.Internal
+
+-- unused import warnings due to messy CPP
+import Bytezap.Bytes
 import Data.Text.Array qualified as A
 import GHC.Exts
 
@@ -15,9 +18,13 @@ import Data.Foldable ( foldl' )
 import Data.Bits ( shiftR, (.&.) )
 
 textUtf8 :: Text -> Write
+{-# INLINE textUtf8 #-}
+#if MIN_VERSION_text(2,0,0)
 textUtf8 (Text (A.ByteArray arr#) (I# off#) len@(I# len#)) =
     Write len $ pokeByteArray# arr# off# len#
-{-# INLINE textUtf8 #-}
+#else
+textUtf8 = error "Bytezap.Text.textUtf8: cba for text-1"
+#endif
 
 -- TODO adapted from utf8-string
 charUtf8 :: Char -> Write

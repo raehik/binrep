@@ -1,5 +1,5 @@
--- {-# LANGUAGE UndecidableInstances #-} -- for 'TypeError'
- {-# LANGUAGE BlockArguments #-}
+{-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
+{-# LANGUAGE BlockArguments #-}
 
 module Binrep.Get.Flatparse
   ( Getter, Get(..), runGet, runGetter
@@ -14,7 +14,7 @@ import FlatParse.Basic qualified as FP
 import Data.ByteString qualified as B
 
 import Binrep.Util.Class
-import GHC.TypeError
+import GHC.TypeLits ( TypeError )
 
 import Data.Void
 import Data.Word
@@ -117,7 +117,7 @@ data EGenericSum e
     deriving stock (Eq, Show, Generic)
 
 eBase :: EBase -> Getter a
-eBase eb = FP.ParserT \fp eob s st ->
+eBase eb = FP.ParserT \_fp eob s st ->
     let os = I# (minusAddr# eob s)
      in FP.Err# st (E os $ EBase eb)
 

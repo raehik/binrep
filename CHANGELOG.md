@@ -1,4 +1,9 @@
-## 0.5.0 (2023-05-11)
+## 0.5.0 (2023-06-02)
+  * extract generic serializing & parsing into separate library. yes, I wrote
+    generic generics. what are you going to do about it
+  * allow using different libraries for parsing and serializing (since I can't
+    decide)
+  * count-prefixed types use `Refined1`, currently in my refined fork
   * refactor `Binrep.Type.Text`: users can now add extend to add their own
     encodings
 

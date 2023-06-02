@@ -1,3 +1,5 @@
+{-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
+
 {- | Generic sequential non-sum type serialization.
 
 All we do here is unwrap, then pass to the constructor serializer.
@@ -6,7 +8,7 @@ All we do here is unwrap, then pass to the constructor serializer.
 module Senserial.Sequential.Serialize.NonSum where
 
 import GHC.Generics
-import GHC.TypeError ( TypeError )
+import GHC.TypeLits ( TypeError )
 import Senserial.Internal.Error ( type ENoEmpty, type EUnexpectedSum )
 import Senserial.Sequential.Serialize.Constructor ( GSeqSerC(gSeqSerC) )
 

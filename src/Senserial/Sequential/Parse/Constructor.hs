@@ -16,6 +16,8 @@ import Util.Generic ( datatypeName', conName', selName'' )
 import Util.TypeNats ( natVal'' )
 import Data.Kind ( Type )
 
+import Control.Applicative ( liftA2 )
+
 -- | Generic sequential parser (constructor level).
 class GSeqParseC cd cc (si :: Natural) prs f where gSeqParseC :: prs (f p)
 

@@ -1,9 +1,10 @@
+{-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
+{-# LANGUAGE AllowAmbiguousTypes #-} -- due to type class design
+
 {-| Generic sequential non-sum type parsing.
 
 All we do here is unwrap, then pass to the constructor parser.
 -}
-
-{-# LANGUAGE AllowAmbiguousTypes #-} -- due to type class design
 
 module Senserial.Sequential.Parse.NonSum where
 
@@ -11,7 +12,7 @@ import Senserial.Sequential.Parse.Constructor
 import Senserial.Internal.Error ( type ENoEmpty, type EUnexpectedSum )
 
 import GHC.Generics
-import GHC.TypeError ( TypeError )
+import GHC.TypeLits ( TypeError )
 
 -- | Sequentially parse a term of the non-sum type @a@ generically.
 seqParseNonSum
