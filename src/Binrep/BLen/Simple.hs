@@ -8,7 +8,7 @@ import GHC.TypeNats
 import Util.TypeNats ( natValInt )
 
 import Binrep.Util.Class
-import GHC.TypeError
+import GHC.TypeLits ( TypeError )
 
 import Data.Void
 import Data.ByteString qualified as B

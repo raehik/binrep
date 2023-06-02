@@ -1,3 +1,5 @@
+{-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
+
 {- | Generic sequential sum type serialization.
 
 Here, we use the the provided function to turn the given value's constructor
@@ -7,7 +9,7 @@ name into a prefix tag, then pass to the constructor serializer.
 module Senserial.Sequential.Serialize.Sum where
 
 import GHC.Generics
-import GHC.TypeError ( TypeError )
+import GHC.TypeLits ( TypeError )
 import Util.Generic ( conName' )
 import Senserial.Internal.Error ( type ENoEmpty, type EUnexpectedNonSum )
 import Senserial.Sequential.Serialize.Constructor ( GSeqSerC(gSeqSerC) )

@@ -8,7 +8,7 @@ module Bytezap.Class.Generic where
 import Bytezap
 import Bytezap.Class
 import GHC.Generics
-import GHC.TypeError
+import GHC.TypeLits ( TypeError ) -- unused import warning due to messy CPP
 import Data.Kind
 import GHC.TypeLits
 import Util.TypeNats ( natVal'' )

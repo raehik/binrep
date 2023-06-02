@@ -20,7 +20,7 @@
         packages.default = self'.packages.binrep;
         haskellProjects.ghc96 = import ./haskell-flake-ghc96.nix pkgs;
         haskellProjects.default = {
-          basePackages = config.haskellProjects.ghc96.outputs.finalPackages;
+          #basePackages = config.haskellProjects.ghc96.outputs.finalPackages;
           source-overrides = {
             refined1 = inputs.refined1; # 2023-05-11: not on Nix Hackage yet
             strongweak = inputs.strongweak;

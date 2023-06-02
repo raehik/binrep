@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
 {-# OPTIONS_GHC -fno-warn-orphans #-} -- for senserial instance
 
 {- | Serialization using the bytezap library.
@@ -19,7 +20,7 @@ import Data.ByteString qualified as B
 import Binrep.BLen.Simple
 
 import Binrep.Util.Class
-import GHC.TypeError
+import GHC.TypeLits ( TypeError )
 
 import Data.Void
 import Data.Word
