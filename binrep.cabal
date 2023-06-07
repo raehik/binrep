@@ -75,6 +75,7 @@ library
       Bytezap.Poke.Int
       Bytezap.Text
       Data.Aeson.Extra.SizedVector
+      Generic.Data.Error
       Generic.Data.FoldMap
       Generic.Data.FoldMap.Constructor
       Generic.Data.FoldMap.NonSum
@@ -84,19 +85,6 @@ library
       Generic.Data.Traverse.NonSum
       Generic.Data.Traverse.Sum
       Generic.Data.Via
-      Senserial.Internal.Error
-      Senserial.Sequential
-      Senserial.Sequential.Parse
-      Senserial.Sequential.Parse.Constructor
-      Senserial.Sequential.Parse.NonSum
-      Senserial.Sequential.Parse.Parser
-      Senserial.Sequential.Parse.Sum
-      Senserial.Sequential.Serialize
-      Senserial.Sequential.Serialize.Builder
-      Senserial.Sequential.Serialize.Constructor
-      Senserial.Sequential.Serialize.NonSum
-      Senserial.Sequential.Serialize.Sum
-      Senserial.Util
       Util.Generic
       Util.TypeNats
   other-modules:

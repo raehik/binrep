@@ -6,7 +6,7 @@ module Generic.Data.Traverse.Sum where
 import GHC.Generics
 import GHC.TypeLits ( TypeError )
 import Util.Generic ( datatypeName', conName' )
-import Senserial.Internal.Error ( type ENoEmpty, type EUnexpectedNonSum )
+import Generic.Data.Error ( type ENoEmpty, type EUnexpectedNonSum )
 import Generic.Data.Traverse.Constructor ( GTraverseC(gTraverseC), GenericTraverse(..) )
 
 import Data.Text ( Text )

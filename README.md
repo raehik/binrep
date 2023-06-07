@@ -143,5 +143,10 @@ many core ideas, such as refinement types.
 Check out Wuffs if you need to write a bunch of codecs and they really, really
 need to be both fast and safe. The trade-off is, of course, your time.
 
+### flat
+https://hackage.haskell.org/package/flat
+
+Cool, bit-oriented rather than byte-oriented.
+
 ## License
 Provided under the MIT license. See `LICENSE` for license text.

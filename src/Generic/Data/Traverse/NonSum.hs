@@ -5,7 +5,7 @@ module Generic.Data.Traverse.NonSum where
 
 import GHC.Generics
 import GHC.TypeLits ( TypeError )
-import Senserial.Internal.Error ( type ENoEmpty, type EUnexpectedSum )
+import Generic.Data.Error ( type ENoEmpty, type EUnexpectedSum )
 import Generic.Data.Traverse.Constructor ( GTraverseC(gTraverseC) )
 
 class GTraverseNonSum f f' where gTraverseNonSum :: f (f' p)

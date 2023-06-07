@@ -4,7 +4,7 @@ module Generic.Data.FoldMap.NonSum where
 
 import GHC.Generics
 import GHC.TypeLits ( TypeError )
-import Senserial.Internal.Error ( type ENoEmpty, type EUnexpectedSum )
+import Generic.Data.Error ( type ENoEmpty, type EUnexpectedSum )
 import Generic.Data.FoldMap.Constructor ( GFoldMapC(gFoldMapC) )
 
 {- | Left-to-right 'foldMap' over generic product data types.

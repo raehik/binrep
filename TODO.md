@@ -1,4 +1,7 @@
 # binrep to-dos
+## Test new parser errors
+Where we keep track of the offset. It's very weird and probably bad :(
+
 ## Intermediate types should use the bytestring builder type, not a bytestring
 Saves on allocations if you're just gonna serialize. Specifically, the text
 modules probably want this. Not sure how to do it exactly to retain maximum
@@ -38,17 +41,6 @@ May help prevent unexpected OOMs?
     * `newtype ZigZag size end = ZigZag { unZigZag :: I 'S size end }`
     * https://developers.google.com/protocol-buffers/docs/encoding
     * https://hackage.haskell.org/package/zigzag-0.0.1.0/docs/Data-Word-Zigzag.html
-
-## Think about
-  * say it's for defining byte-oriented binary representations, particularly
-    file formats (where byte-oriented is the norm). not well suited for
-    bit-oriented formats such as some wire formats/network data representations
-    * you can still encode bit-oriented data, but it has to be packaged as
-      byte-aligned, because you cannot get/put less than a byte at a time.
-      so for bit fields you'll need bitwise shifts. e.g. IPv4 packet header
-    * there's a cool bit-oriented (= compact!) data representation out there
-      with a Haskell focus called Flat: https://hackage.haskell.org/package/flat
-      should be (?) bad for efficiency and tough for complexity, but cool idea
 
 ## Generate (human-readable) schema from type
 I think I do this by writing yet another typeclass, filling it out for my
