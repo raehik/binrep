@@ -16,6 +16,10 @@ import Data.Kind ( type Type, type Constraint )
 import Generic.Data.Via
 import GHC.TypeLits ( TypeError )
 
+import Data.Monoid
+data A a = A a (Sum Int) ()
+    deriving stock (Generic, Show)
+
 class GenericTraverse f where
     type GenericTraverseC f a :: Constraint
 
@@ -32,12 +36,15 @@ instance GenericTraverse NoRec0 where
     genericTraverseAction = undefined
 
 -- | 'traverse' over types where all fields map to their respective 'mempty'.
+--
+-- Can result in type errors lacking context: a field missing a 'Monoid'
+-- instance will type error with a regular "no instance for" message, without
+-- telling you the surrounding type.
+--
+-- Maybe silly.
 instance GenericTraverse EmptyRec0 where
     type GenericTraverseC EmptyRec0 a = Monoid a
     genericTraverseAction _ _ _ _ = EmptyRec0 mempty
-
-data A a = A a Int Bool ()
-    deriving stock (Functor, Generic)
 
 class GTraverseC cd cc (si :: Natural) f f' where gTraverseC :: f (f' p)
 

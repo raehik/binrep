@@ -7,3 +7,4 @@
 
 ## Code quality
   * highly granular constraints nice for writing, perhaps worse for type errors?
+  * use `Tagged` instead of newtype spam for via?

@@ -16,30 +16,22 @@ import Generic.Data.Traverse.Constructor
 
 import Data.Text qualified as Text
 
-{-
--- | Generic left-to-right 'traverse' over a term of non-sum data type @a@.
+-- | Generic left-to-right 'traverse' over a term of non-sum data type @f a@.
 --
--- @a@ must have exactly one constructor.
+-- @f a@ must have exactly one constructor.
 genericTraverseNonSum
     :: forall f a
     .  (Generic a, GTraverseNonSum f (Rep a), Functor f)
     => f a
 genericTraverseNonSum = to <$> gTraverseNonSum
--}
 
-genericTraverseNonSum
-    :: forall f a
-    .  (Generic1 f, GTraverseNonSum f (Rep1 f))
-    => f a
-genericTraverseNonSum = to1 <$> gTraverseNonSum
-
--- | Generic left-to-right 'traverse' over a term of sum data type @a@.
+-- | Generic left-to-right 'traverse' over a term of sum data type @f a@.
 --
--- @a@ must have at least two constructors.
+-- @f a@ must have at least two constructors.
 --
 -- You must provide a configuration for how to handle constructors.
 genericTraverseSum
-    :: forall f pt a
+    :: forall f a pt
     .  (Generic a, GTraverseSum f (Rep a), GenericTraverseC f pt, Functor f)
     => PfxTagCfg pt
     -> f a
