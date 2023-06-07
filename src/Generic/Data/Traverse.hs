@@ -16,6 +16,7 @@ import Generic.Data.Traverse.Constructor
 
 import Data.Text qualified as Text
 
+{-
 -- | Generic left-to-right 'traverse' over a term of non-sum data type @a@.
 --
 -- @a@ must have exactly one constructor.
@@ -24,6 +25,13 @@ genericTraverseNonSum
     .  (Generic a, GTraverseNonSum f (Rep a), Functor f)
     => f a
 genericTraverseNonSum = to <$> gTraverseNonSum
+-}
+
+genericTraverseNonSum
+    :: forall f a
+    .  (Generic1 f, GTraverseNonSum f (Rep1 f))
+    => f a
+genericTraverseNonSum = to1 <$> gTraverseNonSum
 
 -- | Generic left-to-right 'traverse' over a term of sum data type @a@.
 --

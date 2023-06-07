@@ -8,12 +8,12 @@ import GHC.TypeLits ( TypeError )
 import Senserial.Internal.Error ( type ENoEmpty, type EUnexpectedSum )
 import Generic.Data.Traverse.Constructor ( GTraverseC(gTraverseC) )
 
-class GTraverseNonSum f f' where gTraverseNonSum :: f (f' p)
+class GTraverseNonSum f f' where gTraverseNonSum :: f x
 
 instance (Functor f, GTraverseNonSum' cd f f') => GTraverseNonSum f (D1 cd f') where
     gTraverseNonSum = M1 <$> gTraverseNonSum' @cd
 
-class GTraverseNonSum' cd f f' where gTraverseNonSum' :: f (f' p)
+class GTraverseNonSum' cd f f' where gTraverseNonSum' :: f x
 
 instance TypeError EUnexpectedSum => GTraverseNonSum' cd f (l :+: r) where
     gTraverseNonSum' = undefined

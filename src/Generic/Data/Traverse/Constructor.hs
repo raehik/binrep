@@ -31,10 +31,13 @@ instance GenericTraverse NoRec0 where
     type GenericTraverseC NoRec0 a = TypeError ENoRec0
     genericTraverseAction = undefined
 
--- | 'traverse' over types where all fields map to 'mempty'.
+-- | 'traverse' over types where all fields map to their respective 'mempty'.
 instance GenericTraverse EmptyRec0 where
     type GenericTraverseC EmptyRec0 a = Monoid a
     genericTraverseAction _ _ _ _ = EmptyRec0 mempty
+
+data A a = A a Int Bool ()
+    deriving stock (Functor, Generic)
 
 class GTraverseC cd cc (si :: Natural) f f' where gTraverseC :: f (f' p)
 
@@ -44,13 +47,9 @@ instance (Applicative f, GTraverseC cd cc si f l, GTraverseC cd cc (si + ProdAri
                    (gTraverseC @cd @cc @si)
                    (gTraverseC @cd @cc @(si + ProdArity r))
 
-instance (GenericTraverse f, GenericTraverseC f a, Applicative f, KnownNat si, Selector cs, Constructor cc, Datatype cd)
+instance (GenericTraverse f, GenericTraverseC f a, Functor f, KnownNat si, Selector cs, Constructor cc, Datatype cd)
   => GTraverseC cd cc si f (S1 cs (Rec0 a)) where
-    gTraverseC = do
-        -- TODO rewrite in Applicative style
-        -- ApplicativeDo figures it out but it's still messy w
-        a <- genericTraverseAction cd cc cs si
-        pure $ M1 $ K1 a
+    gTraverseC = (M1 . K1) <$> genericTraverseAction cd cc cs si
       where
         cs = selName'' @cs
         cd = datatypeName' @cd

@@ -8,7 +8,6 @@ import GHC.TypeLits ( ErrorMessage(Text) )
 --   'Rec0' base case i.e. any non-empty constructor.
 newtype NoRec0 a = NoRec0 { unNoRec0 :: a }
     deriving stock (Generic, Show)
-    --deriving (Semigroup, Monoid) via a
 
 type ENoRec0 =
     'Text "Cannot use generic function on NoRec0-wrapped type containing fields"
@@ -20,4 +19,3 @@ type ENoRec0 =
 -- should be something unit-like, such as 'mempty' or 'empty'.
 newtype EmptyRec0 a = EmptyRec0 { unEmptyRec0 :: a }
     deriving stock (Generic, Show)
-    --deriving (Semigroup, Monoid) via a
