@@ -38,7 +38,7 @@ newtype BLen' a = BLen' { getBLen' :: a }
     deriving (Semigroup, Monoid) via Sum a
 
 instance GenericFoldMap (BLen' Int) where
-    type GenericFoldMapC (BLen' Int) = BLen
+    type GenericFoldMapC (BLen' Int) a = BLen a
     genericFoldMapF = BLen' . blen
 
 -- | Measure the byte length of a term of the non-sum type @a@ via its 'Generic'

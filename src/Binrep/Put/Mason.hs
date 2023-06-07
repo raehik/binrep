@@ -29,7 +29,7 @@ runBuilder :: Builder -> B.ByteString
 runBuilder = Mason.toStrictByteString
 
 instance GenericFoldMap Builder where
-    type GenericFoldMapC Builder = Put
+    type GenericFoldMapC Builder a = Put a
     genericFoldMapF = put
 
 -- | Serialize a term of the non-sum type @a@ via its 'Generic' instance.

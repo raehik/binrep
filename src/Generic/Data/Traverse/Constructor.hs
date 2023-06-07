@@ -13,8 +13,11 @@ import Control.Applicative ( liftA2 )
 
 import Data.Kind ( type Type, type Constraint )
 
-class Applicative f => GenericTraverse f where
-    type GenericTraverseC f :: Type -> Constraint
+import Generic.Data.Via
+import GHC.TypeLits ( TypeError )
+
+class GenericTraverse f where
+    type GenericTraverseC f a :: Constraint
 
     -- include data type metadata because this is especially useful for
     -- (monadic) parsers which would like to record that in error messages. we
@@ -22,6 +25,16 @@ class Applicative f => GenericTraverse f where
     genericTraverseAction
         :: GenericTraverseC f a
         => String -> String -> Maybe String -> Natural -> f a
+
+-- | 'traverse' over types with no fields in any constructor.
+instance GenericTraverse NoRec0 where
+    type GenericTraverseC NoRec0 a = TypeError ENoRec0
+    genericTraverseAction = undefined
+
+-- | 'traverse' over types where all fields map to 'mempty'.
+instance GenericTraverse EmptyRec0 where
+    type GenericTraverseC EmptyRec0 a = Monoid a
+    genericTraverseAction _ _ _ _ = EmptyRec0 mempty
 
 class GTraverseC cd cc (si :: Natural) f f' where gTraverseC :: f (f' p)
 

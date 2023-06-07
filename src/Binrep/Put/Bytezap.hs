@@ -36,7 +36,7 @@ runPut a = runPoke (blen a) (put a)
 {-# INLINE runPut #-}
 
 instance GenericFoldMap Poke where
-    type GenericFoldMapC Poke = Put
+    type GenericFoldMapC Poke a = Put a
     genericFoldMapF = put
 
 -- | Serialize a term of the non-sum type @a@ via its 'Generic' instance.

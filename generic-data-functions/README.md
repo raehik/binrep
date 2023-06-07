@@ -1,7 +1,29 @@
 [hackage-flatparse]: https://hackage.haskell.org/package/flatparse
 [hackage-megaparsec]: https://hackage.haskell.org/package/megaparsec
 
-# senserial
+# generic-data-functions
+A small Haskell library providing some funky generics that essentially implement
+select folding and unfolding operations over arbitrary Haskell data types.
+
+## Use cases
+### `foldMap`
+  * simple binary serializers which just concatenate fields together
+  * reducing to a numeric value
+
+### `traverse`
+  * simple binary parsers which can parse generic `foldMap` output
+
+## Notes
+### Orphan instances
+This library is designed to work with and around existing libraries and type
+classes. Thus, you will likely be dealing in orphans. Instances, that is. That's
+life, Jim.
+
+## License
+Provided under the MIT license. See `LICENSE` for license text.
+
+---
+
 senserial is a small library providing reusable generics for (binary) parsers
 and serializers. No need to muddle through boilerplate generics that look the
 same as everyone else's; just provide a few definitions and senserial can give
@@ -43,12 +65,3 @@ serialization).
 
 In short, the primary use of this library is to pull out the common generics
 patterns from binary serialization libraries for easy reuse.
-
-## Notes
-### Orphan instances
-This library is designed to work with and around existing libraries and type
-classes. Unless you add a senserial instance to your parser/serializer
-definition site, you will be dealing with orphan instances. That's life, Jim.
-
-## License
-Provided under the MIT license. See `LICENSE` for license text.

@@ -7,6 +7,13 @@ import GHC.TypeLits ( TypeError )
 import Senserial.Internal.Error ( type ENoEmpty, type EUnexpectedSum )
 import Generic.Data.FoldMap.Constructor ( GFoldMapC(gFoldMapC) )
 
+{- | Left-to-right 'foldMap' over generic product data types.
+
+Take a generic representation, map each field in the data type to a 'Monoid',
+and combine the results with ('<>').
+
+We combine left-to-right because it's most common.
+-}
 class GFoldMapNonSum m f where gFoldMapNonSum :: f p -> m
 
 instance GFoldMapNonSum m f => GFoldMapNonSum m (D1 c f) where

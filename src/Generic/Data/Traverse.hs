@@ -1,5 +1,4 @@
-{- TODO left-to-right
--}
+-- | Left-to-right 'traverse' for generic data types.
 
 module Generic.Data.Traverse
   ( GenericTraverse(..)
@@ -17,16 +16,25 @@ import Generic.Data.Traverse.Constructor
 
 import Data.Text qualified as Text
 
+-- | Generic left-to-right 'traverse' over a term of non-sum data type @a@.
+--
+-- @a@ must have exactly one constructor.
 genericTraverseNonSum
     :: forall f a
     .  (Generic a, GTraverseNonSum f (Rep a), Functor f)
     => f a
 genericTraverseNonSum = to <$> gTraverseNonSum
 
+-- | Generic left-to-right 'traverse' over a term of sum data type @a@.
+--
+-- @a@ must have at least two constructors.
+--
+-- You must provide a configuration for how to handle constructors.
 genericTraverseSum
     :: forall f pt a
     .  (Generic a, GTraverseSum f (Rep a), GenericTraverseC f pt, Functor f)
-    => PfxTagCfg pt -> f a
+    => PfxTagCfg pt
+    -> f a
 genericTraverseSum ptc = to <$> gTraverseSum ptc
 
 -- | Construct a prefix tag config using existing 'Eq' and 'Show' instances.

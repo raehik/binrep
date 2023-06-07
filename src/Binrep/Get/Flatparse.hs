@@ -157,7 +157,7 @@ runGetter g bs = case FP.runParser g bs of
                    FP.Err e    -> Left e
 
 instance GenericTraverse (FP.Parser E) where
-    type GenericTraverseC (FP.Parser E) = Get
+    type GenericTraverseC (FP.Parser E) a = Get a
     genericTraverseAction cd cc mcs si =
         getWrapGeneric cd $ EGenericField cc mcs si
 

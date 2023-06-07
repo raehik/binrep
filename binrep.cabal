@@ -83,6 +83,7 @@ library
       Generic.Data.Traverse.Constructor
       Generic.Data.Traverse.NonSum
       Generic.Data.Traverse.Sum
+      Generic.Data.Via
       Senserial.Internal.Error
       Senserial.Sequential
       Senserial.Sequential.Parse
