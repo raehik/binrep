@@ -9,10 +9,6 @@ import Generic.Data.Via
 import GHC.TypeLits ( TypeError )
 
 -- | 'Monoid's that can be generically 'foldMap'ped to.
---
--- We leave out the 'Monoid' superclass constraint because it gets required
--- later in the generic code, and it's not actually required for some silly edge
--- case types like @data A = A@.
 class GenericFoldMap m where
     -- | The type class that enables mapping permitted types to the monoid.
     --

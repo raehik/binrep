@@ -20,15 +20,23 @@ import Data.Monoid
 data A a = A a (Sum Int) ()
     deriving stock (Generic, Show)
 
+-- | 'Applicative' functors that can be generically 'traverse'd.
 class GenericTraverse f where
+    -- | The type class providing (applicative) actions for permitted types.
     type GenericTraverseC f a :: Constraint
 
-    -- include data type metadata because this is especially useful for
-    -- (monadic) parsers which would like to record that in error messages. we
-    -- don't do it for foldMap because that's pure.
+    -- | The action in 'traverse' (first argument).
+    --
+    -- We include data type metadata because this function is useful for monadic
+    -- parsers, which can record it in error messages. (We don't do it for
+    -- foldMap because it's pure.)
     genericTraverseAction
         :: GenericTraverseC f a
-        => String -> String -> Maybe String -> Natural -> f a
+        => String       {- ^ data type name -}
+        -> String       {- ^ constructor name -}
+        -> Maybe String {- ^ record name (if present) -}
+        -> Natural      {- ^ field index -}
+        -> f a
 
 -- | 'traverse' over types with no fields in any constructor.
 instance GenericTraverse NoRec0 where

@@ -13,6 +13,10 @@ import Data.Text ( Text )
 import Control.Applicative qualified as Applicative
 import Control.Applicative ( Alternative((<|>)) )
 
+{- | Sum-type monads that can be generically 'traverse'd.
+
+For sum types, we require a monad with choice to differentiate constructors.
+-}
 class (GenericTraverse f, Alternative f, Monad f) => GenericTraverseSum f where
     -- | Try to parse a prefix tag of type 'pt'.
     --
