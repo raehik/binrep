@@ -29,7 +29,7 @@ import Bytezap ( Write(..) )
 
 import Data.Monoid ( Sum(..) )
 import GHC.Generics ( Generic, type Rep )
-import Generic.Data.FoldMap
+import Generic.Data.Function.FoldMap
 
 class BLen a where blen :: a -> Int
 

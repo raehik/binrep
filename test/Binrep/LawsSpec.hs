@@ -19,7 +19,7 @@ import Data.Word
 import Data.ByteString qualified as B
 import GHC.Generics ( Generic )
 
-import Generic.Data.Traverse
+import Generic.Data.Function.Traverse
 
 spec :: Spec
 spec = do

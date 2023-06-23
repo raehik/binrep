@@ -1,18 +1,16 @@
 {-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
 
-module Generic.Data.FoldMap.NonSum where
+module Generic.Data.Function.FoldMap.NonSum where
 
 import GHC.Generics
 import GHC.TypeLits ( TypeError )
-import Generic.Data.Error ( type ENoEmpty, type EUnexpectedSum )
-import Generic.Data.FoldMap.Constructor ( GFoldMapC(gFoldMapC) )
+import Generic.Data.Function.Error ( type ENoEmpty, type EUnexpectedSum )
+import Generic.Data.Function.FoldMap.Constructor ( GFoldMapC(gFoldMapC) )
 
-{- | Left-to-right 'foldMap' over generic product data types.
+{- | 'foldMap' over generic product data types.
 
 Take a generic representation, map each field in the data type to a 'Monoid',
 and combine the results with ('<>').
-
-We combine left-to-right because it's most common.
 -}
 class GFoldMapNonSum m f where gFoldMapNonSum :: f p -> m
 

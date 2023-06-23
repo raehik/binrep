@@ -27,7 +27,7 @@ import Data.Text ( Text )
 import Numeric.Natural
 
 import GHC.Generics ( Generic, type Rep )
-import Generic.Data.Traverse
+import Generic.Data.Function.Traverse
 
 import GHC.Exts ( minusAddr#, Int(I#) )
 

@@ -1,6 +1,6 @@
 -- | Common descriptions for generic data type errors.
 
-module Generic.Data.Error where
+module Generic.Data.Function.Error where
 
 import GHC.TypeLits ( ErrorMessage(Text) )
 

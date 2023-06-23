@@ -75,16 +75,17 @@ library
       Bytezap.Poke.Int
       Bytezap.Text
       Data.Aeson.Extra.SizedVector
-      Generic.Data.Error
-      Generic.Data.FoldMap
-      Generic.Data.FoldMap.Constructor
-      Generic.Data.FoldMap.NonSum
-      Generic.Data.FoldMap.Sum
-      Generic.Data.Traverse
-      Generic.Data.Traverse.Constructor
-      Generic.Data.Traverse.NonSum
-      Generic.Data.Traverse.Sum
-      Generic.Data.Via
+      Generic.Data.Function
+      Generic.Data.Function.Error
+      Generic.Data.Function.FoldMap
+      Generic.Data.Function.FoldMap.Constructor
+      Generic.Data.Function.FoldMap.NonSum
+      Generic.Data.Function.FoldMap.Sum
+      Generic.Data.Function.Traverse
+      Generic.Data.Function.Traverse.Constructor
+      Generic.Data.Function.Traverse.NonSum
+      Generic.Data.Function.Traverse.Sum
+      Generic.Data.Function.Via
       Util.Generic
       Util.TypeNats
   other-modules:

@@ -1,6 +1,12 @@
--- | Left-to-right 'traverse' for generic data types.
+{- | 'traverse' for generic data types.
 
-module Generic.Data.Traverse
+TODO This is harder to conceptualize than generic 'foldMap'. No nice clean
+explanation yet.
+
+This function can provide generic support for simple parser-esque types.
+-}
+
+module Generic.Data.Function.Traverse
   ( GenericTraverse(..)
   , genericTraverseNonSum , GTraverseNonSum
   , GenericTraverseSum(..), PfxTagCfg(..)
@@ -10,13 +16,13 @@ module Generic.Data.Traverse
 
 import GHC.Generics
 
-import Generic.Data.Traverse.NonSum
-import Generic.Data.Traverse.Sum
-import Generic.Data.Traverse.Constructor
+import Generic.Data.Function.Traverse.NonSum
+import Generic.Data.Function.Traverse.Sum
+import Generic.Data.Function.Traverse.Constructor
 
 import Data.Text qualified as Text
 
--- | Generic left-to-right 'traverse' over a term of non-sum data type @f a@.
+-- | Generic 'traverse' over a term of non-sum data type @f a@.
 --
 -- @f a@ must have exactly one constructor.
 genericTraverseNonSum
@@ -25,7 +31,7 @@ genericTraverseNonSum
     => f a
 genericTraverseNonSum = to <$> gTraverseNonSum
 
--- | Generic left-to-right 'traverse' over a term of sum data type @f a@.
+-- | Generic 'traverse' over a term of sum data type @f a@.
 --
 -- @f a@ must have at least two constructors.
 --

@@ -21,12 +21,10 @@
         haskellProjects.ghc96 = import ./haskell-flake-ghc96.nix pkgs;
         haskellProjects.default = {
           #basePackages = config.haskellProjects.ghc96.outputs.finalPackages;
-          source-overrides = {
-            refined1 = inputs.refined1; # 2023-05-11: not on Nix Hackage yet
-            strongweak = inputs.strongweak;
-          };
-          overrides = self: super: with pkgs.haskell.lib; {
-            flatparse = super.flatparse_0_4_1_0;
+          packages = {
+            refined1.source = inputs.refined1; # 2023-05-11: not on Nix Hackage yet
+            strongweak.source = inputs.strongweak;
+            flatparse.source = "0.4.1.0";
           };
           devShell = {
             tools = hp: {

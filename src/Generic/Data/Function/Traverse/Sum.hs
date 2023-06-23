@@ -1,13 +1,13 @@
 {-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
 {-# LANGUAGE AllowAmbiguousTypes #-} -- required due to generic typeclass design
 
-module Generic.Data.Traverse.Sum where
+module Generic.Data.Function.Traverse.Sum where
 
 import GHC.Generics
 import GHC.TypeLits ( TypeError )
 import Util.Generic ( datatypeName', conName' )
-import Generic.Data.Error ( type ENoEmpty, type EUnexpectedNonSum )
-import Generic.Data.Traverse.Constructor ( GTraverseC(gTraverseC), GenericTraverse(..) )
+import Generic.Data.Function.Error ( type ENoEmpty, type EUnexpectedNonSum )
+import Generic.Data.Function.Traverse.Constructor ( GTraverseC(gTraverseC), GenericTraverse(..) )
 
 import Data.Text ( Text )
 import Control.Applicative qualified as Applicative

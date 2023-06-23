@@ -27,7 +27,7 @@ import Data.Word
 import Data.Int
 
 import GHC.Generics ( Generic, type Rep )
-import Generic.Data.FoldMap
+import Generic.Data.Function.FoldMap
 
 class Put a where put :: a -> Poke
 

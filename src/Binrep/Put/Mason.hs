@@ -13,7 +13,7 @@ import Data.Int
 import Data.Void ( Void, absurd )
 
 import GHC.Generics ( Generic, type Rep )
-import Generic.Data.FoldMap
+import Generic.Data.Function.FoldMap
 
 type Builder = Mason.BuilderFor Mason.StrictByteStringBackend
 

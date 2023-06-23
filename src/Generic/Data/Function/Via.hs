@@ -1,6 +1,6 @@
 -- | Wrapper types for using with @DerivingVia@.
 
-module Generic.Data.Via where
+module Generic.Data.Function.Via where
 
 import GHC.Generics ( Generic )
 import GHC.TypeLits ( ErrorMessage(Text) )

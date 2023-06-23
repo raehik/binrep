@@ -1,12 +1,12 @@
 {-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
 
-module Generic.Data.FoldMap.Sum where
+module Generic.Data.Function.FoldMap.Sum where
 
 import GHC.Generics
 import GHC.TypeLits ( TypeError )
 import Util.Generic ( conName' )
-import Generic.Data.Error ( type ENoEmpty, type EUnexpectedNonSum )
-import Generic.Data.FoldMap.Constructor ( GFoldMapC(gFoldMapC) )
+import Generic.Data.Function.Error ( type ENoEmpty, type EUnexpectedNonSum )
+import Generic.Data.Function.FoldMap.Constructor ( GFoldMapC(gFoldMapC) )
 
 class GFoldMapSum m f where
     gFoldMapSum :: (String -> m) -> f p -> m

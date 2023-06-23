@@ -2,15 +2,39 @@
 [hackage-megaparsec]: https://hackage.haskell.org/package/megaparsec
 
 # generic-data-functions
-A small Haskell library providing some funky generics that essentially implement
-select folding and unfolding operations over arbitrary Haskell data types.
+A small Haskell library providing some funky generics that work over arbitrary
+Haskell data types. We handle the sums of products representation; you only need
+to pass a handful of definitions. Obtain simple, type-safe generic
+serializers/reducers and parsers for almost zero effort.
 
-## Use cases
-### `foldMap`
+## Functions
+### `foldMap` (L->R)
+```haskell
+foldMap :: (Foldable t, Monoid m) => (a -> m) -> t a -> m
+```
+
+The user provides the `a -> m` dictionary via a special type class instance.
+Constructor fields are mapped and combined left-to-right. Sum representations
+are handled by mappending the constructor via a user-supplied `String -> m`
+first.
+
+Useful for:
+
   * simple binary serializers which just concatenate fields together
   * reducing to a numeric value
 
-### `traverse`
+### `traverse` (L->R)
+```haskell
+traverse :: (Traversable t, Applicative f) => (a -> f b) -> t a -> f (t b)
+```
+
+The user provides the `f a` dictionary via a special type class instance.
+Constructor field actions are run left-to-right.
+Sum representations are handled by running a constructor action first (thus
+requiring `Monad f`).
+
+Useful for:
+
   * simple binary parsers which can parse generic `foldMap` output
 
 ## Notes

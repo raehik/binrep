@@ -2,7 +2,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}  -- due to type class design
 {-# LANGUAGE ApplicativeDo #-} -- TODO because I'm lazy
 
-module Generic.Data.Traverse.Constructor where
+module Generic.Data.Function.Traverse.Constructor where
 
 import GHC.Generics
 import GHC.TypeNats ( Natural, KnownNat, type (+) )
@@ -13,7 +13,7 @@ import Control.Applicative ( liftA2 )
 
 import Data.Kind ( type Type, type Constraint )
 
-import Generic.Data.Via
+import Generic.Data.Function.Via
 import GHC.TypeLits ( TypeError )
 
 import Data.Monoid

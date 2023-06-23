@@ -1,12 +1,12 @@
 {-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
 {-# LANGUAGE AllowAmbiguousTypes #-} -- due to type class design
 
-module Generic.Data.Traverse.NonSum where
+module Generic.Data.Function.Traverse.NonSum where
 
 import GHC.Generics
 import GHC.TypeLits ( TypeError )
-import Generic.Data.Error ( type ENoEmpty, type EUnexpectedSum )
-import Generic.Data.Traverse.Constructor ( GTraverseC(gTraverseC) )
+import Generic.Data.Function.Error ( type ENoEmpty, type EUnexpectedSum )
+import Generic.Data.Function.Traverse.Constructor ( GTraverseC(gTraverseC) )
 
 class GTraverseNonSum f f' where gTraverseNonSum :: f (f' p)
 

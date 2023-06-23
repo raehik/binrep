@@ -1,18 +1,19 @@
 {-# LANGUAGE UndecidableInstances #-} -- due to type class design
 
-module Generic.Data.FoldMap.Constructor where
+module Generic.Data.Function.FoldMap.Constructor where
 
 import GHC.Generics
 import Data.Kind ( type Constraint )
 
-import Generic.Data.Via
+import Generic.Data.Function.Via
 import GHC.TypeLits ( TypeError )
 
 -- | 'Monoid's that can be generically 'foldMap'ped to.
 class GenericFoldMap m where
     -- | The type class that enables mapping permitted types to the monoid.
     --
-    -- Should provide a function like 'genericFoldMapF'.
+    -- The type class should provide a function that looks like
+    -- 'genericFoldMapF'.
     type GenericFoldMapC m a :: Constraint
 
     -- | The "map" function in 'foldMap' (first argument).
