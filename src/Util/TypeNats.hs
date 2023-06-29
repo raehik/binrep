@@ -1,5 +1,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 
+-- | Handy typenat utils.
+
 module Util.TypeNats where
 
 -- natVal''
@@ -13,3 +15,4 @@ natVal'' = natVal' (proxy# :: Proxy# n)
 natValInt :: forall n. KnownNat n => Int
 natValInt = fromIntegral $ natVal'' @n
 {-# INLINE natValInt #-}
+

@@ -3,12 +3,8 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     haskell-flake.url = "github:srid/haskell-flake";
-    refined1 = {
-      url = "github:raehik/refined/refined1-hackage";
-      flake = false;
-    };
-    strongweak = {
-      url = "github:raehik/strongweak";
+    generic-data-functions = {
+      url = "github:raehik/generic-data-functions";
       flake = false;
     };
   };
@@ -22,8 +18,8 @@
         haskellProjects.default = {
           #basePackages = config.haskellProjects.ghc96.outputs.finalPackages;
           packages = {
-            refined1.source = inputs.refined1; # 2023-05-11: not on Nix Hackage yet
-            strongweak.source = inputs.strongweak;
+            generic-data-functions.source = inputs.generic-data-functions;
+            strongweak.source = "0.6.0";
             flatparse.source = "0.4.1.0";
           };
           devShell = {

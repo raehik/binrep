@@ -75,18 +75,6 @@ library
       Bytezap.Poke.Int
       Bytezap.Text
       Data.Aeson.Extra.SizedVector
-      Generic.Data.Function
-      Generic.Data.Function.Error
-      Generic.Data.Function.FoldMap
-      Generic.Data.Function.FoldMap.Constructor
-      Generic.Data.Function.FoldMap.NonSum
-      Generic.Data.Function.FoldMap.Sum
-      Generic.Data.Function.Traverse
-      Generic.Data.Function.Traverse.Constructor
-      Generic.Data.Function.Traverse.NonSum
-      Generic.Data.Function.Traverse.Sum
-      Generic.Data.Function.Via
-      Util.Generic
       Util.TypeNats
   other-modules:
       Paths_binrep
@@ -110,6 +98,7 @@ library
     , bytestring ==0.11.*
     , deepseq >=1.4.6.1 && <1.5
     , flatparse >=0.4.0.1 && <0.5
+    , generic-data-functions >=0.1.0 && <0.2
     , mason
     , megaparsec >=9.2.0 && <9.3
     , parser-combinators >=1.3.0 && <1.4
@@ -156,6 +145,7 @@ test-suite spec
     , bytestring ==0.11.*
     , deepseq >=1.4.6.1 && <1.5
     , flatparse >=0.4.0.1 && <0.5
+    , generic-data-functions >=0.1.0 && <0.2
     , generic-random >=1.5.0.1 && <1.6
     , hspec >=2.7 && <2.10
     , mason
@@ -200,6 +190,7 @@ benchmark bench
     , deepseq >=1.4.6.1 && <1.5
     , flatparse >=0.4.0.1 && <0.5
     , gauge
+    , generic-data-functions >=0.1.0 && <0.2
     , mason
     , megaparsec >=9.2.0 && <9.3
     , parser-combinators >=1.3.0 && <1.4
