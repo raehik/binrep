@@ -26,8 +26,10 @@ import Data.Text ( Text )
 
 import Numeric.Natural
 
-import GHC.Generics ( Generic, type Rep )
+import GHC.Generics
 import Generic.Data.Function.Traverse
+import Generic.Data.Function.Common
+import Generic.Data.Rep.Assert
 
 import GHC.Exts ( minusAddr#, Int(I#) )
 
@@ -169,15 +171,19 @@ instance GenericTraverseSum (FP.Parser E) where
         FP.err $ E 0 $ EGeneric cd $ EGenericSum $ EGenericSumTagNoMatch cstrs ptText
 
 getGenericNonSum
-    :: (Generic a, GTraverseNonSum (FP.Parser E) (Rep a))
+    :: forall {cd} {f} {asserts} a
+    .  (Generic a, Rep a ~ D1 cd f, GTraverseNonSum cd (FP.Parser E) f
+       , asserts ~ '[ 'NoEmpty, 'NoSum], ApplyGCAsserts asserts f)
     => Getter a
-getGenericNonSum = genericTraverseNonSum
+getGenericNonSum = genericTraverseNonSum @asserts
 
 getGenericSum
-    :: forall pt a
-    .  (Generic a, GTraverseSum (FP.Parser E) (Rep a), Get pt)
+    :: forall {cd} {f} {asserts} pt a
+    .  ( Generic a, Rep a ~ D1 cd f, GTraverseSum 'SumOnly cd (FP.Parser E) f
+       , Get pt
+       , asserts ~ '[ 'NoEmpty, 'NeedSum], ApplyGCAsserts asserts f)
     => PfxTagCfg pt -> Getter a
-getGenericSum = genericTraverseSum
+getGenericSum = genericTraverseSum @'SumOnly @asserts
 
 instance TypeError ENoEmpty => Get Void where get = undefined
 instance TypeError ENoSum => Get (Either a b) where get = undefined

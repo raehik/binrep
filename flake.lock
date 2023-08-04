@@ -21,11 +21,11 @@
     "generic-data-functions": {
       "flake": false,
       "locked": {
-        "lastModified": 1689853710,
-        "narHash": "sha256-Svc8jbfVezPTKhpZ3JivqCiPwvkqwgsgo5pURLxnNqg=",
+        "lastModified": 1691181981,
+        "narHash": "sha256-ORD6AAiXM5tNqiau+KZ24GSnHX2cBMl071jjZab+gzo=",
         "owner": "raehik",
         "repo": "generic-data-functions",
-        "rev": "950b23bcbdf6d5f354852ddf7438ad47db089590",
+        "rev": "b09706c468300c6e8f701871a08296244ba2b0e1",
         "type": "github"
       },
       "original": {
@@ -51,16 +51,16 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1690952720,
-        "narHash": "sha256-fPsiQHARfhVxXpWgcuSKvkYwSco8K13K7XevBpdIfPg=",
+        "lastModified": 1691107999,
+        "narHash": "sha256-OSzNTfUfqhMknwBxk/T9mxdKa7vAOUGzK+s2kx5iy2E=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "96112a3ed5d12bb1758b42c63b924c004b6c0bc9",
+        "rev": "c01174aacb4094caadc08c0226768582923efc12",
         "type": "github"
       },
       "original": {
         "owner": "nixos",
-        "ref": "nixpkgs-unstable",
+        "ref": "haskell-updates",
         "repo": "nixpkgs",
         "type": "github"
       }

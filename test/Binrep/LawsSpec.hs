@@ -29,11 +29,6 @@ spec = do
       \(bs :: B.ByteString) -> runGet (runPut bs) `shouldBe` Right (bs, "")
     prop "parse-print roundtrip isomorphism (generic, sum tag via nullterm constructor)" $ do
       \(d :: D) -> runGet (runPut d) `shouldBe` Right (d, "")
-    {- Previously, I had tests for asserting that using generic binrep instances
-       which were configured incorrectly errored and/or gave certain exceptions.
-       With the new generic instance design, this is no longer possible, since
-       those cases have been promoted to the type level!
-    -}
 
 --------------------------------------------------------------------------------
 

@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/haskell-updates";
     flake-parts.url = "github:hercules-ci/flake-parts";
     haskell-flake.url = "github:srid/haskell-flake";
     generic-data-functions = {
@@ -19,8 +19,8 @@
           #basePackages = config.haskellProjects.ghc96.outputs.finalPackages;
           packages = {
             generic-data-functions.source = inputs.generic-data-functions;
-            strongweak.source = "0.6.0";
-            flatparse.source = "0.4.1.0";
+            #strongweak.source = "0.6.0";
+            #flatparse.source = "0.4.1.0";
           };
           devShell = {
             tools = hp: {

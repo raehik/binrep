@@ -26,8 +26,10 @@ import Data.Void
 import Data.Word
 import Data.Int
 
-import GHC.Generics ( Generic, type Rep )
+import GHC.Generics
 import Generic.Data.Function.FoldMap
+import Generic.Data.Function.Common
+import Generic.Data.Rep.Assert
 
 class Put a where put :: a -> Poke
 
@@ -41,9 +43,11 @@ instance GenericFoldMap Poke where
 
 -- | Serialize a term of the non-sum type @a@ via its 'Generic' instance.
 putGenericNonSum
-    :: (Generic a, GFoldMapNonSum Poke (Rep a))
+    :: forall {cd} {f} {asserts} a
+    .  ( Generic a, Rep a ~ D1 cd f, GFoldMapNonSum Poke f
+       , asserts ~ '[ 'NoEmpty, 'NoSum], ApplyGCAsserts asserts f)
     => a -> Poke
-putGenericNonSum = genericFoldMapNonSum
+putGenericNonSum = genericFoldMapNonSum @asserts
 
 -- | Serialize a term of the sum type @a@ via its 'Generic' instance.
 --
@@ -51,9 +55,11 @@ putGenericNonSum = genericFoldMapNonSum
 -- inefficient due to having to use 'String's. Alas. Do write your own instance
 -- if you want better performance!
 putGenericSum
-    :: (Generic a, GFoldMapSum Poke (Rep a))
+    :: forall {cd} {f} {asserts} a
+    .  (Generic a, Rep a ~ D1 cd f, GFoldMapSum 'SumOnly Poke f
+       , asserts ~ '[ 'NoEmpty, 'NeedSum], ApplyGCAsserts asserts f)
     => (String -> Poke) -> a -> Poke
-putGenericSum = genericFoldMapSum
+putGenericSum = genericFoldMapSum @'SumOnly @asserts
 
 instance TypeError ENoEmpty => Put Void where put = undefined
 instance TypeError ENoSum => Put (Either a b) where put = undefined

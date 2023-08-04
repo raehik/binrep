@@ -12,8 +12,10 @@ import Data.Word
 import Data.Int
 import Data.Void ( Void, absurd )
 
-import GHC.Generics ( Generic, type Rep )
+import GHC.Generics
 import Generic.Data.Function.FoldMap
+import Generic.Data.Function.Common
+import Generic.Data.Rep.Assert
 
 type Builder = Mason.BuilderFor Mason.StrictByteStringBackend
 
@@ -34,9 +36,11 @@ instance GenericFoldMap Builder where
 
 -- | Serialize a term of the non-sum type @a@ via its 'Generic' instance.
 putGenericNonSum
-    :: (Generic a, GFoldMapNonSum Builder (Rep a))
+    :: forall {cd} {f} {asserts} a
+    .  ( Generic a, Rep a ~ D1 cd f, GFoldMapNonSum Builder f
+       , asserts ~ '[ 'NoEmpty, 'NoSum], ApplyGCAsserts asserts f)
     => a -> Builder
-putGenericNonSum = genericFoldMapNonSum
+putGenericNonSum = genericFoldMapNonSum @asserts
 
 -- | Serialize a term of the sum type @a@ via its 'Generic' instance.
 --
@@ -44,9 +48,11 @@ putGenericNonSum = genericFoldMapNonSum
 -- inefficient due to having to use 'String's. Alas. Do write your own instance
 -- if you want better performance!
 putGenericSum
-    :: (Generic a, GFoldMapSum Builder (Rep a))
+    :: forall {cd} {f} {asserts} a
+    .  (Generic a, Rep a ~ D1 cd f, GFoldMapSum 'SumOnly Builder f
+       , asserts ~ '[ 'NoEmpty, 'NeedSum], ApplyGCAsserts asserts f)
     => (String -> Builder) -> a -> Builder
-putGenericSum = genericFoldMapSum
+putGenericSum = genericFoldMapSum @'SumOnly @asserts
 
 -- | Impossible to serialize 'Void'.
 instance Put Void where
