@@ -68,6 +68,8 @@ dependencies:
 - megaparsec >= 9.2.0 && < 9.5.0 # for HexByteString
 - aeson >= 2.0 && < 2.2 # because we use refined which uses it (also for HexByteString)
 
+# - containers (only for Haskpatch lol)
+
 library:
   source-dirs: src
 
