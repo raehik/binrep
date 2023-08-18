@@ -12,6 +12,7 @@ import Data.ByteString.Internal qualified as B
 import GHC.IO
 import Data.Word
 import Foreign.ForeignPtr
+import Foreign.Marshal.Utils qualified
 
 byteString :: B.ByteString -> Write
 byteString (B.BS fptr len) = Write len (pokeForeignPtr fptr len)
@@ -25,7 +26,8 @@ pokeForeignPtr fptr len@(I# len#) = poke $ \addr# st# ->
 
 memcpyForeignPtr :: Ptr Word8 -> ForeignPtr Word8 -> Int -> IO ()
 memcpyForeignPtr ptrTo fptrFrom len =
-    B.unsafeWithForeignPtr fptrFrom $ \ptrFrom -> B.memcpy ptrTo ptrFrom len
+    B.unsafeWithForeignPtr fptrFrom $ \ptrFrom ->
+        Foreign.Marshal.Utils.copyBytes ptrTo ptrFrom len
 {-# INLINE memcpyForeignPtr #-}
 
 pokeByteArray# :: ByteArray# -> Int# -> Int# -> Poke
@@ -37,5 +39,5 @@ pokeByteArray# arr# off# len# = poke $ \addr# st# ->
 -- TODO this seems to work but like, really? wow lol
 pokeByteReplicate :: Int -> Word8 -> Poke
 pokeByteReplicate n@(I# n#) w8 = poke $ \addr# st# ->
-    case unIO (B.memset (Ptr addr#) w8 (fromIntegral n)) st# of
+    case unIO (Foreign.Marshal.Utils.fillBytes (Ptr addr#) w8 (fromIntegral n)) st# of
       (# st'#, _ #) -> (# st'#, addr# `plusAddr#` n# #)

@@ -10,6 +10,7 @@ import Data.ByteString.Internal qualified as B
 import GHC.IO
 import Data.Word
 import Foreign.ForeignPtr
+import Foreign.Marshal.Utils qualified
 
 byteString :: B.ByteString -> Poke
 byteString (B.BS fptr len) = pokeForeignPtr fptr len
@@ -23,7 +24,8 @@ pokeForeignPtr fptr len@(I# len#) = poke $ \addr# st# ->
 
 memcpyForeignPtr :: Ptr Word8 -> ForeignPtr Word8 -> Int -> IO ()
 memcpyForeignPtr ptrTo fptrFrom len =
-    B.unsafeWithForeignPtr fptrFrom $ \ptrFrom -> B.memcpy ptrTo ptrFrom len
+    B.unsafeWithForeignPtr fptrFrom $ \ptrFrom ->
+        Foreign.Marshal.Utils.copyBytes ptrTo ptrFrom len
 {-# INLINE memcpyForeignPtr #-}
 
 pokeByteArray# :: ByteArray# -> Int# -> Int# -> Poke
