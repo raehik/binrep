@@ -18,7 +18,7 @@
         haskellProjects.default = {
           #basePackages = config.haskellProjects.ghc96.outputs.finalPackages;
           packages = {
-            generic-data-functions.source = inputs.generic-data-functions;
+            #generic-data-functions.source = inputs.generic-data-functions;
             #strongweak.source = "0.6.0";
             #flatparse.source = "0.4.1.0";
           };
