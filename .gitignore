@@ -5,3 +5,6 @@
 /dist-newstyle/
 
 /tmp
+
+# Nix flake
+result
