@@ -1,10 +1,11 @@
+-- | Poke operations on textual data.
+
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE CPP #-}
 
 module Bytezap.Text where
 
 import Bytezap
-import Bytezap.Int
 
 import Data.Text.Internal
 
@@ -13,18 +14,16 @@ import Bytezap.Bytes
 import Data.Text.Array qualified as A
 import GHC.Exts
 
-import Data.Char ( ord )
-import Data.Foldable ( foldl' )
-import Data.Bits ( shiftR, (.&.) )
-
-textUtf8 :: Text -> Write
+textUtf8 :: Text -> Poke
 {-# INLINE textUtf8 #-}
 #if MIN_VERSION_text(2,0,0)
-textUtf8 (Text (A.ByteArray arr#) (I# off#) len@(I# len#)) =
-    Write len $ pokeByteArray# arr# off# len#
+textUtf8 (Text (A.ByteArray arr#) (I# off#) (I# len#)) =
+    pokeByteArray# arr# off# len#
 #else
 textUtf8 = error "Bytezap.Text.textUtf8: cba for text-1"
 #endif
+
+{-
 
 -- TODO adapted from utf8-string
 charUtf8 :: Char -> Write
@@ -56,3 +55,5 @@ charUtf8 = go . ord
 stringUtf8 :: String -> Write
 stringUtf8 = foldl' (\w c -> w <> charUtf8 c) mempty
 {-# INLINE stringUtf8 #-}
+
+-}

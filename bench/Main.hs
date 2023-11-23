@@ -5,7 +5,10 @@ module Main where
 
 import Gauge
 
-import Binrep
+import Binrep.Put.Mason   qualified as Mason
+import Binrep.Put.Bytezap qualified as Bytezap
+import Binrep.BLen.Simple
+
 import Binrep.Generic
 import Binrep.Type.NullTerminated
 import Data.ByteString qualified as B
@@ -24,13 +27,15 @@ instance BLen X where blen _ = 4
 -}
 
 data X3
-    = X31 Word8
+    = X31 Word8 X3
     | X32 Word8
     | X33 Word8 (NullTerminated B.ByteString) X3
+    | X34 Word8
     deriving stock (Generic)
 
-instance BLen X3 where blen = blenGenericSum cDef
-instance Put  X3 where put  = putGenericSum  cDef
+instance BLen        X3 where blen = blenGenericSum        (blen        . nullTermCstrPfxTag)
+instance Mason.Put   X3 where put  = Mason.putGenericSum   (Mason.put   . nullTermCstrPfxTag)
+instance Bytezap.Put X3 where put  = Bytezap.putGenericSum (Bytezap.put . nullTermCstrPfxTag)
 
 x33 :: X3
 x33 =
@@ -295,9 +300,18 @@ x33 =
     $ X33 007 $$(refineTH "hi, cstring here")
     $ X32 008
 
+x31 :: X3
+x31 = X31 0 $ X31 1 $ X31 2 $ X31 3 $ X31 4 $ X31 5 $ X31 6 $ X31 7 $ X31 8
+    $ X31 0 $ X31 1 $ X31 2 $ X31 3 $ X31 4 $ X31 5 $ X31 6 $ X31 7 $ X31 8
+    $ X31 0 $ X31 1 $ X31 2 $ X31 3 $ X31 4 $ X31 5 $ X31 6 $ X31 7 $ X31 8
+    $ X34 0
+
 main :: IO ()
 main = defaultMain
   [ bgroup "tiny"
-    [ bench "put"  $ whnf Binrep.runPut               x33
+    [ bench "put/text/mason"   $ whnf Mason.runPut   x33
+    , bench "put/text/bytezap" $ whnf Bytezap.runPut x33
+    , bench "put/w8s/mason"    $ whnf Mason.runPut   x31
+    , bench "put/w8s/bytezap"  $ whnf Bytezap.runPut x31
     ]
   ]

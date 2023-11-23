@@ -11,10 +11,8 @@ import ArbitraryOrphans()
 
 import Binrep
 import Binrep.Generic ( nullTermCstrPfxTag )
-import Binrep.BLen.Simple ( blenGenericNonSum, blenGenericSum )
 import Binrep.Type.Int
 import Binrep.Type.Common ( Endianness(..) )
-import Binrep.Type.NullTerminated
 import Data.Word
 import Data.ByteString qualified as B
 import GHC.Generics ( Generic )

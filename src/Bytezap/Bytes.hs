@@ -1,4 +1,4 @@
--- | 'ByteString's and primitive byte arrays.
+-- | Poke operations on strict 'ByteString's and primitive byte arrays.
 
 {-# LANGUAGE UnboxedTuples #-}
 
@@ -14,8 +14,8 @@ import Data.Word
 import Foreign.ForeignPtr
 import Foreign.Marshal.Utils qualified
 
-byteString :: B.ByteString -> Write
-byteString (B.BS fptr len) = Write len (pokeForeignPtr fptr len)
+byteString :: B.ByteString -> Poke
+byteString (B.BS fptr len) = pokeForeignPtr fptr len
 {-# INLINE byteString #-}
 
 pokeForeignPtr :: ForeignPtr Word8 -> Int -> Poke
@@ -41,3 +41,4 @@ pokeByteReplicate :: Int -> Word8 -> Poke
 pokeByteReplicate n@(I# n#) w8 = poke $ \addr# st# ->
     case unIO (Foreign.Marshal.Utils.fillBytes (Ptr addr#) w8 (fromIntegral n)) st# of
       (# st'#, _ #) -> (# st'#, addr# `plusAddr#` n# #)
+{-# INLINE pokeByteReplicate #-}

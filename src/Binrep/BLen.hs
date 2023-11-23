@@ -12,7 +12,7 @@ binrep-compatible Haskell types. If it isn't, consider whether the
 representation is appropriate for binrep.
 -}
 
-module Binrep.BLen.Simple where
+module Binrep.BLen where
 
 import Binrep.CBLen
 import GHC.TypeNats
@@ -25,7 +25,6 @@ import Data.Void
 import Data.ByteString qualified as B
 import Data.Word
 import Data.Int
-import Bytezap ( Write(..) )
 
 import Data.Monoid ( Sum(..) )
 import GHC.Generics
@@ -67,10 +66,6 @@ blenGenericSum f = getBLen' . genericFoldMapSum @'SumOnly @asserts (BLen' <$> f)
 
 instance TypeError ENoEmpty => BLen Void where blen = undefined
 instance TypeError ENoSum => BLen (Either a b) where blen = undefined
-
-instance BLen Write where
-    {-# INLINE blen #-}
-    blen = writeSize
 
 -- | Unit type has length 0.
 instance BLen () where

@@ -11,13 +11,13 @@ about this, because a binrep type should always have an efficient and preferably
 simple 'BLen' instance (and if not, it shouldn't be a binrep type).
 -}
 
-module Binrep.Put.Bytezap where
+module Binrep.Put where
 
 import Bytezap
-import Bytezap.Poke.Bytes
-import Bytezap.Poke.Int
+import Bytezap.Bytes
+import Bytezap.Int
 import Data.ByteString qualified as B
-import Binrep.BLen.Simple
+import Binrep.BLen
 
 import Binrep.Util.Class
 import GHC.TypeLits ( TypeError )
@@ -63,10 +63,6 @@ putGenericSum = genericFoldMapSum @'SumOnly @asserts
 
 instance TypeError ENoEmpty => Put Void where put = undefined
 instance TypeError ENoSum => Put (Either a b) where put = undefined
-
-instance Put Write where
-    {-# INLINE put #-}
-    put = writePoke
 
 -- | Fairly useless because 'Poke' doesn't have a 'BLen' instance.
 instance Put Poke where

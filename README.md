@@ -20,8 +20,8 @@ Here's why it's useful:
     pattern to define an unvalidated data type for easy internal transformation,
     and get validation code for free.
   * **Performant:** Parsing and serialization is *extremely fast*, using
-    [flatparse][gh-flatparse] and [mason][gh-mason] respectively. An
-    experimental non-allocating serializer is also provided.
+    [flatparse][gh-flatparse] and a custom static allocation serializer
+    respectively.
 
 ## Usage
 ### Dependencies
@@ -68,12 +68,19 @@ with binrep's binary representation primitives.
 
 ### Performant primitives
 Parsing uses András Kovács' [flatparse][gh-flatparse] library. Serializing is
-via Fumiaki Kinoshita's [mason][gh-mason] library. These are about as fast as
-you can get in 2022.
+via my custom non-reallocating serialization library bytezap. These approximate
+the upper limit to performance.
+
+Non-reallocating serializers are heavily limited compared to regular ones such
+as Fumiaki Kinoshita's high-performance [mason][gh-mason]
 
 We only define serializers for validated types, meaning we can potentially skip
 safety checks, that other serializers would do. Except we still do them, but
 validation is an explicitly required step before serialization.
+
+Note that there is room for faster flatparse 
+Fumiaki Kinoshita's [mason][gh-mason] library. These are about as fast as
+you can get in 2022.
 
 *This might change if we start to support weirder binary representations,
 specifically offset-based data.*

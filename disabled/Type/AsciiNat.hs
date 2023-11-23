@@ -1,4 +1,4 @@
-{-| Naturals represented via ASCII numerals.
+{- | Naturals represented via ASCII numerals.
 
 A concept which sees occasional use in places where neither speed nor size
 efficiency matter.

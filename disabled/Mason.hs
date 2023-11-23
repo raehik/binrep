@@ -17,6 +17,39 @@ import Generic.Data.Function.FoldMap
 import Generic.Data.Function.Common
 import Generic.Data.Rep.Assert
 
+{-
+import Data.ByteString.Internal qualified as B
+import Mason.Builder.Internal ( Buffer(..), BuilderFor, unBuilder )
+import Foreign.ForeignPtr ( mallocForeignPtrBytes )
+import Foreign.ForeignPtr.Unsafe ( unsafeForeignPtrToPtr )
+import Foreign.Ptr ( minusPtr, plusPtr )
+import Data.IORef ( readIORef, newIORef )
+import System.IO.Unsafe ( unsafePerformIO )
+import Binrep.BLen ( BLen(blen) )
+
+type Builder = Mason.BuilderFor ()
+
+-- | Run the serializer.
+runPut :: (BLen a, Put a) => a -> B.ByteString
+runPut a = runBuilder (blen a) (put a)
+
+runBuilder :: Int -> Builder -> B.ByteString
+runBuilder = masonToStrictByteStringC
+
+masonToStrictByteStringC :: Int -> BuilderFor () -> B.ByteString
+masonToStrictByteStringC len b = unsafePerformIO $ do
+  fptr0 <- mallocForeignPtrBytes len
+  bufferRef <- newIORef fptr0
+  let ptr0 = unsafeForeignPtrToPtr fptr0
+
+  Buffer _ pos <- unBuilder b ()
+    $ Buffer (ptr0 `plusPtr` len) ptr0
+
+  fptr <- readIORef bufferRef
+  pure $ B.PS fptr 0 (pos `minusPtr` unsafeForeignPtrToPtr fptr)
+{-# INLINE masonToStrictByteStringC #-}
+-}
+
 type Builder = Mason.BuilderFor Mason.StrictByteStringBackend
 
 class Put a where
@@ -83,6 +116,8 @@ instance Put  Int8 where
     put w = Mason.int8 w
     {-# INLINE put #-}
 
+{-
+
 -- | Put with inlined checks via an environment.
 class PutWith r a where
     -- | Attempt to serialize to binary with the given environment.
@@ -100,3 +135,5 @@ instance Put a => PutWith r [a]
 runPutWith :: PutWith r a => r -> a -> Either String B.ByteString
 runPutWith r a = case putWith r a of Left  e -> Left e
                                      Right x -> Right $ runBuilder x
+
+-}

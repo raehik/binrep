@@ -1,4 +1,8 @@
-# bytezap to-dos
+# To-dos
+## No consideration towards memory alignment
+We might be doing a bad with this, I don't really know. store has a lot of code
+dedicated here.
+
 ## Challenges with unbuffered serialization
 ### Floats to decimal ASCII
 Serializing floats to ASCII efficiently is hard. Most of the recent fast

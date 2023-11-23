@@ -1,35 +1,27 @@
-{- TODO 2023-02-15 raehik
-Encoding shouldn't change to a bytestring, for efficiency. Due to convenient
-representations, we can efficiently serialize a Text directly to a builder,
-skipping intermediate ByteString conversion.
+module Binrep.Type.Text where
 
-Hm. Maybe that means it should be changed to the builder. What does that mean
-for decoding?
--}
-
-module Binrep.Type.Text
-  ( AsText
-  , Encode(..), encode, encodeToRep
-  , Decode(..)
-
-  , module Binrep.Type.Text.Encoding.Utf8
-  , module Binrep.Type.Text.Encoding.Ascii
-  , module Binrep.Type.Text.Encoding.Utf16
-  , module Binrep.Type.Text.Encoding.Utf32
-  , module Binrep.Type.Text.Encoding.ShiftJis
-
-  ) where
-
-import Binrep.Type.Text.Internal
+import Binrep
 
 import Refined
 
-import Binrep.Type.Text.Encoding.Utf8
-import Binrep.Type.Text.Encoding.Ascii
-import Binrep.Type.Text.Encoding.Utf16
-import Binrep.Type.Text.Encoding.Utf32
-import Binrep.Type.Text.Encoding.ShiftJis
+import Bytezap.Text qualified as BZ
 
+import Data.Text ( Text )
+
+-- | Validated @enc@ text stored in an @a@.
+--
+-- TODO should this be a newtype instead? idk
+type TextEncodingAs enc a = Refined enc a
+
+data Utf8
+
+-- | Any 'Text' value is always valid UTF-8.
+instance Predicate Utf8 Text where validate _ _ = success
+
+instance Put (Refined Utf8 Text) where
+    put = BZ.textUtf8 . unrefine
+
+{-
 -- | Encode some validated text.
 encode :: forall enc. Encode enc => AsText enc -> Bytes
 encode = encode' @enc . unrefine
@@ -51,3 +43,4 @@ encodeToRep
     => AsText enc
     -> Either RefineException (Refined rep Bytes)
 encodeToRep = refine . encode
+-}

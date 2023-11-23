@@ -18,7 +18,7 @@ Do not use this on the term level. That would be _extremely_ silly.
 module Binrep.Type.Byte where
 
 import Bytezap qualified as BZ
-import Bytezap.Poke.Int qualified as BZ
+import Bytezap.Int qualified as BZ
 import GHC.TypeNats
 import GHC.Word
 

@@ -1,14 +1,14 @@
 module Binrep
   ( module Binrep.CBLen
-  , module Binrep.BLen.Simple
-  , module Binrep.Put.Bytezap
-  , module Binrep.Get.Flatparse
+  , module Binrep.BLen
+  , module Binrep.Put
+  , module Binrep.Get
   ) where
 
 import Binrep.CBLen
-import Binrep.BLen.Simple
-import Binrep.Put.Bytezap
-import Binrep.Get.Flatparse
+import Binrep.BLen
+import Binrep.Put
+import Binrep.Get
 
 {- TODO
   * binrep is its own ecosystem where explicitness and correctness wins over

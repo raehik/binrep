@@ -63,35 +63,3 @@ wrapPoke :: Poke -> Ptr Word8 -> IO ()
 wrapPoke (Poke p) (Ptr addr#) =
     IO (\st# -> case p addr# st# of (# l, _r #) -> (# l, () #))
 {-# INLINE wrapPoke #-}
-
--- | Instructions on how to perform a sized write.
---
--- The 'Poke' in 'writePoke' must write the _exact_ number of bytes specified in
--- 'writeSize'. Otherwise, your computer explodes.
-data Write = Write
-  { writeSize :: {-# UNPACK #-} !Int
-  , writePoke :: !Poke -- unpack unusable TODO is strict good or not here
-  }
-
--- | Construct a 'Write'.
-write :: Int -> Poke# -> Write
-write len p = Write len (Poke p)
-{-# INLINE write #-}
-
--- | Sequence the 'Poke's, sum the sizes.
-instance Semigroup Write where
-    -- TODO feels like this might be INLINE[1] or even INLINE[0]?
-    {-# INLINE (<>) #-}
-    Write ll lp <> Write rl rp = Write (ll + rl) (lp <> rp)
-
--- | The empty 'Write' is the empty 'Poke', which writes zero bytes.
-instance Monoid Write where
-    {-# INLINE mempty #-}
-    mempty = Write 0 mempty
-
--- | Serialize and show the resulting ByteString.
-instance Show Write where showsPrec p = showsPrec p . runWrite
-
-runWrite :: Write -> B.ByteString
-runWrite (Write len p) = runPoke len p
-{-# INLINE runWrite #-}
