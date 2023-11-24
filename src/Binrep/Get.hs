@@ -170,7 +170,7 @@ instance GenericTraverseSum (FP.Parser E) where
 
 getGenericNonSum
     :: forall {cd} {f} {asserts} a
-    .  (Generic a, Rep a ~ D1 cd f, GTraverseNonSum cd (FP.Parser E) f
+    .  ( Generic a, Rep a ~ D1 cd f, GTraverseNonSum cd (FP.Parser E) f
        , asserts ~ '[ 'NoEmpty, 'NoSum], ApplyGCAsserts asserts f)
     => Getter a
 getGenericNonSum = genericTraverseNonSum @asserts
