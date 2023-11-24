@@ -35,6 +35,7 @@ library
   exposed-modules:
       Binrep
       Binrep.BLen
+      Binrep.BLen.Ask
       Binrep.CBLen
       Binrep.CBLen.Generic
       Binrep.Extra.HexByteString
@@ -62,6 +63,7 @@ library
       Bytezap.Int
       Bytezap.Text
       Data.Aeson.Extra.SizedVector
+      Raehik.Contravariant.Ask
       Util.TypeNats
   other-modules:
       Paths_binrep
@@ -83,6 +85,7 @@ library
       aeson >=2.0 && <2.2
     , base >=4.14 && <5
     , bytestring >=0.11 && <0.13
+    , contravariant
     , deepseq >=1.4.6.1 && <1.6
     , flatparse >=0.4.0.1 && <0.6
     , generic-data-functions >=0.2.0 && <0.3
@@ -129,6 +132,7 @@ test-suite spec
     , base >=4.14 && <5
     , binrep
     , bytestring >=0.11 && <0.13
+    , contravariant
     , deepseq >=1.4.6.1 && <1.6
     , flatparse >=0.4.0.1 && <0.6
     , generic-data-functions >=0.2.0 && <0.3
@@ -172,6 +176,7 @@ benchmark bench
     , base >=4.14 && <5
     , binrep
     , bytestring >=0.11 && <0.13
+    , contravariant
     , deepseq >=1.4.6.1 && <1.6
     , flatparse >=0.4.0.1 && <0.6
     , gauge
