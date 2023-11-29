@@ -1,32 +1,5 @@
 # binrep to-dos
-## Test new parser errors
-Where we keep track of the offset. It's very weird and probably bad :(
-
-## Intermediate types should use the bytestring builder type, not a bytestring
-Saves on allocations if you're just gonna serialize. Specifically, the text
-modules probably want this. Not sure how to do it exactly to retain maximum
-soundness.
-
-This might be a big change. I need to check aeson's design more thoroughly, it'd
-look like the `Encoding` stuff.
-
-2023-02-19: No, actually, I think this is a Text-unique thing, and they just
-need some extra definitions.
-
-## Octet instead of byte?
-Is it better to refer to octets instead of bytes? An octet is always 8 bits,
-while a byte is kind of "not necessarily".
-
-## Safety against unknown inputs
-Consider implementing "practical maxes" for various types.
-
-  * https://github.com/multiformats/unsigned-varint does this
-  * So do Haskell's protobufs:
-    https://hackage.haskell.org/package/protocol-buffers-2.4.17/docs/src/Text.ProtocolBuffers.Get.html#decode7unrolled
-
-May help prevent unexpected OOMs?
-
-## More primitives
+## Write more primitives
   * Varint
     * base done, but doesn't support everything
     * `newtype Varint sign end = Varint { unVarint :: VarintRep sign }`
@@ -41,6 +14,25 @@ May help prevent unexpected OOMs?
     * `newtype ZigZag size end = ZigZag { unZigZag :: I 'S size end }`
     * https://developers.google.com/protocol-buffers/docs/encoding
     * https://hackage.haskell.org/package/zigzag-0.0.1.0/docs/Data-Word-Zigzag.html
+
+## Define types for some common file formats
+* How about a shared type for xz
+
+## Test new parser errors
+Where we keep track of the offset. It's very weird and probably bad :(
+
+## Octet instead of byte?
+Is it better to refer to octets instead of bytes? An octet is always 8 bits,
+while a byte is kind of "not necessarily".
+
+## Safety against unknown inputs
+Consider implementing "practical maxes" for various types.
+
+  * https://github.com/multiformats/unsigned-varint does this
+  * So do Haskell's protobufs:
+    https://hackage.haskell.org/package/protocol-buffers-2.4.17/docs/src/Text.ProtocolBuffers.Get.html#decode7unrolled
+
+May help prevent unexpected OOMs?
 
 ## Generate (human-readable) schema from type
 I think I do this by writing yet another typeclass, filling it out for my
