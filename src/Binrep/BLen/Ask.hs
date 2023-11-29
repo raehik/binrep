@@ -1,10 +1,11 @@
 {-# LANGUAGE UndecidableInstances #-} -- for 'CBLenly', 'TypeError'
 {-# LANGUAGE AllowAmbiguousTypes #-} -- for 'cblen'
+{-# OPTIONS_GHC -fno-warn-orphans #-} -- for generic data op instance
 
 module Binrep.BLen.Ask where
 
 import Raehik.Contravariant.Ask
-import Data.Monoid ( Sum(Sum) )
+import Data.Monoid ( Sum(Sum, getSum) )
 import Data.Functor.Contravariant.Divisible ( divide )
 
 import Binrep.CBLen
@@ -15,12 +16,23 @@ import Data.ByteString qualified as B
 import Data.Word
 import Data.Int
 
+import GHC.Generics
+import Generic.Data.Function.Contra
+import Generic.Data.Function.Common
+import Generic.Data.Rep.Assert
+import Binrep.Util.Class
+import GHC.TypeLits ( TypeError )
+import Data.Void
+
 type Builder = Ask (Sum Int)
 
 blenConst :: Int -> Builder a
 blenConst = Ignore . Sum
 
 class BLen a where blen :: Builder a
+
+runBlen :: forall a. BLen a => a -> Int
+runBlen a = case blen @a of Ignore (Sum n) -> n; Use f -> getSum (f a)
 
 -- | Deriving via wrapper for types which may derive a 'BLen' instance through
 --   an existing 'IsCBLen' instance.
@@ -37,19 +49,18 @@ cblen :: forall a n. (n ~ CBLen a, KnownNat n) => Int
 cblen = natValInt @n
 {-# INLINE cblen #-}
 
-{-
 instance GenericContra (Ask (Sum Int)) where
     type GenericContraC (Ask (Sum Int)) a = BLen a
-    genericContraF = contramap getSum blen
+    genericContraF = blen
 
 -- | Measure the byte length of a term of the non-sum type @a@ via its 'Generic'
 --   instance.
 blenGenericNonSum
     :: forall {cd} {f} {asserts} a
-    .  ( Generic a, Rep a ~ D1 cd f, GFoldMapNonSum (BLen' Int) f
+    .  ( Generic a, Rep a ~ D1 cd f, GContraNonSum Builder f
        , asserts ~ '[ 'NoEmpty, 'NoSum], ApplyGCAsserts asserts f)
-    => a -> Int
-blenGenericNonSum = getBLen' . genericFoldMapNonSum @asserts
+    => Builder a
+blenGenericNonSum = genericContraNonSum @asserts
 
 -- | Measure the byte length of a term of the sum type @a@ via its 'Generic'
 --   instance.
@@ -59,14 +70,13 @@ blenGenericNonSum = getBLen' . genericFoldMapNonSum @asserts
 -- Alas. Do write your own instance if you want better performance!
 blenGenericSum
     :: forall {cd} {f} {asserts} a
-    .  (Generic a, Rep a ~ D1 cd f, GFoldMapSum 'SumOnly (BLen' Int) f
+    .  (Generic a, Rep a ~ D1 cd f, GContraSum 'SumOnly Builder f
        , asserts ~ '[ 'NoEmpty, 'NeedSum], ApplyGCAsserts asserts f)
-    => (String -> Int) -> a -> Int
-blenGenericSum f = getBLen' . genericFoldMapSum @'SumOnly @asserts (BLen' <$> f)
+    => Builder String -> Builder a
+blenGenericSum f = genericContraSum @'SumOnly @asserts f
 
-instance TypeError ENoEmpty => BLen Void where blen = undefined
-instance TypeError ENoSum => BLen (Either a b) where blen = undefined
--}
+instance TypeError ENoEmpty => BLen Void         where blen = undefined
+instance TypeError ENoSum   => BLen (Either a b) where blen = undefined
 
 -- | Unit type has length 0.
 instance BLen () where
