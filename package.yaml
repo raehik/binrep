@@ -108,3 +108,11 @@ benchmarks:
     - gauge
     ghc-options:
     - -O2
+  bench-new:
+    source-dirs: bench-new
+    main: Main.hs
+    dependencies:
+    - binrep
+    - tasty-bench
+    ghc-options:
+    - -O2

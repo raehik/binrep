@@ -41,16 +41,39 @@ instance BLen a => BLen (NullTerminated a) where
     blen ra = 1 + blen (unrefine ra)
     {-# INLINE blen #-}
 
--- | Serialization of null-terminated data may be defined generally using the
---   data's underlying serializer.
+-- | We get efficient general serialization of null-terminated data
+--   using the data's underlying serializer.
 instance Put a => Put (NullTerminated a) where
     {-# INLINE put #-}
     put a = put (unrefine a) <> put @Word8 0x00
 
--- | Parse a null-terminated bytestring.
-instance Get (NullTerminated B.ByteString) where
+{- TODO
+
+We may generally parse null-terminated data by checking ahead for a null,
+isolating and using the data's underlying parser.
+
+I thought this might be inefficient. But actually, it might be fine. The base
+case, bytestrings, works like that in flatparse. We just need a new combinator.
+
+2023-11-30T10:29:37+0000 https://github.com/AndrasKovacs/flatparse/pull/50/files
+yep, nice and easy :)
+
+instance Get a => Get (NullTerminated a) where
     {-# INLINE get #-}
-    get = reallyUnsafeRefine <$> getEBase FP.anyCString (EFailNamed "cstring")
+    -- the error wrapping is gonna look ugly idk
+    get = reallyUnsafeRefine <$> getEBase (isolateToNextNull (getEBase get) ...)
+-}
+
+-- | Parse a null-terminated bytestring.
+--
+-- TODO almost certainly could improve error wrapping.
+instance Get a => Get (NullTerminated a) where
+    {-# INLINE get #-}
+    get = reallyUnsafeRefine <$> p
+      where p = getEBase (fpIsolateToNextNull get) (EFailNamed "null-terminated data")
+
+-- TODO 2023-12-03: waiting on a flatparse release
+fpIsolateToNextNull :: Getter a -> Getter a
 
 {-
 I don't know how to do @[a]@. Either I nullterm each element, which is weird

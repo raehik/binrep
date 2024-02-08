@@ -122,10 +122,10 @@ eBase eb = FP.ParserT \_fp eob s st ->
      in FP.Err# st (E os $ EBase eb)
 
 getEBase :: Getter a -> EBase -> Getter a
-getEBase (FP.ParserT f) eb =
+getEBase (FP.ParserT p) eb =
     FP.ParserT \fp eob s st ->
         let os = I# (minusAddr# eob s)
-         in case f fp eob s st of
+         in case p fp eob s st of
               FP.Fail# st'   -> FP.Err# st' (E os $ EBase eb)
               FP.Err#  st' e -> FP.Err# st' (E os $ EAnd e eb)
               x -> x
@@ -135,10 +135,10 @@ getWrapGeneric :: Get a => String -> (E -> EGeneric E) -> Getter a
 getWrapGeneric = getWrapGeneric' get
 
 getWrapGeneric' :: Getter a -> String -> (E -> EGeneric E) -> Getter a
-getWrapGeneric' (FP.ParserT f) cd fe =
+getWrapGeneric' (FP.ParserT p) cd fe =
     FP.ParserT \fp eob s st ->
         let os = I# (minusAddr# eob s)
-         in case f fp eob s st of
+         in case p fp eob s st of
               FP.Fail# st'   -> FP.Err# st' (E os $ EGeneric cd $ fe EFail)
               FP.Err#  st' e -> FP.Err# st' (E os $ EGeneric cd $ fe e)
               x -> x

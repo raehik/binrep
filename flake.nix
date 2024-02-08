@@ -3,6 +3,8 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     haskell-flake.url = "github:srid/haskell-flake";
+    generic-data-functions.url   = "github:raehik/generic-data-functions";
+    generic-data-functions.flake = false;
   };
   outputs = inputs:
   let
@@ -31,6 +33,9 @@
               fgl = self.fgl_5_8_2_0;
               th-desugar = self.th-desugar_1_16;
             };
+          };
+          packages = {
+            generic-data-functions.source = inputs.generic-data-functions;
           };
           devShell.mkShellArgs.name = "ghc96-binrep";
         };

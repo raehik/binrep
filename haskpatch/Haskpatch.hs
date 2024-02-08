@@ -145,12 +145,3 @@ exPaperTargetWindow =
 data TargetSegment i a
   = TargetSegmentKnown  a
   | TargetSegmentSource i
-
--- | "Simplified" VCDIFF target window segment, which can only be known stuff or
---   pointing at source window (WITHOUT the s+t indexing stuff).
-data VCDTargetWindowSegment i bs
-  = Known bs
-  | Source
-        i {- ^ length. Must not go exceed source window -}
-        i {- ^ starting index into source window -}
-    deriving Show
