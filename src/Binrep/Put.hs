@@ -13,10 +13,12 @@ simple 'BLen' instance (and if not, it shouldn't be a binrep type).
 
 module Binrep.Put where
 
+import Data.Functor.Identity
 import Bytezap.Write
 import Raehik.Compat.Data.Primitive.Types ( Prim' )
-import Raehik.Compat.Data.Primitive.Types.Endian ( ByteOrdered(..), ByteSwap )
-import GHC.ByteOrder
+import Binrep.Util.ByteOrder
+import Raehik.Compat.Data.Primitive.Types.Endian ( ByteSwap )
+import Binrep.Via.Prim ( ViaPrim(..) )
 
 import Data.ByteString qualified as B
 
@@ -65,12 +67,12 @@ putGenericSum
     => (String -> Write') -> a -> Write'
 putGenericSum = genericFoldMapSum @'SumOnly @asserts
 
--- | DerivingVia newtype for 'Put' types which can borrow from 'Prim''.
-newtype PutViaPrim a = PutViaPrim { unPutViaPrim :: a }
-instance Prim' a => Put (PutViaPrim a) where put = prim . unPutViaPrim
+instance Prim' a => Put (ViaPrim a) where put = prim . unViaPrim
 
 instance TypeError ENoEmpty => Put Void where put = undefined
 instance TypeError ENoSum => Put (Either a b) where put = undefined
+
+instance Put a => Put (Identity a) where put = put . runIdentity
 
 instance Put Write' where put = id
 
@@ -93,22 +95,21 @@ instance Put B.ByteString where
 
 -- | 8-bit (1-byte) words do not require byte order in order to precisely
 --   define their representation.
-deriving via PutViaPrim Word8 instance Put Word8
+deriving via ViaPrim Word8 instance Put Word8
 
 -- | 8-bit (1-byte) words do not require byte order in order to precisely
 --   define their representation.
-deriving via PutViaPrim  Int8 instance Put  Int8
-
--- TODO maybe via binreply for these two (but need to move instances then...?)
--- | Byte order is irrelevant for 8-bit (1-byte) words.
-deriving via PutViaPrim Word8 instance Put  (ByteOrdered end Word8)
+deriving via ViaPrim  Int8 instance Put  Int8
 
 -- | Byte order is irrelevant for 8-bit (1-byte) words.
-deriving via PutViaPrim  Int8 instance Put  (ByteOrdered end  Int8)
+deriving via Identity Word8 instance Put (ByteOrdered end Word8)
+
+-- | Byte order is irrelevant for 8-bit (1-byte) words.
+deriving via Identity  Int8 instance Put (ByteOrdered end  Int8)
 
 -- ByteSwap is required on opposite endian platforms, but we're not checking
 -- here, so make sure to keep it on both.
-deriving via PutViaPrim (ByteOrdered 'LittleEndian a)
+deriving via ViaPrim (ByteOrdered 'LittleEndian a)
     instance (Prim' a, ByteSwap a) => Put (ByteOrdered 'LittleEndian a)
-deriving via PutViaPrim (ByteOrdered    'BigEndian a)
+deriving via ViaPrim (ByteOrdered    'BigEndian a)
     instance (Prim' a, ByteSwap a) => Put (ByteOrdered    'BigEndian a)

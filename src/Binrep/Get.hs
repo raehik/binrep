@@ -7,10 +7,19 @@ module Binrep.Get
   , eBase
   , getEBase
   -- , GetWith(..), runGetWith
+  , getPrim
   , getGenericNonSum, getGenericSum
   ) where
 
+import Data.Functor.Identity
+import Binrep.Util.ByteOrder
+import Binrep.Via.Prim ( ViaPrim(..) )
+import Raehik.Compat.Data.Primitive.Types ( Prim', sizeOf )
+import Raehik.Compat.Data.Primitive.Types.Endian ( ByteSwap )
+
 import FlatParse.Basic qualified as FP
+import Raehik.Compat.FlatParse.Basic.Prim qualified as FP
+
 import Data.ByteString qualified as B
 
 import Binrep.Util.Class
@@ -19,7 +28,6 @@ import GHC.TypeLits ( TypeError )
 import Data.Void
 import Data.Word
 import Data.Int
-import Bytezap
 
 import Data.Text ( Text )
 
@@ -200,6 +208,8 @@ instance Get Write where
 
 -}
 
+instance Get a => Get (Identity a) where get = Identity <$> get
+
 -- | Unit type parses nothing.
 instance Get () where
     {-# INLINE get #-}
@@ -235,16 +245,32 @@ instance Get B.ByteString where
     {-# INLINE get #-}
     get = B.copy <$> FP.takeRest
 
--- | Unsigned byte.
-instance Get Word8 where get = getEBase FP.anyWord8 (ERanOut 1)
+-- | 8-bit (1-byte) words do not require byte order in order to precisely
+--   define their representation.
+deriving via ViaPrim Word8 instance Get Word8
 
--- | Signed byte.
-instance Get  Int8 where get = getEBase FP.anyInt8  (ERanOut 1)
+-- | 8-bit (1-byte) words do not require byte order in order to precisely
+--   define their representation.
+deriving via ViaPrim  Int8 instance Get  Int8
 
-{-
-Multi-byte machine integers require an endianness to use. A common wrapper is
-defined in "Binrep.Type.Int".
--}
+-- | Byte order is irrelevant for 8-bit (1-byte) words.
+deriving via Identity Word8 instance Get (ByteOrdered end Word8)
+
+-- | Byte order is irrelevant for 8-bit (1-byte) words.
+deriving via Identity  Int8 instance Get (ByteOrdered end  Int8)
+
+-- | Parse any 'Prim''.
+getPrim :: forall a. Prim' a => Getter a
+getPrim = getEBase FP.anyPrim (ERanOut (sizeOf (undefined :: a)))
+
+instance Prim' a => Get (ViaPrim a) where get = ViaPrim <$> getPrim
+
+-- ByteSwap is required on opposite endian platforms, but we're not checking
+-- here, so make sure to keep it on both.
+deriving via ViaPrim (ByteOrdered 'LittleEndian a)
+    instance (Prim' a, ByteSwap a) => Get (ByteOrdered 'LittleEndian a)
+deriving via ViaPrim (ByteOrdered    'BigEndian a)
+    instance (Prim' a, ByteSwap a) => Get (ByteOrdered    'BigEndian a)
 
 {-
 

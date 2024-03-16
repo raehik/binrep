@@ -42,7 +42,6 @@ library
       Binrep.Get
       Binrep.Put
       Binrep.Type.Byte
-      Binrep.Type.Int
       Binrep.Type.Magic
       Binrep.Type.NullPadded
       Binrep.Type.NullTerminated
@@ -62,8 +61,9 @@ library
       Binrep.Util.Class
       Binrep.Util.Generic
       Binrep.Util.Prefix
-      Binrep.Via
+      Binrep.Via.Prim
       Data.Aeson.Extra.SizedVector
+      Raehik.Compat.FlatParse.Basic.Prim
       Util.TypeNats
   other-modules:
       Paths_binrep
