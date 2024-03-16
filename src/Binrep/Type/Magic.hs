@@ -24,10 +24,9 @@ module Binrep.Type.Magic where
 
 import Binrep
 import Binrep.Type.Byte
-import Bytezap.Write.Internal ( Write(Write) )
 import FlatParse.Basic qualified as FP
 import Data.ByteString qualified as B
-import Util.TypeNats ( type Length, natValInt )
+import Util.TypeNats ( natValInt )
 
 import GHC.TypeLits
 
@@ -36,49 +35,52 @@ import Data.Data ( Data )
 
 import Strongweak
 
--- | A singleton data type representing a "magic number" (a constant bytestring)
---   via a phantom type.
+-- | A singleton data type representing a "magic number" via a phantom type.
 --
 -- The phantom type variable unambiguously defines a constant bytestring.
 -- A handful of types are supported for using magics conveniently, e.g. for pure
 -- ASCII magics, you may use a 'Symbol' type-level string.
-data Magic (a :: k) = Magic
-    deriving stock (Generic, Data, Show, Eq)
+data Magic (a :: k) = Magic deriving stock (Generic, Data, Show, Eq)
 
--- | Weaken a 'Magic a' to the unit. Perhaps you prefer pattern matching on @()@
---   over @Magic@, or wish a weak type to be fully divorced from its binrep
---   origins.
+-- | Weaken a @'Magic' a@ to the unit.
 instance Weaken (Magic a) where
     type Weak (Magic a) = ()
     weaken Magic = ()
 
--- | Strengthen the unit to some 'Magic a'.
-instance Strengthen (Magic a) where
-    strengthen () = pure Magic
+-- | Strengthen the unit to some @'Magic' a@.
+instance Strengthen (Magic a) where strengthen () = pure Magic
 
+-- | The byte length of a magic is known at compile time.
 instance IsCBLen (Magic a) where type CBLen (Magic a) = Length (MagicBytes a)
-deriving via CBLenly (Magic a) instance
+
+-- | The byte length of a magic is obtained via reifying.
+deriving via ViaCBLen (Magic a) instance
     KnownNat (Length (MagicBytes a)) => BLen (Magic a)
 
-instance (bs ~ MagicBytes a, ReifyBytes bs, KnownNat (Length bs))
-  => Put (Magic a) where
-    put Magic = Write (natValInt @(Length bs)) (reifyBytes @bs)
+instance (bs ~ MagicBytes a, ReifyBytes bs) => Put (Magic a) where
+    put Magic = reifyBytes @bs
 
 instance (bs ~ MagicBytes a, ReifyBytes bs, KnownNat (Length bs))
   => Get (Magic a) where
-    -- TODO silly optimization: we _could_ skip comparing BS lengths because we
-    -- know they have to be the same. lmao
     get = do
         -- Nice case where we _want_ flatparse's no-copy behaviour, because
         -- 'actual' is only in scope for this parser. Except, of course, if we
         -- error, in which case _now_ we copy. Efficient!
-        actual <- FP.take (blen magic)
+        actual <- FP.take (natValInt @(Length bs))
+        -- silly optimization: we could skip comparing lengths because we know
+        -- they must be the same. very silly though
         if   actual == expected
-        then pure Magic
+        then pure magic
         else eBase $ EExpected expected (B.copy actual)
       where
         expected = runPut magic
         magic = Magic :: Magic a
+
+-- TODO might wanna move this
+-- | The length of a type-level list.
+type family Length (a :: [k]) :: Natural where
+    Length '[]       = 0
+    Length (a ': as) = 1 + Length as
 
 {-
 I do lots of functions on lists, because they're structurally simple. But you
@@ -115,8 +117,7 @@ class Magical (a :: k) where
     type MagicBytes a :: [Natural]
 
 -- | Type-level naturals go as-is. (Make sure you don't go over 255, though!)
-instance Magical (ns :: [Natural]) where
-    type MagicBytes ns = ns
+instance Magical (ns :: [Natural]) where type MagicBytes ns = ns
 
 -- | Type-level symbols are turned into their Unicode codepoints - but
 --   multibyte characters aren't handled, so they'll simply be overlarge bytes,

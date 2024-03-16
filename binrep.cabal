@@ -34,7 +34,7 @@ flag icu
 library
   exposed-modules:
       Binrep
-      Binrep.BLen.Simple
+      Binrep.BLen
       Binrep.CBLen
       Binrep.CBLen.Generic
       Binrep.Extra.HexByteString
@@ -64,6 +64,7 @@ library
       Binrep.Via.Prim
       Data.Aeson.Extra.SizedVector
       Raehik.Compat.FlatParse.Basic.Prim
+      Raehik.Compat.FlatParse.Basic.WithLength
       Util.TypeNats
   other-modules:
       Paths_binrep

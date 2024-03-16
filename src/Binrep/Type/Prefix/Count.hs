@@ -34,10 +34,12 @@ instance (KnownNat (Max pfx), Foldable f, Typeable pfx)
 instance IsCBLen (CountPrefixed pfx f a) where
     type CBLen (CountPrefixed pfx f a) = CBLen pfx + CBLen (f a)
 
+{-
 instance (Prefix pfx, Foldable f, BLen pfx, BLen (f a))
   => BLen (CountPrefixed pfx f a) where
     blen rfa = blen (lenToPfx @pfx (Foldable.length fa)) + blen fa
       where fa = unrefine1 rfa
+-}
 
 instance (Prefix pfx, Foldable f, Put pfx, Put (f a))
   => Put (CountPrefixed pfx f a) where

@@ -1,20 +1,11 @@
 {-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
 {-# OPTIONS_GHC -fno-warn-orphans #-} -- for generic data op instance
 
-{- | Serialization using the bytezap library.
-
-bytezap serializers ("pokes") work by writing bytes into a pointer, which is
-assumed to have _precisely_ the space required. The user must determine the
-post-serialize length before the fact. For that reason, this module requires
-that types to be serialized have a 'BLen' instance. In general, we are happy
-about this, because a binrep type should always have an efficient and preferably
-simple 'BLen' instance (and if not, it shouldn't be a binrep type).
--}
-
 module Binrep.Put where
 
+import Binrep.BLen ( BLen(blen) )
 import Data.Functor.Identity
-import Bytezap.Write
+import Bytezap.Poke
 import Raehik.Compat.Data.Primitive.Types ( Prim' )
 import Binrep.Util.ByteOrder
 import Raehik.Compat.Data.Primitive.Types.Endian ( ByteSwap )
@@ -36,23 +27,23 @@ import Generic.Data.Rep.Assert
 
 import Control.Monad.ST ( RealWorld )
 
-type Write' = Write RealWorld
+type Putter = Poke RealWorld
 
-class Put a where put :: a -> Write'
+class Put a where put :: a -> Putter
 
-runPut :: Put a => a -> B.ByteString
-runPut = runWriteBS . put
+runPut :: (BLen a, Put a) => a -> B.ByteString
+runPut a = unsafeRunPokeBS (blen a) (put a)
 
-instance GenericFoldMap Write' where
-    type GenericFoldMapC Write' a = Put a
+instance GenericFoldMap Putter where
+    type GenericFoldMapC Putter a = Put a
     genericFoldMapF = put
 
 -- | Serialize a term of the non-sum type @a@ via its 'Generic' instance.
 putGenericNonSum
     :: forall {cd} {f} {asserts} a
-    .  ( Generic a, Rep a ~ D1 cd f, GFoldMapNonSum Write' f
+    .  ( Generic a, Rep a ~ D1 cd f, GFoldMapNonSum Putter f
        , asserts ~ '[ 'NoEmpty, 'NoSum], ApplyGCAsserts asserts f)
-    => a -> Write'
+    => a -> Putter
 putGenericNonSum = genericFoldMapNonSum @asserts
 
 -- | Serialize a term of the sum type @a@ via its 'Generic' instance.
@@ -62,9 +53,9 @@ putGenericNonSum = genericFoldMapNonSum @asserts
 -- if you want better performance!
 putGenericSum
     :: forall {cd} {f} {asserts} a
-    .  (Generic a, Rep a ~ D1 cd f, GFoldMapSum 'SumOnly Write' f
+    .  (Generic a, Rep a ~ D1 cd f, GFoldMapSum 'SumOnly Putter f
        , asserts ~ '[ 'NoEmpty, 'NeedSum], ApplyGCAsserts asserts f)
-    => (String -> Write') -> a -> Write'
+    => (String -> Putter) -> a -> Putter
 putGenericSum = genericFoldMapSum @'SumOnly @asserts
 
 instance Prim' a => Put (ViaPrim a) where put = prim . unViaPrim
@@ -74,7 +65,7 @@ instance TypeError ENoSum => Put (Either a b) where put = undefined
 
 instance Put a => Put (Identity a) where put = put . runIdentity
 
-instance Put Write' where put = id
+instance Put Putter where put = id
 
 -- | Unit type serializes to nothing. How zen.
 instance Put () where
