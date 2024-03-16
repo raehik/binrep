@@ -3,8 +3,9 @@
 module Binrep.Type.NullPadded where
 
 import Binrep
-import Bytezap.Write qualified as BZ
+import Bytezap.Poke qualified as BZ
 import FlatParse.Basic qualified as FP
+import Raehik.Compat.FlatParse.Basic.WithLength qualified as FP
 import Control.Monad.Combinators ( skipCount )
 
 import Binrep.Util ( tshow )
@@ -55,10 +56,10 @@ instance (BLen a, Put a, KnownNat n) => Put (NullPadded n a) where
         paddingLen = natValInt @n - blen a
         -- ^ refinement guarantees >=0
 
-instance (BLen a, Get a, KnownNat n) => Get (NullPadded n a) where
+instance (Get a, KnownNat n) => Get (NullPadded n a) where
     get = do
-        a <- get
-        let paddingLen = natValInt @n - blen a
+        (a, len) <- FP.parseWithLength get
+        let paddingLen = natValInt @n - len
         if   paddingLen < 0
         then eBase $ EFailNamed "TODO used to be EOverlong, cba"
         else do

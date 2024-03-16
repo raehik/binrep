@@ -16,7 +16,7 @@ import Data.Typeable ( typeRep )
 import GHC.TypeNats
 import Util.TypeNats ( natValInt )
 
--- | Essentially reflects a 'BLen' type to 'CBLen'.
+-- | Essentially runtime reflection of a 'BLen' type to 'CBLen'.
 data Size (n :: Natural)
 type Sized n = Refined (Size n)
 
@@ -31,13 +31,14 @@ instance (BLen a, KnownNat n) => Predicate (Size n) a where
         len = blen a
 
 instance IsCBLen (Sized n a) where type CBLen (Sized n a) = n
-deriving via CBLenly (Sized n a) instance KnownNat n => BLen (Sized n a)
+deriving via ViaCBLen (Sized n a) instance KnownNat n => BLen (Sized n a)
 
-instance Put a => Put (Sized n a) where
+instance (Put a, KnownNat n) => Put (Sized n a) where
     put = put . unrefine
 
--- TODO safety: isolate consumes all bytes if succeeds
 instance (Get a, KnownNat n) => Get (Sized n a) where
     get = do
         a <- FP.isolate (natValInt @n) get
         pure $ reallyUnsafeRefine a
+        -- ^ REFINE SAFETY: 'FP.isolate' consumes precisely the number of bytes
+        -- requested when it succeeds

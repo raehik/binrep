@@ -1,12 +1,12 @@
 module Binrep
-  ( module Binrep.CBLen
-  , module Binrep.BLen.Simple
+  ( module Binrep.BLen
+  , module Binrep.CBLen
   , module Binrep.Put
   , module Binrep.Get
   ) where
 
+import Binrep.BLen
 import Binrep.CBLen
-import Binrep.BLen.Simple
 import Binrep.Put
 import Binrep.Get
 
