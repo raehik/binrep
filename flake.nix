@@ -3,6 +3,8 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     haskell-flake.url = "github:srid/haskell-flake";
+    bytezap.url = "github:raehik/bytezap";
+    bytezap.flake = false;
   };
   outputs = inputs:
   let
@@ -23,23 +25,27 @@
       perSystem = { self', pkgs, config, ... }: {
         packages.default  = self'.packages.ghc96-binrep;
         devShells.default = self'.devShells.ghc96;
+        haskellProjects.ghc98 = {
+          basePackages = pkgs.haskell.packages.ghc98;
+          packages.bytezap.source = inputs.bytezap;
+          devShell = nondevDevShell "ghc98";
+        };
         haskellProjects.ghc96 = {
-          # 2023-11-14: GHC 9.6 base package set is borked
-          # PR: https://github.com/NixOS/nixpkgs/pull/267477
-          basePackages = pkgs.haskell.packages.ghc96.override {
-            overrides = self: super: {
-              fgl = self.fgl_5_8_2_0;
-              th-desugar = self.th-desugar_1_16;
-            };
-          };
+          basePackages = pkgs.haskell.packages.ghc96;
+          packages.bytezap.source = inputs.bytezap;
           devShell.mkShellArgs.name = "ghc96-binrep";
+          devShell.tools = _: {
+            haskell-language-server = null; # 2024-03-06: broken
+          };
         };
         haskellProjects.ghc94 = {
           basePackages = pkgs.haskell.packages.ghc94;
+          packages.bytezap.source = inputs.bytezap;
           devShell = nondevDevShell "ghc94";
         };
         haskellProjects.ghc92 = {
           basePackages = pkgs.haskell.packages.ghc92;
+          packages.bytezap.source = inputs.bytezap;
           devShell = nondevDevShell "ghc92";
         };
       };
