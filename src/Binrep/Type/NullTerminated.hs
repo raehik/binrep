@@ -11,7 +11,6 @@ module Binrep.Type.NullTerminated where
 
 import Binrep
 
-import Binrep.Get.Flatparse qualified as Flatparse
 import FlatParse.Basic qualified as FP
 
 import Refined
@@ -48,10 +47,10 @@ instance Put a => Put (NullTerminated a) where
     {-# INLINE put #-}
     put a = put (unrefine a) <> put @Word8 0x00
 
--- | Parse a null-terminated bytestring.
-instance Flatparse.Get (NullTerminated B.ByteString) where
+-- | We may parse any null-terminated data using a special flatparse combinator.
+instance Get a => Get (NullTerminated a) where
     {-# INLINE get #-}
-    get = reallyUnsafeRefine <$> Flatparse.getEBase FP.anyCString (EFailNamed "cstring")
+    get = reallyUnsafeRefine <$> getEBase (FP.isolateToNextNull get) (EFailNamed "cstring")
 
 {-
 I don't know how to do @[a]@. Either I nullterm each element, which is weird

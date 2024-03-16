@@ -3,11 +3,11 @@
     "bytezap": {
       "flake": false,
       "locked": {
-        "lastModified": 1710543478,
-        "narHash": "sha256-9FZFJdH5nID+R+0X1DGsCv0QNUzw3Kw8x+lfLd3l4Y4=",
+        "lastModified": 1710555689,
+        "narHash": "sha256-G1IFB1HAmxwySLhkU/bkJsOexgYDcLFXFGM2sG8i+7o=",
         "owner": "raehik",
         "repo": "bytezap",
-        "rev": "26956638dfdd7a7161bf59530ca1cf1ddc71c7b8",
+        "rev": "08ced1055d8bc52c703a96899695496c8f3511cb",
         "type": "github"
       },
       "original": {
@@ -34,13 +34,29 @@
         "type": "github"
       }
     },
+    "flatparse": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1710539300,
+        "narHash": "sha256-FDRk/mVBJBjSRNJmb/hprVDfVOo7NGzjELqabQ6yEis=",
+        "owner": "AndrasKovacs",
+        "repo": "flatparse",
+        "rev": "d16e501da71a72990b86ed12b902ba0bffa381c6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AndrasKovacs",
+        "repo": "flatparse",
+        "type": "github"
+      }
+    },
     "haskell-flake": {
       "locked": {
-        "lastModified": 1709467224,
-        "narHash": "sha256-xnPTkLMqq78BiTqt6WXj2TXLupclJi+NEH84HDbQSPc=",
+        "lastModified": 1710420065,
+        "narHash": "sha256-0ohPtOIlCuWPr1CHDVdlcCXGxsJ841g/Z6RJkuICII8=",
         "owner": "srid",
         "repo": "haskell-flake",
-        "rev": "9173cc45aeb72b7e7adfe0e5a53a425fe439e3ca",
+        "rev": "10c49135759d45f1e2619b0321d7ad8a90ccf7c1",
         "type": "github"
       },
       "original": {
@@ -51,11 +67,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1709641832,
-        "narHash": "sha256-bzzRc3DiV8Cm/67HDa39pyBymqF45ISgUbXqjrMk2UE=",
+        "lastModified": 1710534455,
+        "narHash": "sha256-huQT4Xs0y4EeFKn2BTBVYgEwJSv8SDlm82uWgMnCMmI=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "bfa8b30043892dc2b660d403faa159bab7b65898",
+        "rev": "9af9c1c87ed3e3ed271934cb896e0cdd33dae212",
         "type": "github"
       },
       "original": {
@@ -87,6 +103,7 @@
       "inputs": {
         "bytezap": "bytezap",
         "flake-parts": "flake-parts",
+        "flatparse": "flatparse",
         "haskell-flake": "haskell-flake",
         "nixpkgs": "nixpkgs"
       }

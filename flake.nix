@@ -5,6 +5,8 @@
     haskell-flake.url = "github:srid/haskell-flake";
     bytezap.url = "github:raehik/bytezap";
     bytezap.flake = false;
+    flatparse.url = "github:AndrasKovacs/flatparse";
+    flatparse.flake = false;
   };
   outputs = inputs:
   let
@@ -28,11 +30,13 @@
         haskellProjects.ghc98 = {
           basePackages = pkgs.haskell.packages.ghc98;
           packages.bytezap.source = inputs.bytezap;
+          packages.flatparse.source = inputs.flatparse;
           devShell = nondevDevShell "ghc98";
         };
         haskellProjects.ghc96 = {
           basePackages = pkgs.haskell.packages.ghc96;
           packages.bytezap.source = inputs.bytezap;
+          packages.flatparse.source = inputs.flatparse;
           devShell.mkShellArgs.name = "ghc96-binrep";
           devShell.tools = _: {
             haskell-language-server = null; # 2024-03-06: broken
@@ -41,11 +45,13 @@
         haskellProjects.ghc94 = {
           basePackages = pkgs.haskell.packages.ghc94;
           packages.bytezap.source = inputs.bytezap;
+          packages.flatparse.source = inputs.flatparse;
           devShell = nondevDevShell "ghc94";
         };
         haskellProjects.ghc92 = {
           basePackages = pkgs.haskell.packages.ghc92;
           packages.bytezap.source = inputs.bytezap;
+          packages.flatparse.source = inputs.flatparse;
           devShell = nondevDevShell "ghc92";
         };
       };

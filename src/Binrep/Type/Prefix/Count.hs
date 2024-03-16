@@ -3,7 +3,7 @@
 
 module Binrep.Type.Prefix.Count where
 
-import Binrep.Type.Prefix
+import Binrep.Util.Prefix
 import Binrep
 import Control.Monad.Combinators qualified as Monad
 

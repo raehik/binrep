@@ -25,8 +25,6 @@ module Binrep.Type.Thin where
 import Binrep
 
 import FlatParse.Basic qualified as FP
-import Bytezap qualified as BZ
-import Bytezap.Bytes qualified as BZ
 
 import GHC.Generics ( Generic )
 import Data.Data ( Data )
@@ -51,5 +49,3 @@ newtype Thin a = Thin { unThin :: a }
     deriving (Weaken, Strengthen) via Identity a
 
 instance Get (Thin B.ByteString) where get = Thin <$> FP.takeRest
-instance Get (Thin BZ.Write) where
-    get = fmap Thin $ fmap BZ.byteString $ FP.takeRest

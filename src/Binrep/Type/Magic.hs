@@ -24,8 +24,10 @@ module Binrep.Type.Magic where
 
 import Binrep
 import Binrep.Type.Byte
+import Bytezap.Write.Internal ( Write(Write) )
 import FlatParse.Basic qualified as FP
 import Data.ByteString qualified as B
+import Util.TypeNats ( type Length, natValInt )
 
 import GHC.TypeLits
 
@@ -58,8 +60,9 @@ instance IsCBLen (Magic a) where type CBLen (Magic a) = Length (MagicBytes a)
 deriving via CBLenly (Magic a) instance
     KnownNat (Length (MagicBytes a)) => BLen (Magic a)
 
-instance (bs ~ MagicBytes a, ReifyBytes bs) => Put (Magic a) where
-    put Magic = reifyBytes @bs
+instance (bs ~ MagicBytes a, ReifyBytes bs, KnownNat (Length bs))
+  => Put (Magic a) where
+    put Magic = Write (natValInt @(Length bs)) (reifyBytes @bs)
 
 instance (bs ~ MagicBytes a, ReifyBytes bs, KnownNat (Length bs))
   => Get (Magic a) where
@@ -76,10 +79,6 @@ instance (bs ~ MagicBytes a, ReifyBytes bs, KnownNat (Length bs))
       where
         expected = runPut magic
         magic = Magic :: Magic a
-
-type family Length (a :: [k]) :: Natural where
-    Length '[]       = 0
-    Length (a ': as) = 1 + Length as
 
 {-
 I do lots of functions on lists, because they're structurally simple. But you
