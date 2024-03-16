@@ -15,4 +15,3 @@ natVal'' = natVal' (proxy# :: Proxy# n)
 natValInt :: forall n. KnownNat n => Int
 natValInt = fromIntegral $ natVal'' @n
 {-# INLINE natValInt #-}
-
