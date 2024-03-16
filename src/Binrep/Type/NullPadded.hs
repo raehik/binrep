@@ -3,9 +3,9 @@
 module Binrep.Type.NullPadded where
 
 import Binrep
-import Bytezap.Bytes qualified as BZ
+import Bytezap.Write qualified as BZ
 import FlatParse.Basic qualified as FP
-import Control.Monad.Combinators qualified as Monad
+import Control.Monad.Combinators ( skipCount )
 
 import Binrep.Util ( tshow )
 
@@ -49,7 +49,7 @@ instance (BLen a, KnownNat n) => Predicate (NullPad n) a where
         len = blen a
 
 instance (BLen a, Put a, KnownNat n) => Put (NullPadded n a) where
-    put ra = put a <> BZ.pokeByteReplicate paddingLen 0x00
+    put ra = put a <> BZ.replicateByte paddingLen 0x00
       where
         a = unrefine ra
         paddingLen = natValInt @n - blen a
@@ -62,5 +62,5 @@ instance (BLen a, Get a, KnownNat n) => Get (NullPadded n a) where
         if   paddingLen < 0
         then eBase $ EFailNamed "TODO used to be EOverlong, cba"
         else do
-            Monad.skipCount paddingLen (FP.word8 0x00)
+            skipCount paddingLen (FP.word8 0x00)
             pure $ reallyUnsafeRefine a

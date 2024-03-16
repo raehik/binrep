@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
 {-# LANGUAGE BlockArguments #-}
 
-module Binrep.Get.Flatparse
+module Binrep.Get
   ( Getter, Get(..), runGet, runGetter
   , E(..), EBase(..), EGeneric(..), EGenericSum(..)
   , eBase
@@ -20,7 +20,6 @@ import Data.Void
 import Data.Word
 import Data.Int
 import Bytezap
-import Bytezap.Bytes qualified as BZ
 
 import Data.Text ( Text )
 
@@ -188,6 +187,8 @@ getGenericSum = genericTraverseSum @'SumOnly @asserts
 instance TypeError ENoEmpty => Get Void where get = undefined
 instance TypeError ENoSum => Get (Either a b) where get = undefined
 
+{-
+
 -- | Parse a bytestring and... immediate reserialize it.
 --
 -- Note that this _does_ perform work: we make a new bytestring so we don't rely
@@ -196,6 +197,8 @@ instance TypeError ENoSum => Get (Either a b) where get = undefined
 instance Get Write where
     {-# INLINE get #-}
     get = fmap BZ.byteString $ fmap B.copy $ FP.takeRest
+
+-}
 
 -- | Unit type parses nothing.
 instance Get () where

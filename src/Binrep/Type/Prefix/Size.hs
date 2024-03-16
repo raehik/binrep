@@ -3,7 +3,7 @@
 
 module Binrep.Type.Prefix.Size where
 
-import Binrep.Type.Prefix
+import Binrep.Util.Prefix
 import Binrep.Type.Thin
 import Binrep
 import FlatParse.Basic qualified as FP

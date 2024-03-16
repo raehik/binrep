@@ -11,13 +11,14 @@ about this, because a binrep type should always have an efficient and preferably
 simple 'BLen' instance (and if not, it shouldn't be a binrep type).
 -}
 
-module Binrep.Put.Bytezap where
+module Binrep.Put where
 
-import Bytezap
-import Bytezap.Poke.Bytes
-import Bytezap.Poke.Int
+import Bytezap.Write
+import Raehik.Compat.Data.Primitive.Types ( Prim' )
+import Raehik.Compat.Data.Primitive.Types.Endian ( ByteOrdered(..), ByteSwap )
+import GHC.ByteOrder
+
 import Data.ByteString qualified as B
-import Binrep.BLen.Simple
 
 import Binrep.Util.Class
 import GHC.TypeLits ( TypeError )
@@ -31,22 +32,25 @@ import Generic.Data.Function.FoldMap
 import Generic.Data.Function.Common
 import Generic.Data.Rep.Assert
 
-class Put a where put :: a -> Poke
+import Control.Monad.ST ( RealWorld )
 
-runPut :: (BLen a, Put a) => a -> B.ByteString
-runPut a = runPoke (blen a) (put a)
-{-# INLINE runPut #-}
+type Write' = Write RealWorld
 
-instance GenericFoldMap Poke where
-    type GenericFoldMapC Poke a = Put a
+class Put a where put :: a -> Write'
+
+runPut :: Put a => a -> B.ByteString
+runPut = runWriteBS . put
+
+instance GenericFoldMap Write' where
+    type GenericFoldMapC Write' a = Put a
     genericFoldMapF = put
 
 -- | Serialize a term of the non-sum type @a@ via its 'Generic' instance.
 putGenericNonSum
     :: forall {cd} {f} {asserts} a
-    .  ( Generic a, Rep a ~ D1 cd f, GFoldMapNonSum Poke f
+    .  ( Generic a, Rep a ~ D1 cd f, GFoldMapNonSum Write' f
        , asserts ~ '[ 'NoEmpty, 'NoSum], ApplyGCAsserts asserts f)
-    => a -> Poke
+    => a -> Write'
 putGenericNonSum = genericFoldMapNonSum @asserts
 
 -- | Serialize a term of the sum type @a@ via its 'Generic' instance.
@@ -56,22 +60,19 @@ putGenericNonSum = genericFoldMapNonSum @asserts
 -- if you want better performance!
 putGenericSum
     :: forall {cd} {f} {asserts} a
-    .  (Generic a, Rep a ~ D1 cd f, GFoldMapSum 'SumOnly Poke f
+    .  (Generic a, Rep a ~ D1 cd f, GFoldMapSum 'SumOnly Write' f
        , asserts ~ '[ 'NoEmpty, 'NeedSum], ApplyGCAsserts asserts f)
-    => (String -> Poke) -> a -> Poke
+    => (String -> Write') -> a -> Write'
 putGenericSum = genericFoldMapSum @'SumOnly @asserts
+
+-- | DerivingVia newtype for 'Put' types which can borrow from 'Prim''.
+newtype PutViaPrim a = PutViaPrim { unPutViaPrim :: a }
+instance Prim' a => Put (PutViaPrim a) where put = prim . unPutViaPrim
 
 instance TypeError ENoEmpty => Put Void where put = undefined
 instance TypeError ENoSum => Put (Either a b) where put = undefined
 
-instance Put Write where
-    {-# INLINE put #-}
-    put = writePoke
-
--- | Fairly useless because 'Poke' doesn't have a 'BLen' instance.
-instance Put Poke where
-    {-# INLINE put #-}
-    put = id
+instance Put Write' where put = id
 
 -- | Unit type serializes to nothing. How zen.
 instance Put () where
@@ -90,10 +91,24 @@ instance Put B.ByteString where
     {-# INLINE put #-}
     put = byteString
 
-instance Put Word8 where
-    {-# INLINE put #-}
-    put = w8
+-- | 8-bit (1-byte) words do not require byte order in order to precisely
+--   define their representation.
+deriving via PutViaPrim Word8 instance Put Word8
 
-instance Put Int8  where
-    {-# INLINE put #-}
-    put = i8
+-- | 8-bit (1-byte) words do not require byte order in order to precisely
+--   define their representation.
+deriving via PutViaPrim  Int8 instance Put  Int8
+
+-- TODO maybe via binreply for these two (but need to move instances then...?)
+-- | Byte order is irrelevant for 8-bit (1-byte) words.
+deriving via PutViaPrim Word8 instance Put  (ByteOrdered end Word8)
+
+-- | Byte order is irrelevant for 8-bit (1-byte) words.
+deriving via PutViaPrim  Int8 instance Put  (ByteOrdered end  Int8)
+
+-- ByteSwap is required on opposite endian platforms, but we're not checking
+-- here, so make sure to keep it on both.
+deriving via PutViaPrim (ByteOrdered 'LittleEndian a)
+    instance (Prim' a, ByteSwap a) => Put (ByteOrdered 'LittleEndian a)
+deriving via PutViaPrim (ByteOrdered    'BigEndian a)
+    instance (Prim' a, ByteSwap a) => Put (ByteOrdered    'BigEndian a)

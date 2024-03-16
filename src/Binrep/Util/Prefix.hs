@@ -1,8 +1,8 @@
 {-# LANGUAGE UndecidableInstances #-} -- for convenient type level arithmetic
 
-module Binrep.Type.Prefix where
+module Binrep.Util.Prefix where
 
-import Binrep.Type.Int
+import Binrep.Util.ByteOrder ( ByteOrdered(ByteOrdered) )
 import GHC.TypeNats
 import Data.Word
 
@@ -38,7 +38,7 @@ instance Prefix () where
     lenToPfx _ = error "you lied to refine and broke everything :("
     pfxToLen () = 0
 
-deriving via (a :: Type) instance Prefix a => Prefix (Endian end a)
+deriving via (a :: Type) instance Prefix a => Prefix (ByteOrdered end a)
 
 instance Prefix Word8  where
     type Max Word8  = 2^8  - 1
