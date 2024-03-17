@@ -29,8 +29,8 @@ data X3
     | X33 Word8 (NullTerminated B.ByteString) X3
     deriving stock (Generic)
 
-instance BLen X3 where blen = blenGenericSum cDef
-instance Put  X3 where put  = putGenericSum  cDef
+instance BLen X3 where blen = blenGenericSum $ blen . nullTermCstrPfxTag
+instance Put  X3 where put  =  putGenericSum $  put . nullTermCstrPfxTag
 
 x33 :: X3
 x33 =
