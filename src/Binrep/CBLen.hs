@@ -1,11 +1,11 @@
-{-# LANGUAGE UndecidableInstances #-} -- for 'WithCBLen'
-{-# LANGUAGE AllowAmbiguousTypes #-} -- for 'cblen'
+{-# LANGUAGE UndecidableInstances #-} -- for nested type families
 
 module Binrep.CBLen where
 
 import GHC.TypeNats
 import Data.Word
 import Data.Int
+import Binrep.Util.ByteOrder
 
 class IsCBLen a where type CBLen a :: Natural
 
@@ -21,3 +21,6 @@ instance IsCBLen Word32 where type CBLen Word32 = 2^2
 instance IsCBLen  Int32 where type CBLen  Int32 = 2^2
 instance IsCBLen Word64 where type CBLen Word64 = 2^3
 instance IsCBLen  Int64 where type CBLen  Int64 = 2^3
+
+instance IsCBLen a => IsCBLen (ByteOrdered end a) where
+    type CBLen (ByteOrdered end a) = CBLen a
