@@ -49,6 +49,9 @@ instance (BLen a, KnownNat n) => Predicate (NullPad n) a where
         n = natValInt @n
         len = blen a
 
+instance IsCBLen (NullPadded n a) where type CBLen (NullPadded n a) = n
+deriving via ViaCBLen (NullPadded n a) instance KnownNat n => BLen (NullPadded n a)
+
 instance (BLen a, Put a, KnownNat n) => Put (NullPadded n a) where
     put ra = put a <> BZ.replicateByte paddingLen 0x00
       where
