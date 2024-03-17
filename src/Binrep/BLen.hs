@@ -34,6 +34,7 @@ import Data.Void
 import Data.ByteString qualified as B
 import Data.Word
 import Data.Int
+import Binrep.Util.ByteOrder
 
 import Data.Monoid ( Sum(..) )
 import GHC.Generics
@@ -104,6 +105,8 @@ deriving via ViaCBLen Word32 instance BLen Word32
 deriving via ViaCBLen  Int32 instance BLen  Int32
 deriving via ViaCBLen Word64 instance BLen Word64
 deriving via ViaCBLen  Int64 instance BLen  Int64
+deriving via ViaCBLen (ByteOrdered end a)
+    instance KnownNat (CBLen a) => BLen (ByteOrdered end a)
 
 --------------------------------------------------------------------------------
 
