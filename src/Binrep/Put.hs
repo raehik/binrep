@@ -6,7 +6,8 @@ module Binrep.Put where
 import Binrep.BLen ( BLen(blen) )
 import Data.Functor.Identity
 import Bytezap.Poke
-import Raehik.Compat.Data.Primitive.Types ( Prim' )
+import Bytezap.Struct qualified as Struct
+import Raehik.Compat.Data.Primitive.Types ( Prim', sizeOf )
 import Binrep.Util.ByteOrder
 import Raehik.Compat.Data.Primitive.Types.Endian ( ByteSwap )
 import Binrep.Via.Prim ( ViaPrim(..) )
@@ -27,9 +28,13 @@ import Generic.Data.Rep.Assert
 
 import Control.Monad.ST ( RealWorld )
 
-type Putter = Poke RealWorld
+type Putter  = Poke RealWorld
+type PutterC = Struct.Poke RealWorld
 
 class Put a where put :: a -> Putter
+
+-- | constant size putter
+class PutC a where putC :: a -> PutterC
 
 runPut :: (BLen a, Put a) => a -> B.ByteString
 runPut a = unsafeRunPokeBS (blen a) (put a)
@@ -58,7 +63,13 @@ putGenericSum
     => (String -> Putter) -> a -> Putter
 putGenericSum = genericFoldMapSum @'SumOnly @asserts
 
-instance Prim' a => Put (ViaPrim a) where put = prim . unViaPrim
+instance Prim' a => PutC (ViaPrim a) where
+    putC = Struct.prim . unViaPrim
+    {-# INLINE putC #-}
+
+instance Prim' a => Put (ViaPrim a) where
+    put = fromStructPoke (sizeOf (undefined :: a)) . putC
+    {-# INLINE put #-}
 
 instance TypeError ENoEmpty => Put Void where put = undefined
 instance TypeError ENoSum => Put (Either a b) where put = undefined

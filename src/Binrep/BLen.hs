@@ -1,4 +1,4 @@
-{-# LANGUAGE UndecidableInstances #-} -- for 'CBLenly', 'TypeError'
+{-# LANGUAGE UndecidableInstances #-} -- for 'ViaCBLen', 'TypeError'
 {-# LANGUAGE AllowAmbiguousTypes #-} -- for 'cblen', 'natValInt'
 
 {- | Byte length as a simple pure function, no bells or whistles.
@@ -115,7 +115,7 @@ deriving via ViaCBLen (ByteOrdered end a)
 --
 -- Examples of such types include machine integers, and explicitly-sized types
 -- (e.g. "Binrep.Type.Sized").
-newtype ViaCBLen a = ViaCBLen { unCBLenly :: a }
+newtype ViaCBLen a = ViaCBLen { unViaCBLen :: a }
 instance KnownNat (CBLen a) => BLen (ViaCBLen a) where blen _ = cblen @a
 
 -- | Reify a type's constant byte length to the term level.

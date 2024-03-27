@@ -14,7 +14,7 @@ generics excel, and the one this module targets.
 You can (attempt to) derive a 'CBLen' type family instance generically for a
 type via
 
-    instance CBLen a where type CBLen a = CBLenGeneric w a
+    instance IsCBLen a where type CBLen a = CBLenGeneric w a
 
 As with deriving @BLen@ generically, you must provide the type used to store the
 sum tag for sum types.
