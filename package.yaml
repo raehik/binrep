@@ -66,7 +66,7 @@ dependencies:
 - vector >= 0.12.3.1 && < 0.14
 - deepseq >= 1.4.6.1 && < 1.6
 
-- megaparsec >= 9.2.0 && < 9.5.0 # for HexByteString
+- megaparsec >= 9.2.0 && < 9.7 # for HexByteString
 - aeson >= 2.0 && < 2.2 # because we use refined which uses it (also for HexByteString)
 
 # - containers (only for Haskpatch lol)
@@ -107,5 +107,3 @@ benchmarks:
     dependencies:
     - binrep
     - gauge
-    ghc-options:
-    - -O2

@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-} -- for nested type families
+{-# LANGUAGE AllowAmbiguousTypes  #-} -- for reification util
 
 module Binrep.CBLen where
 
@@ -6,6 +7,9 @@ import GHC.TypeNats
 import Data.Word
 import Data.Int
 import Binrep.Util.ByteOrder
+
+import GHC.Exts ( Int#, Int(I#), Proxy# )
+import Util.TypeNats ( natValInt )
 
 class IsCBLen a where type CBLen a :: Natural
 
@@ -24,3 +28,11 @@ instance IsCBLen  Int64 where type CBLen  Int64 = 2^3
 
 instance IsCBLen a => IsCBLen (ByteOrdered end a) where
     type CBLen (ByteOrdered end a) = CBLen a
+
+reifyCBLen# :: forall a. KnownNat (CBLen a) => Int#
+reifyCBLen# = i#
+  where !(I# i#) = natValInt @(CBLen a)
+
+reifyCBLenProxy# :: forall a. KnownNat (CBLen a) => Proxy# a -> Int#
+reifyCBLenProxy# _ = i#
+  where !(I# i#) = natValInt @(CBLen a)

@@ -1,4 +1,4 @@
-module Binrep.Util.Class where
+module Binrep.Common.Class.TypeErrors where
 
 import GHC.TypeLits
 

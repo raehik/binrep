@@ -26,7 +26,7 @@ sorry. I don't have much faith in this code.
 module Binrep.CBLen.Generic where
 
 import Binrep.CBLen
-import Binrep.Util.Class
+import Binrep.Common.Class.TypeErrors ( ENoEmpty )
 
 import GHC.Generics
 import GHC.TypeLits

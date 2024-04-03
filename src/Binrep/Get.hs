@@ -13,7 +13,7 @@ module Binrep.Get
 
 import Data.Functor.Identity
 import Binrep.Util.ByteOrder
-import Binrep.Via.Prim ( ViaPrim(..) )
+import Binrep.Common.Via.Prim ( ViaPrim(..) )
 import Raehik.Compat.Data.Primitive.Types ( Prim', sizeOf )
 import Raehik.Compat.Data.Primitive.Types.Endian ( ByteSwap )
 
@@ -22,7 +22,7 @@ import Raehik.Compat.FlatParse.Basic.Prim qualified as FP
 
 import Data.ByteString qualified as B
 
-import Binrep.Util.Class
+import Binrep.Common.Class.TypeErrors ( ENoSum, ENoEmpty )
 import GHC.TypeLits ( TypeError )
 
 import Data.Void

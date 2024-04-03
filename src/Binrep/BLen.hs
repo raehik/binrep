@@ -27,7 +27,7 @@ import Binrep.CBLen
 import GHC.TypeNats
 import Util.TypeNats ( natValInt )
 
-import Binrep.Util.Class
+import Binrep.Common.Class.TypeErrors ( ENoSum, ENoEmpty )
 import GHC.TypeLits ( TypeError )
 
 import Data.Void

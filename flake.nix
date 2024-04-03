@@ -3,10 +3,12 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     haskell-flake.url = "github:srid/haskell-flake";
-    bytezap.url = "github:raehik/bytezap";
+    bytezap.url  = "github:raehik/bytezap";
     bytezap.flake = false;
-    flatparse.url = "github:AndrasKovacs/flatparse";
+    flatparse.url  = "github:AndrasKovacs/flatparse";
     flatparse.flake = false;
+    strongweak.url  = "github:raehik/strongweak";
+    strongweak.flake = false;
   };
   outputs = inputs:
   let
@@ -31,12 +33,14 @@
           basePackages = pkgs.haskell.packages.ghc98;
           packages.bytezap.source = inputs.bytezap;
           packages.flatparse.source = inputs.flatparse;
+          packages.strongweak.source = inputs.strongweak;
           devShell = nondevDevShell "ghc98";
         };
         haskellProjects.ghc96 = {
           basePackages = pkgs.haskell.packages.ghc96;
           packages.bytezap.source = inputs.bytezap;
           packages.flatparse.source = inputs.flatparse;
+          packages.strongweak.source = inputs.strongweak;
           devShell.mkShellArgs.name = "ghc96-binrep";
           devShell.tools = _: {
             haskell-language-server = null; # 2024-03-06: broken
@@ -46,12 +50,14 @@
           basePackages = pkgs.haskell.packages.ghc94;
           packages.bytezap.source = inputs.bytezap;
           packages.flatparse.source = inputs.flatparse;
+          packages.strongweak.source = inputs.strongweak;
           devShell = nondevDevShell "ghc94";
         };
         haskellProjects.ghc92 = {
           basePackages = pkgs.haskell.packages.ghc92;
           packages.bytezap.source = inputs.bytezap;
           packages.flatparse.source = inputs.flatparse;
+          packages.strongweak.source = inputs.strongweak;
           devShell = nondevDevShell "ghc92";
         };
       };

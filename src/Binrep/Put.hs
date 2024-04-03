@@ -1,5 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
 {-# OPTIONS_GHC -fno-warn-orphans #-} -- for generic data op instance
+{-# LANGUAGE AllowAmbiguousTypes #-} -- TODO tmp
 
 module Binrep.Put where
 
@@ -7,15 +8,16 @@ import Binrep.BLen ( BLen(blen) )
 import Data.Functor.Identity
 import Bytezap.Poke
 import Bytezap.Struct qualified as Struct
+import Bytezap.Struct.Generic qualified as Struct
 import Raehik.Compat.Data.Primitive.Types ( Prim', sizeOf )
 import Binrep.Util.ByteOrder
 import Raehik.Compat.Data.Primitive.Types.Endian ( ByteSwap )
-import Binrep.Via.Prim ( ViaPrim(..) )
+import Binrep.Common.Via.Prim ( ViaPrim(..) )
 
 import Data.ByteString qualified as B
 
-import Binrep.Util.Class
-import GHC.TypeLits ( TypeError )
+import Binrep.Common.Class.TypeErrors ( ENoSum, ENoEmpty )
+import GHC.TypeLits ( TypeError, KnownNat )
 
 import Data.Void
 import Data.Word
@@ -28,6 +30,9 @@ import Generic.Data.Rep.Assert
 
 import Control.Monad.ST ( RealWorld )
 
+import Binrep.Common.Class.Generic ( BinrepG )
+import Binrep.CBLen
+
 type Putter  = Poke RealWorld
 type PutterC = Struct.Poke RealWorld
 
@@ -39,6 +44,9 @@ class PutC a where putC :: a -> PutterC
 runPut :: (BLen a, Put a) => a -> B.ByteString
 runPut a = unsafeRunPokeBS (blen a) (put a)
 
+-- TODO UGH I need to make my own internal idx here. Can't use 'Putter' since
+-- that's just bytezap, which others may want to use differently with g-f-d.
+-- Ah, but that means I need to redesign g-f-d!
 instance GenericFoldMap Putter where
     type GenericFoldMapC Putter a = Put a
     genericFoldMapF = put
@@ -58,10 +66,23 @@ putGenericNonSum = genericFoldMapNonSum @asserts
 -- if you want better performance!
 putGenericSum
     :: forall {cd} {f} {asserts} a
-    .  (Generic a, Rep a ~ D1 cd f, GFoldMapSum 'SumOnly Putter f
+    .  ( Generic a, Rep a ~ D1 cd f, GFoldMapSum 'SumOnly Putter f
        , asserts ~ '[ 'NoEmpty, 'NeedSum], ApplyGCAsserts asserts f)
     => (String -> Putter) -> a -> Putter
 putGenericSum = genericFoldMapSum @'SumOnly @asserts
+
+instance Struct.GPokeBase BinrepG where
+    type GPokeBaseSt BinrepG = RealWorld
+    type GPokeBaseC BinrepG a = PutC a
+    gPokeBase = Struct.unPoke . putC
+    type KnownSizeOf' BinrepG a = KnownNat (CBLen a)
+    sizeOf' = reifyCBLenProxy#
+
+putGenericStruct
+    :: forall a
+    .  ( Generic a, Struct.GPoke BinrepG (Rep a) )
+    => a -> PutterC
+putGenericStruct = Struct.Poke . Struct.gPoke @BinrepG . from
 
 instance Prim' a => PutC (ViaPrim a) where
     putC = Struct.prim . unViaPrim
