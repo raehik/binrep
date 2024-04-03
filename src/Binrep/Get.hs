@@ -165,12 +165,13 @@ runGetter g bs = case FP.runParser g bs of
                    FP.Fail     -> Left EFail
                    FP.Err e    -> Left e
 
-instance GenericTraverse (FP.Parser E) where
-    type GenericTraverseC (FP.Parser E) a = Get a
+instance GenericTraverse Get where
+    type GenericTraverseF Get = FP.Parser E
+    type GenericTraverseC Get a = Get a
     genericTraverseAction cd cc mcs si =
         getWrapGeneric cd $ EGenericField cc mcs si
 
-instance GenericTraverseSum (FP.Parser E) where
+instance GenericTraverseSum Get where
     genericTraverseSumPfxTagAction cd =
         getWrapGeneric cd $ EGenericSum . EGenericSumTag
     -- TODO proper offset info
@@ -178,19 +179,19 @@ instance GenericTraverseSum (FP.Parser E) where
         FP.err $ E 0 $ EGeneric cd $ EGenericSum $ EGenericSumTagNoMatch cstrs ptText
 
 getGenericNonSum
-    :: forall {cd} {f} {asserts} a
-    .  (Generic a, Rep a ~ D1 cd f, GTraverseNonSum cd (FP.Parser E) f
-       , asserts ~ '[ 'NoEmpty, 'NoSum], ApplyGCAsserts asserts f)
+    :: forall {cd} {gf} {asserts} a
+    .  (Generic a, Rep a ~ D1 cd gf, GTraverseNonSum cd Get gf
+       , asserts ~ '[ 'NoEmpty, 'NoSum], ApplyGCAsserts asserts gf)
     => Getter a
-getGenericNonSum = genericTraverseNonSum @asserts
+getGenericNonSum = genericTraverseNonSum @asserts @Get
 
 getGenericSum
-    :: forall {cd} {f} {asserts} pt a
-    .  ( Generic a, Rep a ~ D1 cd f, GTraverseSum 'SumOnly cd (FP.Parser E) f
+    :: forall {cd} {gf} {asserts} pt a
+    .  ( Generic a, Rep a ~ D1 cd gf, GTraverseSum 'SumOnly cd Get gf
        , Get pt
-       , asserts ~ '[ 'NoEmpty, 'NeedSum], ApplyGCAsserts asserts f)
+       , asserts ~ '[ 'NoEmpty, 'NeedSum], ApplyGCAsserts asserts gf)
     => PfxTagCfg pt -> Getter a
-getGenericSum = genericTraverseSum @'SumOnly @asserts
+getGenericSum = genericTraverseSum @'SumOnly @asserts @Get
 
 instance TypeError ENoEmpty => Get Void where get = undefined
 instance TypeError ENoSum => Get (Either a b) where get = undefined

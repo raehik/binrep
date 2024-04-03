@@ -50,6 +50,22 @@
         "type": "github"
       }
     },
+    "generic-data-functions": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1712109010,
+        "narHash": "sha256-mZwQjaW8Z6DUbTk4ClW+kRmJvecRaL2FRKjUVANHRWg=",
+        "owner": "raehik",
+        "repo": "generic-data-functions",
+        "rev": "9b38614df05c1b1d138f314256f1076bce7a23e8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "raehik",
+        "repo": "generic-data-functions",
+        "type": "github"
+      }
+    },
     "haskell-flake": {
       "locked": {
         "lastModified": 1711729580,
@@ -104,6 +120,7 @@
         "bytezap": "bytezap",
         "flake-parts": "flake-parts",
         "flatparse": "flatparse",
+        "generic-data-functions": "generic-data-functions",
         "haskell-flake": "haskell-flake",
         "nixpkgs": "nixpkgs",
         "strongweak": "strongweak"

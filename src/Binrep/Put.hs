@@ -44,20 +44,18 @@ class PutC a where putC :: a -> PutterC
 runPut :: (BLen a, Put a) => a -> B.ByteString
 runPut a = unsafeRunPokeBS (blen a) (put a)
 
--- TODO UGH I need to make my own internal idx here. Can't use 'Putter' since
--- that's just bytezap, which others may want to use differently with g-f-d.
--- Ah, but that means I need to redesign g-f-d!
-instance GenericFoldMap Putter where
-    type GenericFoldMapC Putter a = Put a
+instance GenericFoldMap Put where
+    type GenericFoldMapM Put = Putter
+    type GenericFoldMapC Put a = Put a
     genericFoldMapF = put
 
 -- | Serialize a term of the non-sum type @a@ via its 'Generic' instance.
 putGenericNonSum
-    :: forall {cd} {f} {asserts} a
-    .  ( Generic a, Rep a ~ D1 cd f, GFoldMapNonSum Putter f
-       , asserts ~ '[ 'NoEmpty, 'NoSum], ApplyGCAsserts asserts f)
+    :: forall {cd} {gf} {asserts} a
+    .  ( Generic a, Rep a ~ D1 cd gf, GFoldMapNonSum Put gf
+       , asserts ~ '[ 'NoEmpty, 'NoSum], ApplyGCAsserts asserts gf)
     => a -> Putter
-putGenericNonSum = genericFoldMapNonSum @asserts
+putGenericNonSum = genericFoldMapNonSum @asserts @Put
 
 -- | Serialize a term of the sum type @a@ via its 'Generic' instance.
 --
@@ -65,11 +63,11 @@ putGenericNonSum = genericFoldMapNonSum @asserts
 -- inefficient due to having to use 'String's. Alas. Do write your own instance
 -- if you want better performance!
 putGenericSum
-    :: forall {cd} {f} {asserts} a
-    .  ( Generic a, Rep a ~ D1 cd f, GFoldMapSum 'SumOnly Putter f
-       , asserts ~ '[ 'NoEmpty, 'NeedSum], ApplyGCAsserts asserts f)
+    :: forall {cd} {gf} {asserts} a
+    .  ( Generic a, Rep a ~ D1 cd gf, GFoldMapSum 'SumOnly Put gf
+       , asserts ~ '[ 'NoEmpty, 'NeedSum], ApplyGCAsserts asserts gf)
     => (String -> Putter) -> a -> Putter
-putGenericSum = genericFoldMapSum @'SumOnly @asserts
+putGenericSum = genericFoldMapSum @'SumOnly @asserts @Put
 
 instance Struct.GPokeBase BinrepG where
     type GPokeBaseSt BinrepG = RealWorld

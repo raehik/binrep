@@ -3,12 +3,14 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     haskell-flake.url = "github:srid/haskell-flake";
-    bytezap.url  = "github:raehik/bytezap";
+    bytezap.url   = "github:raehik/bytezap";
     bytezap.flake = false;
-    flatparse.url  = "github:AndrasKovacs/flatparse";
+    flatparse.url   = "github:AndrasKovacs/flatparse";
     flatparse.flake = false;
-    strongweak.url  = "github:raehik/strongweak";
+    strongweak.url   = "github:raehik/strongweak";
     strongweak.flake = false;
+    generic-data-functions.url   = "github:raehik/generic-data-functions";
+    generic-data-functions.flake = false;
   };
   outputs = inputs:
   let
@@ -34,6 +36,7 @@
           packages.bytezap.source = inputs.bytezap;
           packages.flatparse.source = inputs.flatparse;
           packages.strongweak.source = inputs.strongweak;
+          packages.generic-data-functions.source = inputs.generic-data-functions;
           devShell = nondevDevShell "ghc98";
         };
         haskellProjects.ghc96 = {
@@ -41,6 +44,7 @@
           packages.bytezap.source = inputs.bytezap;
           packages.flatparse.source = inputs.flatparse;
           packages.strongweak.source = inputs.strongweak;
+          packages.generic-data-functions.source = inputs.generic-data-functions;
           devShell.mkShellArgs.name = "ghc96-binrep";
           devShell.tools = _: {
             haskell-language-server = null; # 2024-03-06: broken
@@ -51,6 +55,7 @@
           packages.bytezap.source = inputs.bytezap;
           packages.flatparse.source = inputs.flatparse;
           packages.strongweak.source = inputs.strongweak;
+          packages.generic-data-functions.source = inputs.generic-data-functions;
           devShell = nondevDevShell "ghc94";
         };
         haskellProjects.ghc92 = {
@@ -58,6 +63,7 @@
           packages.bytezap.source = inputs.bytezap;
           packages.flatparse.source = inputs.flatparse;
           packages.strongweak.source = inputs.strongweak;
+          packages.generic-data-functions.source = inputs.generic-data-functions;
           devShell = nondevDevShell "ghc92";
         };
       };

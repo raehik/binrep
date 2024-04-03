@@ -36,7 +36,7 @@ import Data.Word
 import Data.Int
 import Binrep.Util.ByteOrder
 
-import Data.Monoid ( Sum(..) )
+import Data.Monoid qualified as Monoid
 import GHC.Generics
 import Generic.Data.Function.FoldMap
 import Generic.Data.Rep.Assert
@@ -51,22 +51,19 @@ class BLen a where
     -- | Calculate the serialized byte length of the given value.
     blen :: a -> Int
 
--- newtype sum monoid for generic foldMap
-newtype BLen' a = BLen' { getBLen' :: a }
-    deriving (Semigroup, Monoid) via Sum a
-
-instance GenericFoldMap (BLen' Int) where
-    type GenericFoldMapC (BLen' Int) a = BLen a
-    genericFoldMapF = BLen' . blen
+instance GenericFoldMap BLen where
+    type GenericFoldMapM BLen = Monoid.Sum Int
+    type GenericFoldMapC BLen a = BLen a
+    genericFoldMapF = Monoid.Sum . blen
 
 -- | Measure the byte length of a term of the non-sum type @a@ via its 'Generic'
 --   instance.
 blenGenericNonSum
-    :: forall {cd} {f} {asserts} a
-    .  ( Generic a, Rep a ~ D1 cd f, GFoldMapNonSum (BLen' Int) f
-       , asserts ~ '[ 'NoEmpty, 'NoSum], ApplyGCAsserts asserts f)
+    :: forall {cd} {gf} {asserts} a
+    .  ( Generic a, Rep a ~ D1 cd gf, GFoldMapNonSum BLen gf
+       , asserts ~ '[ 'NoEmpty, 'NoSum], ApplyGCAsserts asserts gf)
     => a -> Int
-blenGenericNonSum = getBLen' . genericFoldMapNonSum @asserts
+blenGenericNonSum = Monoid.getSum . genericFoldMapNonSum @asserts @BLen
 
 -- | Measure the byte length of a term of the sum type @a@ via its 'Generic'
 --   instance.
@@ -75,11 +72,12 @@ blenGenericNonSum = getBLen' . genericFoldMapNonSum @asserts
 -- inspecting the reified constructor names. This is regrettably inefficient.
 -- Alas. Do write your own instance if you want better performance!
 blenGenericSum
-    :: forall {cd} {f} {asserts} a
-    .  (Generic a, Rep a ~ D1 cd f, GFoldMapSum 'SumOnly (BLen' Int) f
-       , asserts ~ '[ 'NoEmpty, 'NeedSum], ApplyGCAsserts asserts f)
+    :: forall {cd} {gf} {asserts} a
+    .  (Generic a, Rep a ~ D1 cd gf, GFoldMapSum 'SumOnly BLen gf
+       , asserts ~ '[ 'NoEmpty, 'NeedSum], ApplyGCAsserts asserts gf)
     => (String -> Int) -> a -> Int
-blenGenericSum f = getBLen' . genericFoldMapSum @'SumOnly @asserts (BLen' <$> f)
+blenGenericSum f =
+    Monoid.getSum . genericFoldMapSum @'SumOnly @asserts @BLen (Monoid.Sum <$> f)
 
 instance TypeError ENoEmpty => BLen Void where blen = undefined
 instance TypeError ENoSum => BLen (Either a b) where blen = undefined
