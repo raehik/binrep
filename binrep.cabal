@@ -37,13 +37,13 @@ library
       Binrep.BLen
       Binrep.CBLen
       Binrep.CBLen.Generic
-      Binrep.Common.Class.Generic
       Binrep.Common.Class.TypeErrors
       Binrep.Common.Via.Prim
       Binrep.Extra.HexByteString
       Binrep.Generic
       Binrep.Get
       Binrep.Put
+      Binrep.Put.Struct
       Binrep.Type.Byte
       Binrep.Type.Magic
       Binrep.Type.NullPadded
