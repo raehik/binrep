@@ -29,10 +29,14 @@ instance IsCBLen  Int64 where type CBLen  Int64 = 2^3
 instance IsCBLen a => IsCBLen (ByteOrdered end a) where
     type CBLen (ByteOrdered end a) = CBLen a
 
-reifyCBLen# :: forall a. KnownNat (CBLen a) => Int#
-reifyCBLen# = i#
+-- | Reify a type's constant byte length to the term level.
+cblen :: forall a n. KnownNat (CBLen a) => Int
+cblen = natValInt @(CBLen a)
+
+cblen# :: forall a. KnownNat (CBLen a) => Int#
+cblen# = i#
   where !(I# i#) = natValInt @(CBLen a)
 
-reifyCBLenProxy# :: forall a. KnownNat (CBLen a) => Proxy# a -> Int#
-reifyCBLenProxy# _ = i#
+cblenProxy# :: forall a. KnownNat (CBLen a) => Proxy# a -> Int#
+cblenProxy# _ = i#
   where !(I# i#) = natValInt @(CBLen a)

@@ -96,10 +96,10 @@ deriving via ViaPrim Word8 instance Put Word8
 deriving via ViaPrim  Int8 instance Put  Int8
 
 -- | Byte order is irrelevant for 8-bit (1-byte) words.
-deriving via Identity Word8 instance Put (ByteOrdered end Word8)
+deriving via Word8 instance Put (ByteOrdered end Word8)
 
 -- | Byte order is irrelevant for 8-bit (1-byte) words.
-deriving via Identity  Int8 instance Put (ByteOrdered end  Int8)
+deriving via  Int8 instance Put (ByteOrdered end  Int8)
 
 -- ByteSwap is required on opposite endian platforms, but we're not checking
 -- here, so make sure to keep it on both.

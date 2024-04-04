@@ -2,12 +2,14 @@ module Binrep
   ( module Binrep.BLen
   , module Binrep.CBLen
   , module Binrep.Put
+  , module Binrep.Put.Struct
   , module Binrep.Get
   ) where
 
 import Binrep.BLen
 import Binrep.CBLen
 import Binrep.Put
+import Binrep.Put.Struct
 import Binrep.Get
 
 {- TODO

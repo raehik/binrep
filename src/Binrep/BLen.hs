@@ -1,5 +1,4 @@
 {-# LANGUAGE UndecidableInstances #-} -- for 'ViaCBLen', 'TypeError'
-{-# LANGUAGE AllowAmbiguousTypes #-} -- for 'cblen', 'natValInt'
 
 {- | Byte length as a simple pure function, no bells or whistles.
 
@@ -25,7 +24,6 @@ module Binrep.BLen
 
 import Binrep.CBLen
 import GHC.TypeNats
-import Util.TypeNats ( natValInt )
 
 import Binrep.Common.Class.TypeErrors ( ENoSum, ENoEmpty )
 import GHC.TypeLits ( TypeError )
@@ -115,7 +113,3 @@ deriving via ViaCBLen (ByteOrdered end a)
 -- (e.g. "Binrep.Type.Sized").
 newtype ViaCBLen a = ViaCBLen { unViaCBLen :: a }
 instance KnownNat (CBLen a) => BLen (ViaCBLen a) where blen _ = cblen @a
-
--- | Reify a type's constant byte length to the term level.
-cblen :: forall a n. (n ~ CBLen a, KnownNat n) => Int
-cblen = natValInt @n

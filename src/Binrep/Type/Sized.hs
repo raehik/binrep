@@ -33,7 +33,11 @@ instance (BLen a, KnownNat n) => Predicate (Size n) a where
 instance IsCBLen (Sized n a) where type CBLen (Sized n a) = n
 deriving via ViaCBLen (Sized n a) instance KnownNat n => BLen (Sized n a)
 
-instance (Put a, KnownNat n) => Put (Sized n a) where
+instance PutC a => PutC (Sized n a) where
+    putC = putC . unrefine
+
+-- TODO obtain thru PutC instead? unsure how to do this exactly
+instance Put a => Put (Sized n a) where
     put = put . unrefine
 
 instance (Get a, KnownNat n) => Get (Sized n a) where

@@ -3,11 +3,11 @@
     "bytezap": {
       "flake": false,
       "locked": {
-        "lastModified": 1711567838,
-        "narHash": "sha256-KgOWvkC8ZzJFRR9rq0GKJdhI7Fb26bKD7xK95siS20o=",
+        "lastModified": 1712249322,
+        "narHash": "sha256-rXtbgZ1D0vv2kNNVJoej4cRsFV4Kn8sfLblQkFLY4rM=",
         "owner": "raehik",
         "repo": "bytezap",
-        "rev": "2c9a2896a03d8bd54aea53267c7059499c1525b2",
+        "rev": "ad33e4912f9e0549045f01309f50a450f2124076",
         "type": "github"
       },
       "original": {

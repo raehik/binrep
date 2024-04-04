@@ -1,3 +1,7 @@
+## 0.6.0 (unreleased)
+* many updates to parsing/serializing internals, including generics
+* provide "C struct" serializer. parser coming soon
+
 ## 0.5.0 (2023-08-17)
   * support GHC 9.2 - 9.6
   * extract generic serializing & parsing into separate library. yes, I wrote
