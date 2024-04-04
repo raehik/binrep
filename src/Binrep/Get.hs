@@ -179,19 +179,19 @@ instance GenericTraverseSum Get where
         FP.err $ E 0 $ EGeneric cd $ EGenericSum $ EGenericSumTagNoMatch cstrs ptText
 
 getGenericNonSum
-    :: forall {cd} {gf} {asserts} a
-    .  (Generic a, Rep a ~ D1 cd gf, GTraverseNonSum cd Get gf
-       , asserts ~ '[ 'NoEmpty, 'NoSum], ApplyGCAsserts asserts gf)
-    => Getter a
-getGenericNonSum = genericTraverseNonSum @asserts @Get
+    :: forall a
+    .  (Generic a, GTraverseNonSum Get (Rep a)
+       , GAssertNotVoid a, GAssertNotSum a
+    ) => Getter a
+getGenericNonSum = genericTraverseNonSum @Get
 
 getGenericSum
-    :: forall {cd} {gf} {asserts} pt a
-    .  ( Generic a, Rep a ~ D1 cd gf, GTraverseSum 'SumOnly cd Get gf
+    :: forall pt a
+    .  ( Generic a, GTraverseSum Get 'SumOnly (Rep a)
        , Get pt
-       , asserts ~ '[ 'NoEmpty, 'NeedSum], ApplyGCAsserts asserts gf)
-    => PfxTagCfg pt -> Getter a
-getGenericSum = genericTraverseSum @'SumOnly @asserts @Get
+       , GAssertNotVoid a, GAssertSum a
+    ) => PfxTagCfg pt -> Getter a
+getGenericSum = genericTraverseSum @Get @'SumOnly
 
 instance TypeError ENoEmpty => Get Void where get = undefined
 instance TypeError ENoSum => Get (Either a b) where get = undefined

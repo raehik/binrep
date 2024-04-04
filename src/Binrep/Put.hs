@@ -41,11 +41,11 @@ instance GenericFoldMap Put where
 
 -- | Serialize a term of the non-sum type @a@ via its 'Generic' instance.
 putGenericNonSum
-    :: forall {cd} {gf} {asserts} a
-    .  ( Generic a, Rep a ~ D1 cd gf, GFoldMapNonSum Put gf
-       , asserts ~ '[ 'NoEmpty, 'NoSum], ApplyGCAsserts asserts gf)
-    => a -> Putter
-putGenericNonSum = genericFoldMapNonSum @asserts @Put
+    :: forall a
+    .  ( Generic a, GFoldMapNonSum Put (Rep a)
+       , GAssertNotVoid a, GAssertNotSum a
+    ) => a -> Putter
+putGenericNonSum = genericFoldMapNonSum @Put
 
 -- | Serialize a term of the sum type @a@ via its 'Generic' instance.
 --
@@ -53,11 +53,11 @@ putGenericNonSum = genericFoldMapNonSum @asserts @Put
 -- inefficient due to having to use 'String's. Alas. Do write your own instance
 -- if you want better performance!
 putGenericSum
-    :: forall {cd} {gf} {asserts} a
-    .  ( Generic a, Rep a ~ D1 cd gf, GFoldMapSum 'SumOnly Put gf
-       , asserts ~ '[ 'NoEmpty, 'NeedSum], ApplyGCAsserts asserts gf)
-    => (String -> Putter) -> a -> Putter
-putGenericSum = genericFoldMapSum @'SumOnly @asserts @Put
+    :: forall a
+    .  ( Generic a, GFoldMapSum Put 'SumOnly (Rep a)
+       , GAssertNotVoid a, GAssertSum a
+    ) => (String -> Putter) -> a -> Putter
+putGenericSum = genericFoldMapSum @Put @'SumOnly
 
 instance Prim' a => Put (ViaPrim a) where
     put = fromStructPoke (sizeOf (undefined :: a)) . putC

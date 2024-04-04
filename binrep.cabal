@@ -90,7 +90,8 @@ library
     , bytezap
     , deepseq >=1.4.6.1 && <1.6
     , flatparse >=0.5.0.2 && <0.6
-    , generic-data-functions >=0.3.0 && <0.4
+    , generic-data-asserts >=0.1.0 && <0.2
+    , generic-data-functions >=0.4.0 && <0.5
     , megaparsec >=9.2.0 && <9.7
     , parser-combinators >=1.3.0 && <1.4
     , primitive >=0.8.0.0 && <0.10.0.0
@@ -138,7 +139,8 @@ test-suite spec
     , bytezap
     , deepseq >=1.4.6.1 && <1.6
     , flatparse >=0.5.0.2 && <0.6
-    , generic-data-functions >=0.3.0 && <0.4
+    , generic-data-asserts >=0.1.0 && <0.2
+    , generic-data-functions >=0.4.0 && <0.5
     , generic-random >=1.5.0.1 && <1.6
     , hspec >=2.7 && <2.12
     , megaparsec >=9.2.0 && <9.7
@@ -184,7 +186,8 @@ benchmark bench
     , deepseq >=1.4.6.1 && <1.6
     , flatparse >=0.5.0.2 && <0.6
     , gauge
-    , generic-data-functions >=0.3.0 && <0.4
+    , generic-data-asserts >=0.1.0 && <0.2
+    , generic-data-functions >=0.4.0 && <0.5
     , megaparsec >=9.2.0 && <9.7
     , parser-combinators >=1.3.0 && <1.4
     , primitive >=0.8.0.0 && <0.10.0.0

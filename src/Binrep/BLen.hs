@@ -59,11 +59,11 @@ instance GenericFoldMap BLen where
 -- | Measure the byte length of a term of the non-sum type @a@ via its 'Generic'
 --   instance.
 blenGenericNonSum
-    :: forall {cd} {gf} {asserts} a
-    .  ( Generic a, Rep a ~ D1 cd gf, GFoldMapNonSum BLen gf
-       , asserts ~ '[ 'NoEmpty, 'NoSum], ApplyGCAsserts asserts gf)
-    => a -> Int
-blenGenericNonSum = Monoid.getSum . genericFoldMapNonSum @asserts @BLen
+    :: forall a
+    .  ( Generic a, GFoldMapNonSum BLen (Rep a)
+       , GAssertNotVoid a, GAssertNotSum a
+    ) => a -> Int
+blenGenericNonSum = Monoid.getSum . genericFoldMapNonSum @BLen
 
 -- | Measure the byte length of a term of the sum type @a@ via its 'Generic'
 --   instance.
@@ -72,12 +72,12 @@ blenGenericNonSum = Monoid.getSum . genericFoldMapNonSum @asserts @BLen
 -- inspecting the reified constructor names. This is regrettably inefficient.
 -- Alas. Do write your own instance if you want better performance!
 blenGenericSum
-    :: forall {cd} {gf} {asserts} a
-    .  (Generic a, Rep a ~ D1 cd gf, GFoldMapSum 'SumOnly BLen gf
-       , asserts ~ '[ 'NoEmpty, 'NeedSum], ApplyGCAsserts asserts gf)
-    => (String -> Int) -> a -> Int
+    :: forall a
+    .  ( Generic a, GFoldMapSum BLen 'SumOnly (Rep a)
+       , GAssertNotVoid a, GAssertSum a
+    ) => (String -> Int) -> a -> Int
 blenGenericSum f =
-    Monoid.getSum . genericFoldMapSum @'SumOnly @asserts @BLen (Monoid.Sum <$> f)
+    Monoid.getSum . genericFoldMapSum @BLen @'SumOnly (Monoid.Sum <$> f)
 
 instance TypeError ENoEmpty => BLen Void where blen = undefined
 instance TypeError ENoSum => BLen (Either a b) where blen = undefined
