@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           binrep
-version:        0.5.0
+version:        0.6.0
 synopsis:       Encode precise binary representations directly in types
 description:    Please see README.md.
 category:       Data, Serialization, Generics
@@ -80,7 +80,7 @@ library
       TypeFamilies
       DataKinds
       MagicHash
-  ghc-options: -Wall -ddump-simpl -ddump-stg-final -ddump-cmm -dsuppress-all -dno-suppress-type-signatures -ddump-to-file
+  ghc-options: -Wall
   build-depends:
       base >=4.14 && <5
     , bytestring >=0.11 && <0.13
@@ -119,7 +119,7 @@ test-suite spec
       TypeFamilies
       DataKinds
       MagicHash
-  ghc-options: -Wall -ddump-simpl -ddump-stg-final -ddump-cmm -dsuppress-all -dno-suppress-type-signatures -ddump-to-file
+  ghc-options: -Wall
   build-tool-depends:
       hspec-discover:hspec-discover >=2.7 && <2.12
   build-depends:
@@ -163,7 +163,7 @@ benchmark bench
       TypeFamilies
       DataKinds
       MagicHash
-  ghc-options: -Wall -ddump-simpl -ddump-stg-final -ddump-cmm -dsuppress-all -dno-suppress-type-signatures -ddump-to-file
+  ghc-options: -Wall
   build-depends:
       base >=4.14 && <5
     , binrep

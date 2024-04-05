@@ -1,6 +1,6 @@
-## 0.6.0 (unreleased)
+## 0.6.0 (2024-04-05)
 * many updates to parsing/serializing internals, including generics
-* provide "C struct" serializer. parser coming soon
+* provide "C struct" serializer
 
 ## 0.5.0 (2023-08-17)
   * support GHC 9.2 - 9.6
