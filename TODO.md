@@ -1,4 +1,22 @@
 # binrep to-dos
+## Extra primitive types, instances
+* more list likes for `Prefix.Count`, maybe other places
+  * `vector` for one. maybe others...?
+* new primitive: Varint
+  * base done, but doesn't support everything
+  * `newtype Varint sign end = Varint { unVarint :: VarintRep sign }`
+  * apparently `Varint s 'LE` would be LEB128, `Varint s 'BE` would be VLQ
+  * https://developers.google.com/protocol-buffers/docs/encoding , Mason
+  * byte-oriented, so each byte is 0-127 instead of 0-255.
+  * protobuf uses little endian, twos complement
+  * Wikipedia suggests we could support signed & unsigned:
+    https://en.wikipedia.org/wiki/LEB128
+* new primitive: ZigZag
+  * maps signed to unsigned
+  * `newtype ZigZag size end = ZigZag { unZigZag :: I 'S size end }`
+  * https://developers.google.com/protocol-buffers/docs/encoding
+  * https://hackage.haskell.org/package/zigzag-0.0.1.0/docs/Data-Word-Zigzag.html
+
 ## Support "known maximum length" serialization
 For some types, we don't know how long their binary representation will be
 before serializing-- but we _do_ know their maximum possible length. The prime
@@ -50,22 +68,6 @@ Consider implementing "practical maxes" for various types.
     https://hackage.haskell.org/package/protocol-buffers-2.4.17/docs/src/Text.ProtocolBuffers.Get.html#decode7unrolled
 
 May help prevent unexpected OOMs?
-
-## More primitives
-  * Varint
-    * base done, but doesn't support everything
-    * `newtype Varint sign end = Varint { unVarint :: VarintRep sign }`
-    * apparently `Varint s 'LE` would be LEB128, `Varint s 'BE` would be VLQ
-    * https://developers.google.com/protocol-buffers/docs/encoding , Mason
-    * byte-oriented, so each byte is 0-127 instead of 0-255.
-    * protobuf uses little endian, twos complement
-    * Wikipedia suggests we could support signed & unsigned:
-      https://en.wikipedia.org/wiki/LEB128
-  * ZigZag
-    * Maps signed to unsigned
-    * `newtype ZigZag size end = ZigZag { unZigZag :: I 'S size end }`
-    * https://developers.google.com/protocol-buffers/docs/encoding
-    * https://hackage.haskell.org/package/zigzag-0.0.1.0/docs/Data-Word-Zigzag.html
 
 ## Generate (human-readable) schema from type
 I think I do this by writing yet another typeclass, filling it out for my
