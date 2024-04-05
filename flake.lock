@@ -3,11 +3,11 @@
     "bytezap": {
       "flake": false,
       "locked": {
-        "lastModified": 1712274245,
-        "narHash": "sha256-Me2OrvvbDBVySMwkTR1h5HNw0GcZUvnVp7XQDvWB4EA=",
+        "lastModified": 1712277103,
+        "narHash": "sha256-YfZSUK0KSkT5N3L0Z2t5lnY838XjrOHZDhLgM2fjMw0=",
         "owner": "raehik",
         "repo": "bytezap",
-        "rev": "ec44a85d96423e8005aa87559ccdece1b63e6908",
+        "rev": "7f4c61cf8d3cdd6434a5e2e75aa55947bd4bb3cc",
         "type": "github"
       },
       "original": {
@@ -69,11 +69,11 @@
     "generic-data-functions": {
       "flake": false,
       "locked": {
-        "lastModified": 1712211678,
-        "narHash": "sha256-mn8bvcaihN3cwmMQj0S+iKuzANwP6KrZpCk2LaDGRDw=",
+        "lastModified": 1712212922,
+        "narHash": "sha256-+YtlMezXv1nO984SKt1ogRqXAg255OF3y4RaBRjX2T8=",
         "owner": "raehik",
         "repo": "generic-data-functions",
-        "rev": "22c29c1ace47b07ff5c4b9376ba3dce172df15cb",
+        "rev": "b9a9eef00b77651b23eebdd97ddd50d669206595",
         "type": "github"
       },
       "original": {
