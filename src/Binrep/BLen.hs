@@ -38,7 +38,6 @@ import Data.Monoid qualified as Monoid
 import GHC.Generics
 import Generic.Data.Function.FoldMap
 import Generic.Data.Rep.Assert
-import Generic.Data.Function.Common
 
 -- | Class for types with easily-calculated length in bytes.
 --
@@ -71,11 +70,11 @@ blenGenericNonSum = Monoid.getSum . genericFoldMapNonSum @BLen
 -- Alas. Do write your own instance if you want better performance!
 blenGenericSum
     :: forall a
-    .  ( Generic a, GFoldMapSum BLen 'SumOnly (Rep a)
+    .  ( Generic a, GFoldMapSum BLen (Rep a)
        , GAssertNotVoid a, GAssertSum a
     ) => (String -> Int) -> a -> Int
 blenGenericSum f =
-    Monoid.getSum . genericFoldMapSum @BLen @'SumOnly (Monoid.Sum <$> f)
+    Monoid.getSum . genericFoldMapSum @BLen (Monoid.Sum <$> f)
 
 instance TypeError ENoEmpty => BLen Void where blen = undefined
 instance TypeError ENoSum => BLen (Either a b) where blen = undefined

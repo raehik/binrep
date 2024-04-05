@@ -1,6 +1,6 @@
-{-# LANGUAGE UndecidableInstances #-} -- hugely unsafe module
+{-# LANGUAGE UndecidableInstances #-} -- due to type algebra
 
-{- | _Experimental._ Generically derive 'CBLen' type family instances.
+{- | Generically derive 'CBLen' type family instances.
 
 A type having a valid 'CBLen' instance usually indicates one of the following:
 
@@ -35,9 +35,10 @@ import Data.Kind
 import Data.Type.Equality
 import Data.Type.Bool
 
--- TODO provide non-sum version
+import Generic.Data.Rep.Error
 
-type CBLenGeneric w a = GCBLen w (Rep a)
+type CBLenGeneric (w :: Type) a = GCBLen w (Rep a)
+type CBLenGenericNonSum a = CBLenGeneric (GAssertErrorSum a) a
 
 type family GCBLen w (f :: k -> Type) :: Natural where
     GCBLen _ U1         = 0

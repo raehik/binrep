@@ -35,7 +35,6 @@ import Numeric.Natural
 
 import GHC.Generics
 import Generic.Data.Function.Traverse
-import Generic.Data.Function.Common
 import Generic.Data.Rep.Assert
 
 import GHC.Exts ( minusAddr#, Int(I#) )
@@ -187,11 +186,11 @@ getGenericNonSum = genericTraverseNonSum @Get
 
 getGenericSum
     :: forall pt a
-    .  ( Generic a, GTraverseSum Get 'SumOnly (Rep a)
+    .  ( Generic a, GTraverseSum Get (Rep a)
        , Get pt
        , GAssertNotVoid a, GAssertSum a
     ) => PfxTagCfg pt -> Getter a
-getGenericSum = genericTraverseSum @Get @'SumOnly
+getGenericSum = genericTraverseSum @Get
 
 instance TypeError ENoEmpty => Get Void where get = undefined
 instance TypeError ENoSum => Get (Either a b) where get = undefined

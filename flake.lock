@@ -53,11 +53,11 @@
     "generic-data-asserts": {
       "flake": false,
       "locked": {
-        "lastModified": 1712199139,
-        "narHash": "sha256-mbXTMO30jm0QkrhUNrfFFIvfPUJOG3mJoSmI4FzOKhA=",
+        "lastModified": 1712297906,
+        "narHash": "sha256-9FJK8a19vX6wSoQYtcfiqphioGhS3bDey0VB7cGbpNM=",
         "owner": "raehik",
         "repo": "generic-data-asserts",
-        "rev": "42f3f161ddadcdebfb6ab0ea065659e60ff7ef84",
+        "rev": "77f590c5713b24163f96525b004deed71af74a70",
         "type": "github"
       },
       "original": {
@@ -69,11 +69,11 @@
     "generic-data-functions": {
       "flake": false,
       "locked": {
-        "lastModified": 1712212922,
-        "narHash": "sha256-+YtlMezXv1nO984SKt1ogRqXAg255OF3y4RaBRjX2T8=",
+        "lastModified": 1712299277,
+        "narHash": "sha256-iYP3MNgxYd5kJ83T1Gc1dPoLp87qc2O5SRflIk5Og6I=",
         "owner": "raehik",
         "repo": "generic-data-functions",
-        "rev": "b9a9eef00b77651b23eebdd97ddd50d669206595",
+        "rev": "83e4bae16c31bea40df4c18928955b1e7963d145",
         "type": "github"
       },
       "original": {

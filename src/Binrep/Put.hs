@@ -22,7 +22,6 @@ import Data.Int
 
 import GHC.Generics
 import Generic.Data.Function.FoldMap
-import Generic.Data.Function.Common
 import Generic.Data.Rep.Assert
 
 import Control.Monad.ST ( RealWorld )
@@ -55,10 +54,10 @@ putGenericNonSum = genericFoldMapNonSum @Put
 -- if you want better performance!
 putGenericSum
     :: forall a
-    .  ( Generic a, GFoldMapSum Put 'SumOnly (Rep a)
+    .  ( Generic a, GFoldMapSum Put (Rep a)
        , GAssertNotVoid a, GAssertSum a
     ) => (String -> Putter) -> a -> Putter
-putGenericSum = genericFoldMapSum @Put @'SumOnly
+putGenericSum = genericFoldMapSum @Put
 
 newtype ViaPutC a = ViaPutC { unViaPutC :: a }
 instance (PutC a, KnownNat (CBLen a)) => Put (ViaPutC a) where
