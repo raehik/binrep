@@ -3,6 +3,7 @@
 module Binrep.Put where
 
 import Binrep.BLen ( BLen(blen) )
+import Binrep.CBLen ( IsCBLen(CBLen), cblen )
 import Data.Functor.Identity
 import Bytezap.Poke
 import Raehik.Compat.Data.Primitive.Types ( Prim', sizeOf )
@@ -13,7 +14,7 @@ import Binrep.Common.Via.Prim ( ViaPrim(..) )
 import Data.ByteString qualified as B
 
 import Binrep.Common.Class.TypeErrors ( ENoSum, ENoEmpty )
-import GHC.TypeLits ( TypeError )
+import GHC.TypeLits ( TypeError, KnownNat )
 
 import Data.Void
 import Data.Word
@@ -59,6 +60,12 @@ putGenericSum
     ) => (String -> Putter) -> a -> Putter
 putGenericSum = genericFoldMapSum @Put @'SumOnly
 
+newtype ViaPutC a = ViaPutC { unViaPutC :: a }
+instance (PutC a, KnownNat (CBLen a)) => Put (ViaPutC a) where
+    {-# INLINE put #-}
+    put = fromStructPoke (cblen @a) . putC . unViaPutC
+
+-- use ViaPutC over this, but should be semantically identical
 instance Prim' a => Put (ViaPrim a) where
     put = fromStructPoke (sizeOf (undefined :: a)) . putC
     {-# INLINE put #-}
@@ -89,11 +96,11 @@ instance Put B.ByteString where
 
 -- | 8-bit (1-byte) words do not require byte order in order to precisely
 --   define their representation.
-deriving via ViaPrim Word8 instance Put Word8
+deriving via ViaPutC Word8 instance Put Word8
 
 -- | 8-bit (1-byte) words do not require byte order in order to precisely
 --   define their representation.
-deriving via ViaPrim  Int8 instance Put  Int8
+deriving via ViaPutC  Int8 instance Put  Int8
 
 -- | Byte order is irrelevant for 8-bit (1-byte) words.
 deriving via Word8 instance Put (ByteOrdered end Word8)
@@ -103,6 +110,7 @@ deriving via  Int8 instance Put (ByteOrdered end  Int8)
 
 -- ByteSwap is required on opposite endian platforms, but we're not checking
 -- here, so make sure to keep it on both.
+-- Stick with ViaPrim here because ByteOrdered is connected to it.
 deriving via ViaPrim (ByteOrdered 'LittleEndian a)
     instance (Prim' a, ByteSwap a) => Put (ByteOrdered 'LittleEndian a)
 deriving via ViaPrim (ByteOrdered    'BigEndian a)

@@ -1,9 +1,12 @@
+-- | Data null-padded to a given length.
+
 {-# LANGUAGE OverloadedStrings #-}
 
 module Binrep.Type.NullPadded where
 
 import Binrep
 import Bytezap.Poke qualified as BZ
+import Bytezap.Struct qualified as BZ.Struct
 import FlatParse.Basic qualified as FP
 import Raehik.Compat.FlatParse.Basic.WithLength qualified as FP
 import Control.Monad.Combinators ( skipCount )
@@ -52,7 +55,16 @@ instance (BLen a, KnownNat n) => Predicate (NullPad n) a where
 instance IsCBLen (NullPadded n a) where type CBLen (NullPadded n a) = n
 deriving via ViaCBLen (NullPadded n a) instance KnownNat n => BLen (NullPadded n a)
 
-instance (BLen a, Put a, KnownNat n) => Put (NullPadded n a) where
+instance (BLen a, KnownNat n, PutC a) => PutC (NullPadded n a) where
+    putC ra = BZ.Struct.sequencePokes (putC a) len
+        (BZ.Struct.replicateByte paddingLen 0x00)
+      where
+        len = blen a
+        a = unrefine ra
+        paddingLen = natValInt @n - len
+        -- ^ refinement guarantees >=0
+
+instance (BLen a, KnownNat n, Put a) => Put (NullPadded n a) where
     put ra = put a <> BZ.replicateByte paddingLen 0x00
       where
         a = unrefine ra

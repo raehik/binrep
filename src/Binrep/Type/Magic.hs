@@ -23,7 +23,7 @@ otherwise. If you really want UTF-8, please read 'Binrep.Type.Magic.UTF8'.
 module Binrep.Type.Magic where
 
 import Binrep
-import Binrep.Type.Byte
+import Bytezap.Struct.TypeLits ( ReifyBytesW64(reifyBytesW64) )
 import FlatParse.Basic qualified as FP
 import Data.ByteString qualified as B
 import Util.TypeNats ( natValInt )
@@ -57,10 +57,13 @@ instance IsCBLen (Magic a) where type CBLen (Magic a) = Length (MagicBytes a)
 deriving via ViaCBLen (Magic a) instance
     KnownNat (Length (MagicBytes a)) => BLen (Magic a)
 
-instance (bs ~ MagicBytes a, ReifyBytes bs) => Put (Magic a) where
-    put Magic = reifyBytes @bs
+instance (bs ~ MagicBytes a, ReifyBytesW64 bs) => PutC (Magic a) where
+    putC Magic = reifyBytesW64 @bs
 
-instance (bs ~ MagicBytes a, ReifyBytes bs, KnownNat (Length bs))
+deriving via (ViaPutC (Magic a)) instance
+  (bs ~ MagicBytes a, ReifyBytesW64 bs, KnownNat (Length bs)) => Put (Magic a)
+
+instance (bs ~ MagicBytes a, ReifyBytesW64 bs, KnownNat (Length bs))
   => Get (Magic a) where
     get = do
         -- Nice case where we _want_ flatparse's no-copy behaviour, because

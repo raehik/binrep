@@ -35,6 +35,8 @@ import Data.Kind
 import Data.Type.Equality
 import Data.Type.Bool
 
+-- TODO provide non-sum version
+
 type CBLenGeneric w a = GCBLen w (Rep a)
 
 type family GCBLen w (f :: k -> Type) :: Natural where

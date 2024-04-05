@@ -30,16 +30,22 @@ instance (KnownNat (Max pfx), Foldable f, Typeable pfx)
   => Predicate (CountPrefix pfx) (f a) where
     validate = validate1
 
--- TODO no idea if this is sensible
+-- | We can know byte length at compile time _if_ we know it for the prefix and
+--   the list-like.
+--
+-- This is extremely unlikely, because then what counting are we even
+-- performing for the list-like? But it's a valid instance.
 instance IsCBLen (CountPrefixed pfx f a) where
     type CBLen (CountPrefixed pfx f a) = CBLen pfx + CBLen (f a)
 
-{-
+-- | The byte length of a count-prefixed type is the length of the prefix type
+--   (holding the length of the type) plus the length of the type.
+--
+-- Bit confusing. How to explain this? TODO
 instance (Prefix pfx, Foldable f, BLen pfx, BLen (f a))
   => BLen (CountPrefixed pfx f a) where
     blen rfa = blen (lenToPfx @pfx (Foldable.length fa)) + blen fa
       where fa = unrefine1 rfa
--}
 
 instance (Prefix pfx, Foldable f, Put pfx, Put (f a))
   => Put (CountPrefixed pfx f a) where

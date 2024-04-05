@@ -15,7 +15,9 @@ import Data.Kind
 -- Note that this is separate to binary representation, so endianness is
 -- irrelevant.
 --
--- TODO oops can't use 'Int's everywhere because of overflow :'( that's OK
+-- Note that we are also limited by the host architecture's 'Int' type.
+-- We don't try to work around this, because most types are indexed with 'Int's,
+-- so I think other things will break before we do.
 class Prefix a where
     type Max a :: Natural
 
@@ -34,10 +36,12 @@ class Prefix a where
 -- all.
 instance Prefix () where
     type Max () = 0
-    lenToPfx 0 = ()
-    lenToPfx _ = error "you lied to refine and broke everything :("
+    lenToPfx = \case
+      0 -> ()
+      _ -> error "you lied to refine and broke everything :("
     pfxToLen () = 0
 
+-- | Byte ordering doesn't change how prefixes work.
 deriving via (a :: Type) instance Prefix a => Prefix (ByteOrdered end a)
 
 instance Prefix Word8  where
@@ -52,5 +56,7 @@ instance Prefix Word32 where
     type Max Word32 = 2^32 - 1
     lenToPfx = fromIntegral
     pfxToLen = fromIntegral
-
--- TODO no instances > Int, since they would break when too large
+instance Prefix Word64 where
+    type Max Word64 = 2^64 - 1
+    lenToPfx = fromIntegral
+    pfxToLen = fromIntegral

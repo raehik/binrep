@@ -30,7 +30,7 @@ instance IsCBLen a => IsCBLen (ByteOrdered end a) where
     type CBLen (ByteOrdered end a) = CBLen a
 
 -- | Reify a type's constant byte length to the term level.
-cblen :: forall a n. KnownNat (CBLen a) => Int
+cblen :: forall a. KnownNat (CBLen a) => Int
 cblen = natValInt @(CBLen a)
 
 cblen# :: forall a. KnownNat (CBLen a) => Int#

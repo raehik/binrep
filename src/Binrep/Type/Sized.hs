@@ -36,7 +36,6 @@ deriving via ViaCBLen (Sized n a) instance KnownNat n => BLen (Sized n a)
 instance PutC a => PutC (Sized n a) where
     putC = putC . unrefine
 
--- TODO obtain thru PutC instead? unsure how to do this exactly
 instance Put a => Put (Sized n a) where
     put = put . unrefine
 
