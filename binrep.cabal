@@ -41,6 +41,8 @@ library
       Binrep.Common.Via.Prim
       Binrep.Generic
       Binrep.Get
+      Binrep.Get.Error
+      Binrep.Get.Struct
       Binrep.Put
       Binrep.Put.Struct
       Binrep.Test

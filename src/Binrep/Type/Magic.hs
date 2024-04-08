@@ -23,9 +23,7 @@ otherwise. If you really want UTF-8, please read 'Binrep.Type.Magic.UTF8'.
 module Binrep.Type.Magic where
 
 import Binrep
-import Bytezap.Struct.TypeLits ( ReifyBytesW64(reifyBytesW64) )
 import FlatParse.Basic qualified as FP
-import Data.ByteString qualified as B
 import Util.TypeNats ( natValInt )
 
 import GHC.TypeLits
@@ -34,6 +32,14 @@ import GHC.Generics ( Generic )
 import Data.Data ( Data )
 
 import Strongweak
+
+import Bytezap.Struct.TypeLits.Bytes ( ReifyBytesW64(reifyBytesW64) )
+import Bytezap.Parser.Struct.TypeLits.Bytes
+  ( ParseReifyBytesW64(parseReifyBytesW64) )
+import Bytezap.Parser.Struct qualified as BZ
+import Data.ByteString.Internal qualified as B
+import GHC.Exts ( Int(I#), plusAddr#, Ptr(Ptr) )
+import Foreign.Marshal.Utils ( copyBytes )
 
 -- | A singleton data type representing a "magic number" via a phantom type.
 --
@@ -63,21 +69,34 @@ instance (bs ~ MagicBytes a, ReifyBytesW64 bs) => PutC (Magic a) where
 deriving via (ViaPutC (Magic a)) instance
   (bs ~ MagicBytes a, ReifyBytesW64 bs, KnownNat (Length bs)) => Put (Magic a)
 
-instance (bs ~ MagicBytes a, ReifyBytesW64 bs, KnownNat (Length bs))
-  => Get (Magic a) where
-    get = do
-        -- Nice case where we _want_ flatparse's no-copy behaviour, because
-        -- 'actual' is only in scope for this parser. Except, of course, if we
-        -- error, in which case _now_ we copy. Efficient!
-        actual <- FP.take (natValInt @(Length bs))
-        -- silly optimization: we could skip comparing lengths because we know
-        -- they must be the same. very silly though
-        if   actual == expected
-        then pure magic
-        else eBase $ EExpected expected (B.copy actual)
+{- this works, but is ugly.
+* we have to duplicate our error wrapping because errors use parser internals
+* we throw the magic into the error, so we need the serializer constraints too
+I mean, it's fine. It's correct. It's as fast as possible. But it looks bad :<
+-}
+instance
+  ( bs ~ MagicBytes a, ParseReifyBytesW64 bs
+  , ReifyBytesW64 bs, KnownNat (Length bs)
+  ) => GetC (Magic a) where
+    getC = BZ.ParserT $ \fpc base os# st0 ->
+        case BZ.runParserT# (parseReifyBytesW64 @bs) fpc base os# st0 of
+          BZ.OK#   st1 () -> BZ.OK#  st1 Magic
+          BZ.Fail# st1    ->
+            let bsActual = B.unsafeCreate len (\buf -> copyBytes buf (Ptr (base `plusAddr#` os#)) len)
+                eb = EExpected bsExpected bsActual
+            in  BZ.Err# st1 (E (I# os#) $ EBase eb)
+          BZ.Err#  st1 e  ->
+            let bsActual = B.unsafeCreate len (\buf -> copyBytes buf (Ptr (base `plusAddr#` os#)) len)
+                eb = EExpected bsExpected bsActual
+            in  BZ.Err# st1 (E (I# os#) $ EAnd e eb)
       where
-        expected = runPut magic
-        magic = Magic :: Magic a
+        len = natValInt @(Length bs)
+        bsExpected = runPutC (Magic :: Magic a)
+
+deriving via ViaGetC (Magic a) instance
+  ( bs ~ MagicBytes a, ParseReifyBytesW64 bs
+  , ReifyBytesW64 bs, KnownNat (Length bs)
+  ) => Get (Magic a)
 
 -- TODO might wanna move this
 -- | The length of a type-level list.

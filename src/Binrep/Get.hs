@@ -2,20 +2,21 @@
 {-# LANGUAGE BlockArguments #-}
 
 module Binrep.Get
-  ( Getter, Get(..), runGet, runGetter
-  , E(..), EBase(..), EGeneric(..), EGenericSum(..)
-  , eBase
-  , getEBase
-  -- , GetWith(..), runGetWith
-  , getPrim
-  , getGenericNonSum, getGenericSum
+  ( module Binrep.Get
+  , module Binrep.Get.Error
   ) where
 
+import Binrep.Get.Error
 import Data.Functor.Identity
 import Binrep.Util.ByteOrder
 import Binrep.Common.Via.Prim ( ViaPrim(..) )
 import Raehik.Compat.Data.Primitive.Types ( Prim', sizeOf )
 import Raehik.Compat.Data.Primitive.Types.Endian ( ByteSwap )
+
+import Binrep.Get.Struct ( GetC(getC) )
+import Bytezap.Parser.Struct qualified as BZ
+import Binrep.CBLen ( IsCBLen(CBLen), cblen )
+import GHC.TypeLits ( KnownNat )
 
 import FlatParse.Basic qualified as FP
 import Raehik.Compat.FlatParse.Basic.Prim qualified as FP
@@ -29,100 +30,26 @@ import Data.Void
 import Data.Word
 import Data.Int
 
-import Data.Text ( Text )
-
-import Numeric.Natural
-
 import GHC.Generics
 import Generic.Data.Function.Traverse
 import Generic.Data.Rep.Assert
 
-import GHC.Exts ( minusAddr#, Int(I#) )
+import GHC.Exts ( minusAddr#, Int(I#), plusAddr# )
+
+-- | Convert a bytezap struct parser to a flatparse parser.
+bzToFp
+    :: forall a e st. KnownNat (CBLen a)
+    => BZ.ParserT st e a -> FP.ParserT st e a
+bzToFp (BZ.ParserT p) = FP.ensure (I# len#) >> (FP.ParserT $ \fpc _eob s st0 ->
+    case p fpc s 0# st0 of
+      BZ.OK#   st1 a -> FP.OK#   st1 a (s `plusAddr#` len#)
+      BZ.Fail# st1   -> FP.Fail# st1
+      BZ.Err#  st1 e -> FP.Err#  st1 e
+    )
+  where
+    !(I# len#) = cblen @a
 
 type Getter a = FP.Parser E a
-
--- | Structured parse error.
-data E
-  = E Int EMiddle
-
-  -- | Unhandled parse error.
-  --
-  -- You get this if you don't change a flatparse fail to an error.
-  --
-  -- Should not be set except by library code.
-  | EFail
-
-    deriving stock (Eq, Show, Generic)
-
-data EMiddle
-
-  -- | Parse error with no further context.
-  = EBase EBase
-
-  -- | Somehow, we got two parse errors.
-  --
-  -- I have a feeling that seeing this indicates a problem in your code.
-  | EAnd E EBase
-
-  -- | Parse error decorated with generic info.
-  --
-  -- Should not be set except by library code.
-  | EGeneric String {- ^ data type name -} (EGeneric E)
-
-    deriving stock (Eq, Show, Generic)
-
-data EBase
-  = EExpectedByte Word8 Word8
-  -- ^ expected first, got second
-
-  | EOverlong Int Int
-  -- ^ expected first, got second
-
-  | EExpected B.ByteString B.ByteString
-  -- ^ expected first, got second
-
-  | EFailNamed String
-  -- ^ known fail
-
-  | EFailParse String B.ByteString Word8
-  -- ^ parse fail (where you parse a larger object, then a smaller one in it)
-
-  | ERanOut Int
-  -- ^ ran out of input, needed precisely @n@ bytes for this part (n > 0)
-  --
-  -- Actually a 'Natural', but we use 'Int' because that's what flatparse uses
-  -- internally.
-
-    deriving stock (Eq, Show, Generic)
-
--- | A generic context layer for a parse error of type @e@.
---
--- Recursive: parse errors occurring in fields are wrapped up here. (Those
--- errors may also have a generic context layer.)
---
--- Making this explicitly recursive may seem strange, but it clarifies that this
--- data type is to be seen as a layer over a top-level type.
-data EGeneric e
-  -- | Parse error relating to sum types (constructors).
-  = EGenericSum (EGenericSum e)
-
-  -- | Parse error in a constructor field.
-  | EGenericField
-        String          -- ^ constructor name
-        (Maybe String)  -- ^ field record name (if present)
-        Natural         -- ^ field index in constructor
-        e               -- ^ field parse error
-    deriving stock (Eq, Show, Generic)
-
-data EGenericSum e
-  -- | Parse error parsing prefix tag.
-  = EGenericSumTag e
-
-  -- | Unable to match a constructor to the parsed prefix tag.
-  | EGenericSumTagNoMatch
-        [String] -- ^ constructors tested
-        Text     -- ^ prettified prefix tag
-    deriving stock (Eq, Show, Generic)
 
 eBase :: EBase -> Getter a
 eBase eb = FP.ParserT \_fp eob s st ->
@@ -192,6 +119,11 @@ getGenericSum
     ) => PfxTagCfg pt -> Getter a
 getGenericSum = genericTraverseSum @Get
 
+newtype ViaGetC a = ViaGetC { unViaGetC :: a }
+instance (GetC a, KnownNat (CBLen a)) => Get (ViaGetC a) where
+    {-# INLINE get #-}
+    get = ViaGetC <$> bzToFp getC
+
 instance TypeError ENoEmpty => Get Void where get = undefined
 instance TypeError ENoSum => Get (Either a b) where get = undefined
 
@@ -254,10 +186,10 @@ deriving via ViaPrim Word8 instance Get Word8
 deriving via ViaPrim  Int8 instance Get  Int8
 
 -- | Byte order is irrelevant for 8-bit (1-byte) words.
-deriving via Identity Word8 instance Get (ByteOrdered end Word8)
+deriving via Word8 instance Get (ByteOrdered end Word8)
 
 -- | Byte order is irrelevant for 8-bit (1-byte) words.
-deriving via Identity  Int8 instance Get (ByteOrdered end  Int8)
+deriving via  Int8 instance Get (ByteOrdered end  Int8)
 
 -- | Parse any 'Prim''.
 getPrim :: forall a. Prim' a => Getter a

@@ -4,6 +4,7 @@ module Binrep
   , module Binrep.Put
   , module Binrep.Put.Struct
   , module Binrep.Get
+  , module Binrep.Get.Struct
   ) where
 
 import Binrep.BLen
@@ -11,6 +12,7 @@ import Binrep.CBLen
 import Binrep.Put
 import Binrep.Put.Struct
 import Binrep.Get
+import Binrep.Get.Struct
 
 {- TODO
   * binrep is its own ecosystem where explicitness and correctness wins over
