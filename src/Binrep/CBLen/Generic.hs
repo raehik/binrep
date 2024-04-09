@@ -42,6 +42,7 @@ type CBLenGenericNonSum a = CBLenGeneric (GAssertErrorSum a) a
 
 type family GCBLen w (f :: k -> Type) :: Natural where
     GCBLen _ U1         = 0
+    GCBLen _ (Rec0 c)   = CBLen c
     GCBLen _ (K1 i c)   = CBLen c
     GCBLen w (l :*: r)  = GCBLen w l + GCBLen w r
 
