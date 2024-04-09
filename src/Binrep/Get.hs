@@ -34,7 +34,7 @@ import GHC.Generics
 import Generic.Data.Function.Traverse
 import Generic.Data.Rep.Assert
 
-import GHC.Exts ( minusAddr#, Int(I#), plusAddr# )
+import GHC.Exts ( minusAddr#, Int(I#), Int#, plusAddr#, (+#) )
 
 -- | Convert a bytezap struct parser to a flatparse parser.
 bzToFp
@@ -48,6 +48,17 @@ bzToFp (BZ.ParserT p) = FP.ensure (I# len#) >> (FP.ParserT $ \fpc _eob s st0 ->
     )
   where
     !(I# len#) = cblen @a
+
+fpToBz
+    :: FP.ParserT st e a -> Int#
+    -> (a -> Int# -> BZ.ParserT st e r) -> BZ.ParserT st e r
+fpToBz (FP.ParserT p) len# fp = BZ.ParserT $ \fpc base# os# st0 ->
+    case p fpc (base# `plusAddr#` (os# +# len#)) (base# `plusAddr#` os#) st0 of
+      FP.OK#   st1 a s ->
+        let unconsumed# = s `minusAddr#` (base# `plusAddr#` os#)
+        in  BZ.runParserT# (fp a unconsumed#) fpc base# (os# +# unconsumed#) st1
+      FP.Fail# st1     -> BZ.Fail# st1
+      FP.Err#  st1 e   -> BZ.Err#  st1 e
 
 type Getter a = FP.Parser E a
 

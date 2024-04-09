@@ -21,6 +21,9 @@ import Util.TypeNats ( natValInt )
 
 import Data.Typeable ( typeRep )
 
+import Bytezap.Parser.Struct qualified as BZG
+import GHC.Exts ( Int(I#) )
+
 data NullPad (n :: Natural)
 
 -- | A type which is to be null-padded to a given total length.
@@ -42,6 +45,10 @@ data NullPad (n :: Natural)
 -- The binrep instances are careful not to construct bytestrings unnecessarily.
 type NullPadded n a = Refined (NullPad n) a
 
+instance IsCBLen (NullPadded n a) where type CBLen (NullPadded n a) = n
+deriving via ViaCBLen (NullPadded n a) instance KnownNat n => BLen (NullPadded n a)
+
+-- | Assert that term will fit.
 instance (BLen a, KnownNat n) => Predicate (NullPad n) a where
     validate p a
       | len <= n = success
@@ -52,15 +59,12 @@ instance (BLen a, KnownNat n) => Predicate (NullPad n) a where
         n = natValInt @n
         len = blen a
 
-instance IsCBLen (NullPadded n a) where type CBLen (NullPadded n a) = n
-deriving via ViaCBLen (NullPadded n a) instance KnownNat n => BLen (NullPadded n a)
-
 instance (BLen a, KnownNat n, PutC a) => PutC (NullPadded n a) where
     putC ra = BZ.Struct.sequencePokes (putC a) len
         (BZ.Struct.replicateByte paddingLen 0x00)
       where
-        len = blen a
         a = unrefine ra
+        len = blen a
         paddingLen = natValInt @n - len
         -- ^ refinement guarantees >=0
 
@@ -70,6 +74,14 @@ instance (BLen a, KnownNat n, Put a) => Put (NullPadded n a) where
         a = unrefine ra
         paddingLen = natValInt @n - blen a
         -- ^ refinement guarantees >=0
+
+-- | Run a @Getter a@ isolated to @n@ bytes.
+instance (KnownNat n, Get a) => GetC (NullPadded n a) where
+    getC = fpToBz get len# $ \a _unconsumed# ->
+        -- TODO consume nulls lol
+        BZG.constParse $ reallyUnsafeRefine a
+      where
+        !(I# len#) = natValInt @n
 
 instance (Get a, KnownNat n) => Get (NullPadded n a) where
     get = do
