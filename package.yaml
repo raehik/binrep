@@ -51,6 +51,10 @@ default-extensions:
 ghc-options:
 - -Wall
 
+#- -ddump-to-file
+#- -ddump-simpl
+#- -ddump-stg-final
+
 dependencies:
 - base >= 4.14 && < 5
 - bytezap ^>= 1.1.0

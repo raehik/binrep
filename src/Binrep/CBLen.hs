@@ -13,6 +13,8 @@ import Util.TypeNats ( natValInt )
 
 import DeFun.Core ( type (~>), type App )
 
+import Refined
+
 class IsCBLen a where type CBLen a :: Natural
 
 instance IsCBLen () where type CBLen () = 0
@@ -30,6 +32,9 @@ instance IsCBLen  Int64 where type CBLen  Int64 = 2^3
 
 instance IsCBLen a => IsCBLen (ByteOrdered end a) where
     type CBLen (ByteOrdered end a) = CBLen a
+
+instance IsCBLen (Refined (pl `And` pr) a) where
+    type CBLen (Refined (pl `And` pr) a) = CBLen (Refined pr (Refined pl a))
 
 -- | Reify a type's constant byte length to the term level.
 cblen :: forall a. KnownNat (CBLen a) => Int

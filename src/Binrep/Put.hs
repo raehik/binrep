@@ -22,11 +22,14 @@ import Data.Int
 
 import GHC.Generics
 import Generic.Data.Function.FoldMap
-import Generic.Data.Rep.Assert
+import Generic.Data.Rep.Assert hiding ( type And )
 
 import Control.Monad.ST ( RealWorld )
 
 import Binrep.Put.Struct ( PutC(putC) )
+
+import Refined
+import Refined.Unsafe
 
 type Putter = Poke RealWorld
 class Put a where put :: a -> Putter
@@ -114,3 +117,8 @@ deriving via ViaPrim (ByteOrdered 'LittleEndian a)
     instance (Prim' a, ByteSwap a) => Put (ByteOrdered 'LittleEndian a)
 deriving via ViaPrim (ByteOrdered    'BigEndian a)
     instance (Prim' a, ByteSwap a) => Put (ByteOrdered    'BigEndian a)
+
+-- | Put types refined with multiple predicates by wrapping the left
+--   predicate with the right. LOL REALLY?
+instance Put (Refined pr (Refined pl a)) => Put (Refined (pl `And` pr) a) where
+    put = put . reallyUnsafeRefine @_ @pr . reallyUnsafeRefine @_ @pl . unrefine

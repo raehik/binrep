@@ -1,5 +1,19 @@
 -- | Data null-padded to a given length.
 
+{- TODO
+Null padding using the underlying type's instances doesn't necessarily work.
+'ByteString's must parse until the end of the string.
+Or maybe that's correct, and we must use null terminated bytestrings with null
+padding...? Huh.
+
+...well, doing that fixes my issue. And thinking about it, I imagine that's how
+C does it (you're still going to be wanting to deal with cstrings regardless of
+null padding). Cool!!
+
+OK, all good. But because of that, I should provide a convenience wrapper to put
+nullpad+nullterm together.
+-}
+
 {-# LANGUAGE OverloadedStrings #-}
 
 module Binrep.Type.NullPadded where
@@ -26,23 +40,22 @@ import GHC.Exts ( Int(I#) )
 
 data NullPad (n :: Natural)
 
--- | A type which is to be null-padded to a given total length.
---
--- Given some @a :: 'NullPadded' n a@, it is guaranteed that
---
--- @
--- 'blen' a '<=' 'natValInt' \@n
--- @
---
--- thus
---
--- @
--- 'natValInt' \@n '-' 'blen' a '>=' 0
--- @
---
--- That is, the serialized stored data will not be longer than the total length.
---
--- The binrep instances are careful not to construct bytestrings unnecessarily.
+{- | A type which is to be null-padded to a given total length.
+
+Given some @a :: 'NullPadded' n a@, it is guaranteed that
+
+@
+'blen' a '<=' 'natValInt' \@n
+@
+
+thus
+
+@
+'natValInt' \@n '-' 'blen' a '>=' 0
+@
+
+That is, the serialized stored data will not be longer than the total length.
+-}
 type NullPadded n a = Refined (NullPad n) a
 
 instance IsCBLen (NullPadded n a) where type CBLen (NullPadded n a) = n

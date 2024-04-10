@@ -37,7 +37,10 @@ import Binrep.Util.ByteOrder
 import Data.Monoid qualified as Monoid
 import GHC.Generics
 import Generic.Data.Function.FoldMap
-import Generic.Data.Rep.Assert
+import Generic.Data.Rep.Assert hiding ( type And )
+
+import Refined
+import Refined.Unsafe
 
 -- | Class for types with easily-calculated length in bytes.
 --
@@ -112,3 +115,7 @@ deriving via ViaCBLen (ByteOrdered end a)
 -- (e.g. "Binrep.Type.Sized").
 newtype ViaCBLen a = ViaCBLen { unViaCBLen :: a }
 instance KnownNat (CBLen a) => BLen (ViaCBLen a) where blen _ = cblen @a
+
+instance BLen (Refined pr (Refined pl a))
+  => BLen (Refined (pl `And` pr) a) where
+    blen = blen . reallyUnsafeRefine @_ @pr . reallyUnsafeRefine @_ @pl . unrefine

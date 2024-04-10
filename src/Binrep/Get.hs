@@ -32,9 +32,12 @@ import Data.Int
 
 import GHC.Generics
 import Generic.Data.Function.Traverse
-import Generic.Data.Rep.Assert
+import Generic.Data.Rep.Assert hiding ( And )
 
 import GHC.Exts ( minusAddr#, Int(I#), Int#, plusAddr#, (+#) )
+
+import Refined
+import Refined.Unsafe
 
 -- | Convert a bytezap struct parser to a flatparse parser.
 bzToFp
@@ -214,6 +217,9 @@ deriving via ViaPrim (ByteOrdered 'LittleEndian a)
     instance (Prim' a, ByteSwap a) => Get (ByteOrdered 'LittleEndian a)
 deriving via ViaPrim (ByteOrdered    'BigEndian a)
     instance (Prim' a, ByteSwap a) => Get (ByteOrdered    'BigEndian a)
+
+instance Get (Refined pr (Refined pl a)) => Get (Refined (pl `And` pr) a) where
+    get = (reallyUnsafeRefine . unrefine @pl . unrefine @pr) <$> get
 
 {-
 
