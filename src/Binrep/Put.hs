@@ -22,7 +22,7 @@ import Data.Int
 
 import GHC.Generics
 import Generic.Data.Function.FoldMap
-import Generic.Data.Rep.Assert hiding ( type And )
+import Generic.Type.Assert
 
 import Control.Monad.ST ( RealWorld )
 
@@ -37,6 +37,7 @@ class Put a where put :: a -> Putter
 runPut :: (BLen a, Put a) => a -> B.ByteString
 runPut a = unsafeRunPokeBS (blen a) (put a)
 
+-- | Serialize generically using generic 'foldMap'.
 instance GenericFoldMap Put where
     type GenericFoldMapM Put = Putter
     type GenericFoldMapC Put a = Put a
@@ -61,6 +62,9 @@ putGenericSum
        , GAssertNotVoid a, GAssertSum a
     ) => (String -> Putter) -> a -> Putter
 putGenericSum = genericFoldMapSum @Put
+
+-- We can't provide a Generically instance because the user must choose between
+-- sum and non-sum handlers.
 
 newtype ViaPutC a = ViaPutC { unViaPutC :: a }
 instance (PutC a, KnownNat (CBLen a)) => Put (ViaPutC a) where

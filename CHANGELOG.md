@@ -1,3 +1,14 @@
+## Unreleased
+* provide "C struct" parser (from bytezap)
+* fill out some missing C struct instances
+* speed up magic parsing (sped up serializing in v0.6.0)
+* add special binrep instances for `And` predicate combinator which re-associate
+  to wrap the left predicate in the right
+  * this gives a clean solution to the null-padded null-terminated bytestring,
+    and appears to be generally sound! felt great to discover
+* add Generically instances for C struct parser/serializers
+  * can't for regular parser/serializer because of sum/non-sum choice
+
 ## 0.6.0 (2024-04-05)
 * many updates to parsing/serializing internals, including generics
 * provide "C struct" serializer

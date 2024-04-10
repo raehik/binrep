@@ -1,4 +1,7 @@
 # binrep to-dos
+## Assert fast magic handling is safe on either endian
+I think we do endian-neutral operations, but do confirm.
+
 ## Extra primitive types, instances
 * more list likes for `Prefix.Count`, maybe other places
   * `vector` for one. maybe others...?

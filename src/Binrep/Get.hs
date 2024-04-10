@@ -32,65 +32,14 @@ import Data.Int
 
 import GHC.Generics
 import Generic.Data.Function.Traverse
-import Generic.Data.Rep.Assert hiding ( And )
+import Generic.Type.Assert
 
 import GHC.Exts ( minusAddr#, Int(I#), Int#, plusAddr#, (+#) )
 
 import Refined
 import Refined.Unsafe
 
--- | Convert a bytezap struct parser to a flatparse parser.
-bzToFp
-    :: forall a e st. KnownNat (CBLen a)
-    => BZ.ParserT st e a -> FP.ParserT st e a
-bzToFp (BZ.ParserT p) = FP.ensure (I# len#) >> (FP.ParserT $ \fpc _eob s st0 ->
-    case p fpc s 0# st0 of
-      BZ.OK#   st1 a -> FP.OK#   st1 a (s `plusAddr#` len#)
-      BZ.Fail# st1   -> FP.Fail# st1
-      BZ.Err#  st1 e -> FP.Err#  st1 e
-    )
-  where
-    !(I# len#) = cblen @a
-
-fpToBz
-    :: FP.ParserT st e a -> Int#
-    -> (a -> Int# -> BZ.ParserT st e r) -> BZ.ParserT st e r
-fpToBz (FP.ParserT p) len# fp = BZ.ParserT $ \fpc base# os# st0 ->
-    case p fpc (base# `plusAddr#` (os# +# len#)) (base# `plusAddr#` os#) st0 of
-      FP.OK#   st1 a s ->
-        let unconsumed# = s `minusAddr#` (base# `plusAddr#` os#)
-        in  BZ.runParserT# (fp a unconsumed#) fpc base# (os# +# unconsumed#) st1
-      FP.Fail# st1     -> BZ.Fail# st1
-      FP.Err#  st1 e   -> BZ.Err#  st1 e
-
 type Getter a = FP.Parser E a
-
-eBase :: EBase -> Getter a
-eBase eb = FP.ParserT \_fp eob s st ->
-    let os = I# (minusAddr# eob s)
-     in FP.Err# st (E os $ EBase eb)
-
-getEBase :: Getter a -> EBase -> Getter a
-getEBase (FP.ParserT f) eb =
-    FP.ParserT \fp eob s st ->
-        let os = I# (minusAddr# eob s)
-         in case f fp eob s st of
-              FP.Fail# st'   -> FP.Err# st' (E os $ EBase eb)
-              FP.Err#  st' e -> FP.Err# st' (E os $ EAnd e eb)
-              x -> x
-
--- | Parse. On parse error, coat it in a generic context layer.
-getWrapGeneric :: Get a => String -> (E -> EGeneric E) -> Getter a
-getWrapGeneric = getWrapGeneric' get
-
-getWrapGeneric' :: Getter a -> String -> (E -> EGeneric E) -> Getter a
-getWrapGeneric' (FP.ParserT f) cd fe =
-    FP.ParserT \fp eob s st ->
-        let os = I# (minusAddr# eob s)
-         in case f fp eob s st of
-              FP.Fail# st'   -> FP.Err# st' (E os $ EGeneric cd $ fe EFail)
-              FP.Err#  st' e -> FP.Err# st' (E os $ EGeneric cd $ fe e)
-              x -> x
 
 class Get a where
     -- | Parse from binary.
@@ -120,7 +69,7 @@ instance GenericTraverseSum Get where
 
 getGenericNonSum
     :: forall a
-    .  (Generic a, GTraverseNonSum Get (Rep a)
+    .  ( Generic a, GTraverseNonSum Get (Rep a)
        , GAssertNotVoid a, GAssertNotSum a
     ) => Getter a
 getGenericNonSum = genericTraverseNonSum @Get
@@ -132,6 +81,60 @@ getGenericSum
        , GAssertNotVoid a, GAssertSum a
     ) => PfxTagCfg pt -> Getter a
 getGenericSum = genericTraverseSum @Get
+
+-- We can't provide a Generically instance because the user must choose between
+-- sum and non-sum handlers.
+
+eBase :: EBase -> Getter a
+eBase eb = FP.ParserT \_fp eob s st ->
+    let os = I# (minusAddr# eob s)
+     in FP.Err# st (E os $ EBase eb)
+
+getEBase :: Getter a -> EBase -> Getter a
+getEBase (FP.ParserT f) eb =
+    FP.ParserT \fp eob s st ->
+        let os = I# (minusAddr# eob s)
+         in case f fp eob s st of
+              FP.Fail# st'   -> FP.Err# st' (E os $ EBase eb)
+              FP.Err#  st' e -> FP.Err# st' (E os $ EAnd e eb)
+              x -> x
+
+-- | Convert a bytezap struct parser to a flatparse parser.
+bzToFp
+    :: forall a e st. KnownNat (CBLen a)
+    => BZ.ParserT st e a -> FP.ParserT st e a
+bzToFp (BZ.ParserT p) = FP.ensure (I# len#) >> (FP.ParserT $ \fpc _eob s st0 ->
+    case p fpc s 0# st0 of
+      BZ.OK#   st1 a -> FP.OK#   st1 a (s `plusAddr#` len#)
+      BZ.Fail# st1   -> FP.Fail# st1
+      BZ.Err#  st1 e -> FP.Err#  st1 e
+    )
+  where
+    !(I# len#) = cblen @a
+
+fpToBz
+    :: FP.ParserT st e a -> Int#
+    -> (a -> Int# -> BZ.ParserT st e r) -> BZ.ParserT st e r
+fpToBz (FP.ParserT p) len# fp = BZ.ParserT $ \fpc base# os# st0 ->
+    case p fpc (base# `plusAddr#` (os# +# len#)) (base# `plusAddr#` os#) st0 of
+      FP.OK#   st1 a s ->
+        let unconsumed# = s `minusAddr#` (base# `plusAddr#` os#)
+        in  BZ.runParserT# (fp a unconsumed#) fpc base# (os# +# unconsumed#) st1
+      FP.Fail# st1     -> BZ.Fail# st1
+      FP.Err#  st1 e   -> BZ.Err#  st1 e
+
+-- | Parse. On parse error, coat it in a generic context layer.
+getWrapGeneric :: Get a => String -> (E -> EGeneric E) -> Getter a
+getWrapGeneric = getWrapGeneric' get
+
+getWrapGeneric' :: Getter a -> String -> (E -> EGeneric E) -> Getter a
+getWrapGeneric' (FP.ParserT f) cd fe =
+    FP.ParserT \fp eob s st ->
+        let os = I# (minusAddr# eob s)
+         in case f fp eob s st of
+              FP.Fail# st'   -> FP.Err# st' (E os $ EGeneric cd $ fe EFail)
+              FP.Err#  st' e -> FP.Err# st' (E os $ EGeneric cd $ fe e)
+              x -> x
 
 newtype ViaGetC a = ViaGetC { unViaGetC :: a }
 instance (GetC a, KnownNat (CBLen a)) => Get (ViaGetC a) where

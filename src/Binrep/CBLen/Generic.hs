@@ -36,7 +36,7 @@ import Data.Kind
 import Data.Type.Equality
 import Data.Type.Bool
 
-import Generic.Data.Rep.Error
+import Generic.Type.Assert.Error
 
 type CBLenGeneric (w :: Type) a = GCBLen w (Rep a)
 type CBLenGenericNonSum a = CBLenGeneric (GAssertErrorSum a) a

@@ -11,8 +11,10 @@
     strongweak.flake = false;
     generic-data-functions.url   = "github:raehik/generic-data-functions";
     generic-data-functions.flake = false;
-    generic-data-asserts.url   = "github:raehik/generic-data-asserts";
-    generic-data-asserts.flake = false;
+    generic-type-asserts.url   = "github:raehik/generic-type-asserts";
+    generic-type-asserts.flake = false;
+    generic-type-functions.url   = "github:raehik/generic-type-functions";
+    generic-type-functions.flake = false;
   };
   outputs = inputs:
   let
@@ -39,7 +41,8 @@
           packages.flatparse.source = inputs.flatparse;
           packages.strongweak.source = inputs.strongweak;
           packages.generic-data-functions.source = inputs.generic-data-functions;
-          packages.generic-data-asserts.source = inputs.generic-data-asserts;
+          packages.generic-type-asserts.source = inputs.generic-type-asserts;
+          packages.generic-type-functions.source = inputs.generic-type-functions;
           devShell = nondevDevShell "ghc98";
         };
         haskellProjects.ghc96 = {
@@ -48,7 +51,8 @@
           packages.flatparse.source = inputs.flatparse;
           packages.strongweak.source = inputs.strongweak;
           packages.generic-data-functions.source = inputs.generic-data-functions;
-          packages.generic-data-asserts.source = inputs.generic-data-asserts;
+          packages.generic-type-asserts.source = inputs.generic-type-asserts;
+          packages.generic-type-functions.source = inputs.generic-type-functions;
           devShell.mkShellArgs.name = "ghc96-binrep";
           devShell.tools = _: {
             haskell-language-server = null; # 2024-03-06: broken
@@ -60,7 +64,8 @@
           packages.flatparse.source = inputs.flatparse;
           packages.strongweak.source = inputs.strongweak;
           packages.generic-data-functions.source = inputs.generic-data-functions;
-          packages.generic-data-asserts.source = inputs.generic-data-asserts;
+          packages.generic-type-asserts.source = inputs.generic-type-asserts;
+          packages.generic-type-functions.source = inputs.generic-type-functions;
           devShell = nondevDevShell "ghc94";
         };
         haskellProjects.ghc92 = {
@@ -69,7 +74,8 @@
           packages.flatparse.source = inputs.flatparse;
           packages.strongweak.source = inputs.strongweak;
           packages.generic-data-functions.source = inputs.generic-data-functions;
-          packages.generic-data-asserts.source = inputs.generic-data-asserts;
+          packages.generic-type-asserts.source = inputs.generic-type-asserts;
+          packages.generic-type-functions.source = inputs.generic-type-functions;
           devShell = nondevDevShell "ghc92";
         };
       };

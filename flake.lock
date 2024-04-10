@@ -3,11 +3,11 @@
     "bytezap": {
       "flake": false,
       "locked": {
-        "lastModified": 1712719033,
-        "narHash": "sha256-FAKvYwJpooiKDPkh+PHG1ipDYBaqvVtsOnZE2vG6Kuw=",
+        "lastModified": 1712784857,
+        "narHash": "sha256-3RCMdwqH7aGDVXIqCnY7nriITHOVRDOGMOug3ULl8Ns=",
         "owner": "raehik",
         "repo": "bytezap",
-        "rev": "2eff45c22f11406ff85412d804cc58c99035f9c6",
+        "rev": "5d4a9db91351441afe796c0ef7fcf9eaba33c472",
         "type": "github"
       },
       "original": {
@@ -50,22 +50,6 @@
         "type": "github"
       }
     },
-    "generic-data-asserts": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1712297906,
-        "narHash": "sha256-9FJK8a19vX6wSoQYtcfiqphioGhS3bDey0VB7cGbpNM=",
-        "owner": "raehik",
-        "repo": "generic-data-asserts",
-        "rev": "77f590c5713b24163f96525b004deed71af74a70",
-        "type": "github"
-      },
-      "original": {
-        "owner": "raehik",
-        "repo": "generic-data-asserts",
-        "type": "github"
-      }
-    },
     "generic-data-functions": {
       "flake": false,
       "locked": {
@@ -79,6 +63,38 @@
       "original": {
         "owner": "raehik",
         "repo": "generic-data-functions",
+        "type": "github"
+      }
+    },
+    "generic-type-asserts": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1712787507,
+        "narHash": "sha256-r31KC8UmVsH4+xfQ7hBS20m0prEG6Opa0mMfhoAGwts=",
+        "owner": "raehik",
+        "repo": "generic-type-asserts",
+        "rev": "648620da174dc42ff561d48af24bc33fced30585",
+        "type": "github"
+      },
+      "original": {
+        "owner": "raehik",
+        "repo": "generic-type-asserts",
+        "type": "github"
+      }
+    },
+    "generic-type-functions": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1712783923,
+        "narHash": "sha256-ZTWotMygjnlJn0tMonEtFgnowRm7Xo7B8tVT+aWqbLA=",
+        "owner": "raehik",
+        "repo": "generic-type-functions",
+        "rev": "95bb0e3f48ac9c54309fad31ab787efb67b8ee90",
+        "type": "github"
+      },
+      "original": {
+        "owner": "raehik",
+        "repo": "generic-type-functions",
         "type": "github"
       }
     },
@@ -136,8 +152,9 @@
         "bytezap": "bytezap",
         "flake-parts": "flake-parts",
         "flatparse": "flatparse",
-        "generic-data-asserts": "generic-data-asserts",
         "generic-data-functions": "generic-data-functions",
+        "generic-type-asserts": "generic-type-asserts",
+        "generic-type-functions": "generic-type-functions",
         "haskell-flake": "haskell-flake",
         "nixpkgs": "nixpkgs",
         "strongweak": "strongweak"

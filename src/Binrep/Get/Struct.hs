@@ -1,4 +1,4 @@
--- {-# LANGUAGE UndecidableInstances #-} -- for @KnownNat (CBLen a)@ in head
+{-# LANGUAGE UndecidableInstances #-} -- for Generically instance
 
 module Binrep.Get.Struct where
 
@@ -22,6 +22,8 @@ import Data.Functor.Identity
 import Raehik.Compat.Data.Primitive.Types.Endian ( ByteSwap )
 
 import Data.ByteString qualified as B
+
+import Generic.Type.Assert
 
 type GetterC = Parser E
 
@@ -63,9 +65,16 @@ instance GParseBase GetC where
 -- | Serialize a term of the struct-like type @a@ via its 'Generic' instance.
 getGenericStruct
     :: forall a
-    .  ( Generic a, GParse GetC (Rep a) )
-    => GetterC a
+    .  ( Generic a, GParse GetC (Rep a)
+       , GAssertNotVoid a, GAssertNotSum a
+    ) => GetterC a
 getGenericStruct = to <$> gParse @GetC
+
+instance
+  ( Generic a, GParse GetC (Rep a)
+  , GAssertNotVoid a, GAssertNotSum a
+  ) => GetC (Generically a) where
+    getC = Generically <$> getGenericStruct
 
 instance GetC () where
     {-# INLINE getC #-}

@@ -37,7 +37,7 @@ import Binrep.Util.ByteOrder
 import Data.Monoid qualified as Monoid
 import GHC.Generics
 import Generic.Data.Function.FoldMap
-import Generic.Data.Rep.Assert hiding ( type And )
+import Generic.Type.Assert
 
 import Refined
 import Refined.Unsafe
@@ -79,6 +79,13 @@ blenGenericSum
 blenGenericSum f =
     Monoid.getSum . genericFoldMapSum @BLen (Monoid.Sum <$> f)
 
+-- We can't provide a Generically instance because the user must choose between
+-- sum and non-sum handlers.
+
+instance BLen (Refined pr (Refined pl a))
+  => BLen (Refined (pl `And` pr) a) where
+    blen = blen . reallyUnsafeRefine @_ @pr . reallyUnsafeRefine @_ @pl . unrefine
+
 instance TypeError ENoEmpty => BLen Void where blen = undefined
 instance TypeError ENoSum => BLen (Either a b) where blen = undefined
 
@@ -115,7 +122,3 @@ deriving via ViaCBLen (ByteOrdered end a)
 -- (e.g. "Binrep.Type.Sized").
 newtype ViaCBLen a = ViaCBLen { unViaCBLen :: a }
 instance KnownNat (CBLen a) => BLen (ViaCBLen a) where blen _ = cblen @a
-
-instance BLen (Refined pr (Refined pl a))
-  => BLen (Refined (pl `And` pr) a) where
-    blen = blen . reallyUnsafeRefine @_ @pr . reallyUnsafeRefine @_ @pl . unrefine

@@ -48,6 +48,10 @@ cblenProxy# :: forall a. KnownNat (CBLen a) => Proxy# a -> Int#
 cblenProxy# _ = i#
   where !(I# i#) = natValInt @(CBLen a)
 
+-- | Defunctionalization symbol for 'CBLen'.
+--
+-- This is required for parameterized type-level generics e.g. bytezap's
+-- 'Bytezap.Struct.Generic.GPokeBase'.
 type CBLenSym :: a ~> Natural
 data CBLenSym a
 type instance App CBLenSym a = CBLen a

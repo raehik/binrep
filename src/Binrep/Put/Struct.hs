@@ -22,6 +22,8 @@ import Binrep.Common.Class.TypeErrors ( ENoSum, ENoEmpty )
 import GHC.TypeLits ( TypeError )
 import Data.Void
 
+import Generic.Type.Assert
+
 type PutterC = Struct.Poke RealWorld
 
 -- | constant size putter
@@ -39,9 +41,16 @@ instance Struct.GPokeBase PutC where
 -- | Serialize a term of the struct-like type @a@ via its 'Generic' instance.
 putGenericStruct
     :: forall a
-    .  ( Generic a, Struct.GPoke PutC (Rep a) )
-    => a -> PutterC
+    .  ( Generic a, Struct.GPoke PutC (Rep a)
+       , GAssertNotVoid a, GAssertNotSum a
+    ) => a -> PutterC
 putGenericStruct = Struct.Poke . Struct.gPoke @PutC . from
+
+instance
+  ( Generic a, Struct.GPoke PutC (Rep a)
+  , GAssertNotVoid a, GAssertNotSum a
+  ) => PutC (Generically a) where
+    putC (Generically a) = putGenericStruct a
 
 instance Prim' a => PutC (ViaPrim a) where
     putC = Struct.prim . unViaPrim
