@@ -1,4 +1,4 @@
-## Unreleased
+## 0.7.0 (2024-04-10)
 * provide "C struct" parser (from bytezap)
 * fill out some missing C struct instances
 * speed up magic parsing (sped up serializing in v0.6.0)

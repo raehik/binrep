@@ -115,6 +115,8 @@ out the function applications or something. Essentially, you can't do this:
         Map f (a ': as) = f a ': Map f as
 
 So you have to write that out for every concrete function over lists.
+
+TODO wellll we depend on defun-core now so may as well use that LOL
 -}
 
 type family SymbolUnicodeCodepoints (a :: Symbol) :: [Natural] where
