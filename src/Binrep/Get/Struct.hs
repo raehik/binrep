@@ -9,7 +9,7 @@ import Binrep.CBLen
 import Foreign.Ptr ( Ptr )
 import Data.Void ( Void )
 import GHC.Exts ( Proxy#, Int(I#) )
-import GHC.TypeLits ( KnownNat )
+import GHC.TypeNats ( KnownNat )
 import GHC.Generics
 
 import Binrep.Common.Via.Prim ( ViaPrim(..) )
@@ -58,8 +58,7 @@ instance GParseBase GetC where
     type GParseBaseC  GetC a = GetC a
     type GParseBaseE  GetC = E
     gParseBase = getC
-    type GParseBaseLen GetC a = KnownNat (CBLen a)
-    gParseBaseLen p = I# (cblenProxy# p)
+    type GParseBaseLenTF GetC = CBLenSym
 
 -- | Serialize a term of the struct-like type @a@ via its 'Generic' instance.
 getGenericStruct

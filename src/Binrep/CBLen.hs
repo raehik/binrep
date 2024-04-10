@@ -11,6 +11,8 @@ import Binrep.Util.ByteOrder
 import GHC.Exts ( Int#, Int(I#), Proxy# )
 import Util.TypeNats ( natValInt )
 
+import DeFun.Core ( type (~>), type App )
+
 class IsCBLen a where type CBLen a :: Natural
 
 instance IsCBLen () where type CBLen () = 0
@@ -40,3 +42,7 @@ cblen# = i#
 cblenProxy# :: forall a. KnownNat (CBLen a) => Proxy# a -> Int#
 cblenProxy# _ = i#
   where !(I# i#) = natValInt @(CBLen a)
+
+type CBLenSym :: a ~> Natural
+data CBLenSym a
+type instance App CBLenSym a = CBLen a

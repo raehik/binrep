@@ -21,6 +21,7 @@ sum tag for sum types.
 
 Then try using it. Hopefully it works, or you get a useful type error. If not,
 sorry. I don't have much faith in this code.
+
 -}
 
 module Binrep.CBLen.Generic where
@@ -42,7 +43,6 @@ type CBLenGenericNonSum a = CBLenGeneric (GAssertErrorSum a) a
 
 type family GCBLen w (f :: k -> Type) :: Natural where
     GCBLen _ U1         = 0
-    GCBLen _ (Rec0 c)   = CBLen c
     GCBLen _ (K1 i c)   = CBLen c
     GCBLen w (l :*: r)  = GCBLen w l + GCBLen w r
 

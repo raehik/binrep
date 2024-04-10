@@ -34,8 +34,7 @@ instance Struct.GPokeBase PutC where
     type GPokeBaseSt PutC   = RealWorld
     type GPokeBaseC  PutC a = PutC a
     gPokeBase = Struct.unPoke . putC
-    type KnownSizeOf' PutC a = KnownNat (CBLen a)
-    sizeOf' = cblenProxy#
+    type GPokeBaseLenTF PutC = CBLenSym
 
 -- | Serialize a term of the struct-like type @a@ via its 'Generic' instance.
 putGenericStruct

@@ -63,6 +63,7 @@ dependencies:
 - refined1 ^>= 0.9
 - text >= 1.2.5.0 && < 2.1
 - deepseq >= 1.4.6.1 && < 1.6
+- defun-core ^>= 0.1
 
 library:
   source-dirs: src
