@@ -30,6 +30,7 @@ import Binrep.Common.Via.Generically.NonSum
 
 class IsCBLen a where type CBLen a :: Natural
 
+-- | Deriving via this instance necessitates @UndecidableInstances@.
 instance Generic a => IsCBLen (GenericallyNonSum a) where
     type CBLen (GenericallyNonSum a) = CBLenGenericNonSum a
 
@@ -74,7 +75,9 @@ type CBLenSym :: a ~> Natural
 data CBLenSym a
 type instance App CBLenSym a = CBLen a
 
-{- | Generically derive 'CBLen' type family instances.
+{- $generic-cblen
+
+Generically derive 'CBLen' type family instances.
 
 A type having a valid 'CBLen' instance usually indicates one of the following:
 
@@ -98,8 +101,10 @@ the sum tag for sum types. That sum tag type must have a 'CBLen', and every
 constructor must have the same 'CBLen' for a 'CBLen' to be calculated. Not many types will fit those criteria, and the code is not well-tested.
 -}
 
--- | TODO these sadly necessitate UndecidableInstances! rough but that's life
+-- | Using this necessitates @UndecidableInstances@.
 type CBLenGenericSum (w :: Type) a = GCBLen w (Rep a)
+
+-- | Using this necessitates @UndecidableInstances@.
 type CBLenGenericNonSum a = GTFoldMapCAddition CBLenSym (Rep a)
 
 type family GCBLen w (gf :: k -> Type) :: Natural where
