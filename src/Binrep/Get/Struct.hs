@@ -27,6 +27,9 @@ import Generic.Type.Assert
 
 import Binrep.Common.Via.Generically.NonSum
 
+import Refined
+import Refined.Unsafe
+
 type GetterC = Parser E
 
 -- | constant size parser
@@ -83,6 +86,10 @@ instance
   , GAssertNotVoid a, GAssertNotSum a
   ) => GetC (GenericallyNonSum a) where
     getC = GenericallyNonSum <$> getGenericStruct
+
+instance GetC (Refined pr (Refined pl a))
+  => GetC (Refined (pl `And` pr) a) where
+    getC = (reallyUnsafeRefine . unrefine @pl . unrefine @pr) <$> getC
 
 instance GetC () where
     {-# INLINE getC #-}

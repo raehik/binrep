@@ -30,9 +30,17 @@ import Binrep.Common.Via.Generically.NonSum
 
 class IsCBLen a where type CBLen a :: Natural
 
-instance IsCBLen () where type CBLen () = 0
+instance Generic a => IsCBLen (GenericallyNonSum a) where
+    type CBLen (GenericallyNonSum a) = CBLenGenericNonSum a
+
+instance IsCBLen (Refined pr (Refined pl a))
+  =>   IsCBLen (Refined (pl `And` pr) a) where
+    type CBLen (Refined (pl `And` pr) a) = CBLen (Refined pr (Refined pl a))
+
 instance (IsCBLen l, IsCBLen r) => IsCBLen (l, r) where
     type CBLen (l, r) = CBLen l + CBLen r
+
+instance IsCBLen () where type CBLen () = 0
 
 instance IsCBLen Word8  where type CBLen Word8  = 2^0
 instance IsCBLen  Int8  where type CBLen  Int8  = 2^0
@@ -45,9 +53,6 @@ instance IsCBLen  Int64 where type CBLen  Int64 = 2^3
 
 instance IsCBLen a => IsCBLen (ByteOrdered end a) where
     type CBLen (ByteOrdered end a) = CBLen a
-
-instance IsCBLen (Refined (pl `And` pr) a) where
-    type CBLen (Refined (pl `And` pr) a) = CBLen (Refined pr (Refined pl a))
 
 -- | Reify a type's constant byte length to the term level.
 cblen :: forall a. KnownNat (CBLen a) => Int
@@ -125,6 +130,3 @@ type family GCBLenCaseMaybe a where
 -- TODO rewrite this stuff to thread error info through!
 data JustX a b
 data NothingX
-
-instance Generic a => IsCBLen (GenericallyNonSum a) where
-    type CBLen (GenericallyNonSum a) = CBLenGenericNonSum a
