@@ -42,8 +42,8 @@ explicitness and correctness win over all:
   * there are no binrep instances for 'Data.Void.Void' or 'GHC.Generics.V1'
     because we can't use them; rather than providing an absurd, possibly
     convenient instance, we emit a type error for their attempted use.
-  * you can't put/get 'Word32's etc by themselves; you must provide endianness
-    information via the 'Binrep.Util.ByteOrder.ByteOrdered' newtype
+  * you can't put/get 'Data.Word.Word32's etc by themselves; you must provide
+    endianness information via the 'Binrep.Util.ByteOrder.ByteOrdered' newtype
   * @'Get' 'Data.ByteString.ByteString'@ just consumes the whole input. seem
     weird? it works with the combinators (it's actually rather important)
 
