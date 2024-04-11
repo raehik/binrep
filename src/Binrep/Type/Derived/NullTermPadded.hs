@@ -1,6 +1,11 @@
--- | Various types derived from other binrep types.
+{- | Null-terminated, then null-padded data.
 
-module Binrep.Type.Derived where
+This is defined using the composition of existing 'NullTerminate' and
+'NullPad' predicates, plus the re-associating binrep instances for the 'And'
+predicate combinator. It kind of just magically works.
+-}
+
+module Binrep.Type.Derived.NullTermPadded where
 
 import Binrep.Type.NullTerminated
 import Binrep.Type.NullPadded
