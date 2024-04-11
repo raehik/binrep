@@ -1,19 +1,5 @@
 -- | Data null-padded to a given length.
 
-{- TODO
-Null padding using the underlying type's instances doesn't necessarily work.
-'ByteString's must parse until the end of the string.
-Or maybe that's correct, and we must use null terminated bytestrings with null
-padding...? Huh.
-
-...well, doing that fixes my issue. And thinking about it, I imagine that's how
-C does it (you're still going to be wanting to deal with cstrings regardless of
-null padding). Cool!!
-
-OK, all good. But because of that, I should provide a convenience wrapper to put
-nullpad+nullterm together.
--}
-
 {-# LANGUAGE OverloadedStrings #-}
 
 module Binrep.Type.NullPadded where
@@ -72,8 +58,8 @@ instance (BLen a, KnownNat n) => Predicate (NullPad n) a where
         n = natValInt @n
         len = blen a
 
-instance (BLen a, KnownNat n, PutC a) => PutC (NullPadded n a) where
-    putC ra = BZ.Struct.sequencePokes (putC a) len
+instance (BLen a, KnownNat n, Put a) => PutC (NullPadded n a) where
+    putC ra = BZ.Struct.sequencePokes (BZ.toStructPoke (put a)) len
         (BZ.Struct.replicateByte paddingLen 0x00)
       where
         a = unrefine ra
