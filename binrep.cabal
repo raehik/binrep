@@ -46,6 +46,7 @@ library
       Binrep.Put
       Binrep.Put.Struct
       Binrep.Test
+      Binrep.Type.Derived
       Binrep.Type.Magic
       Binrep.Type.NullPadded
       Binrep.Type.NullTerminated
