@@ -4,7 +4,6 @@ module Binrep.Put where
 
 import Binrep.BLen ( BLen(blen) )
 import Binrep.CBLen ( IsCBLen(CBLen), cblen )
-import Data.Functor.Identity
 import Bytezap.Poke
 import Raehik.Compat.Data.Primitive.Types ( Prim', sizeOf )
 import Binrep.Util.ByteOrder
@@ -16,10 +15,6 @@ import Data.ByteString qualified as B
 import Binrep.Common.Class.TypeErrors ( ENoSum, ENoEmpty )
 import GHC.TypeLits ( TypeError, KnownNat )
 
-import Data.Void
-import Data.Word
-import Data.Int
-
 import GHC.Generics
 import Generic.Data.Function.FoldMap
 import Generic.Type.Assert
@@ -30,6 +25,12 @@ import Binrep.Put.Struct ( PutC(putC) )
 
 import Refined
 import Refined.Unsafe
+
+import Data.Word
+import Data.Int
+import Data.Void
+import Data.Functor.Identity
+import Binrep.Common.Via.Generically.NonSum
 
 type Putter = Poke RealWorld
 class Put a where put :: a -> Putter
@@ -51,6 +52,12 @@ putGenericNonSum
     ) => a -> Putter
 putGenericNonSum = genericFoldMapNonSum @Put
 
+instance
+  ( Generic a, GFoldMapNonSum Put (Rep a)
+  , GAssertNotVoid a, GAssertNotSum a
+  ) => Put (GenericallyNonSum a) where
+    put = putGenericNonSum . unGenericallyNonSum
+
 -- | Serialize a term of the sum type @a@ via its 'Generic' instance.
 --
 -- You must provide a serializer for @a@'s constructors. This is regrettably
@@ -62,9 +69,6 @@ putGenericSum
        , GAssertNotVoid a, GAssertSum a
     ) => (String -> Putter) -> a -> Putter
 putGenericSum = genericFoldMapSum @Put
-
--- We can't provide a Generically instance because the user must choose between
--- sum and non-sum handlers.
 
 newtype ViaPutC a = ViaPutC { unViaPutC :: a }
 instance (PutC a, KnownNat (CBLen a)) => Put (ViaPutC a) where

@@ -24,6 +24,8 @@ import Data.Void
 
 import Generic.Type.Assert
 
+import Binrep.Common.Via.Generically.NonSum
+
 type PutterC = Struct.Poke RealWorld
 
 -- | constant size putter
@@ -51,6 +53,12 @@ instance
   , GAssertNotVoid a, GAssertNotSum a
   ) => PutC (Generically a) where
     putC (Generically a) = putGenericStruct a
+
+instance
+  ( Generic a, Struct.GPoke PutC (Rep a)
+  , GAssertNotVoid a, GAssertNotSum a
+  ) => PutC (GenericallyNonSum a) where
+    putC = putGenericStruct . unGenericallyNonSum
 
 instance Prim' a => PutC (ViaPrim a) where
     putC = Struct.prim . unViaPrim

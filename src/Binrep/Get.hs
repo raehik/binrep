@@ -7,7 +7,6 @@ module Binrep.Get
   ) where
 
 import Binrep.Get.Error
-import Data.Functor.Identity
 import Binrep.Util.ByteOrder
 import Binrep.Common.Via.Prim ( ViaPrim(..) )
 import Raehik.Compat.Data.Primitive.Types ( Prim', sizeOf )
@@ -26,10 +25,6 @@ import Data.ByteString qualified as B
 import Binrep.Common.Class.TypeErrors ( ENoSum, ENoEmpty )
 import GHC.TypeLits ( TypeError )
 
-import Data.Void
-import Data.Word
-import Data.Int
-
 import GHC.Generics
 import Generic.Data.Function.Traverse
 import Generic.Type.Assert
@@ -38,6 +33,12 @@ import GHC.Exts ( minusAddr#, Int(I#), Int#, plusAddr#, (+#) )
 
 import Refined
 import Refined.Unsafe
+
+import Data.Word
+import Data.Int
+import Data.Void
+import Data.Functor.Identity
+import Binrep.Common.Via.Generically.NonSum
 
 type Getter a = FP.Parser E a
 
@@ -73,6 +74,12 @@ getGenericNonSum
        , GAssertNotVoid a, GAssertNotSum a
     ) => Getter a
 getGenericNonSum = genericTraverseNonSum @Get
+
+instance
+  ( Generic a, GTraverseNonSum Get (Rep a)
+  , GAssertNotVoid a, GAssertNotSum a
+  ) => Get (GenericallyNonSum a) where
+    get = GenericallyNonSum <$> getGenericNonSum
 
 getGenericSum
     :: forall pt a

@@ -1,4 +1,4 @@
-{-# LANGUAGE UndecidableInstances #-} -- for nested type families
+{-# LANGUAGE UndecidableInstances #-} -- due to various type algebra
 {-# LANGUAGE AllowAmbiguousTypes  #-} -- for reification util
 
 module Binrep.CBLen where
@@ -14,6 +14,19 @@ import Util.TypeNats ( natValInt )
 import DeFun.Core ( type (~>), type App )
 
 import Refined
+
+import Binrep.Common.Class.TypeErrors ( ENoEmpty )
+
+import GHC.Generics
+import GHC.TypeError
+import Data.Kind ( type Type )
+
+import Data.Type.Equality
+import Data.Type.Bool
+
+import Bytezap.Common.Generic ( type GTFoldMapCAddition )
+
+import Binrep.Common.Via.Generically.NonSum
 
 class IsCBLen a where type CBLen a :: Natural
 
@@ -55,3 +68,63 @@ cblenProxy# _ = i#
 type CBLenSym :: a ~> Natural
 data CBLenSym a
 type instance App CBLenSym a = CBLen a
+
+{- | Generically derive 'CBLen' type family instances.
+
+A type having a valid 'CBLen' instance usually indicates one of the following:
+
+  * it's a primitive, or extremely simple
+  * it holds size information in its type
+  * it's constructed from other constant byte length types
+
+The first two cases must be handled manually. The third case is where Haskell
+generics excel, and the one this module targets.
+
+You may derive a 'CBLen' type generically for a non-sum type with
+
+    instance IsCBLen a where type CBLen a = CBLenGenericNonSum a
+
+You may attempt to derive a 'CBLen' type generically for a sum type with
+
+    instance IsCBLen a where type CBLen a = CBLenGenericSum w a
+
+As with other generic sum type handlers, you must provide the type used to store
+the sum tag for sum types. That sum tag type must have a 'CBLen', and every
+constructor must have the same 'CBLen' for a 'CBLen' to be calculated. Not many types will fit those criteria, and the code is not well-tested.
+-}
+
+-- | TODO these sadly necessitate UndecidableInstances! rough but that's life
+type CBLenGenericSum (w :: Type) a = GCBLen w (Rep a)
+type CBLenGenericNonSum a = GTFoldMapCAddition CBLenSym (Rep a)
+
+type family GCBLen w (gf :: k -> Type) :: Natural where
+    GCBLen w (D1 _ gf) = GCBLen w gf
+    GCBLen _ V1        = TypeError ENoEmpty
+    GCBLen w (l :+: r) = CBLen w + GCBLenCaseMaybe (GCBLenSum (l :+: r))
+    GCBLen w (C1 _ gf) = GTFoldMapCAddition CBLenSym gf
+
+--type family GCBLenSum (gf :: k -> Type) :: Maybe Natural where
+type family GCBLenSum (gf :: k -> Type) where
+    GCBLenSum (C1 ('MetaCons name _ _) gf) =
+        JustX (GTFoldMapCAddition CBLenSym gf) name
+    GCBLenSum (l :+: r) = MaybeEq (GCBLenSum l) (GCBLenSum r)
+
+type family MaybeEq a b where
+    MaybeEq (JustX n nName) (JustX m _) = If (n == m) (JustX n nName) NothingX
+    MaybeEq _               _           = NothingX
+
+-- | I don't know how to pattern match in types without writing type families.
+type family GCBLenCaseMaybe a where
+    GCBLenCaseMaybe (JustX n _) = n
+    GCBLenCaseMaybe NothingX  =
+        TypeError
+            (     'Text "Two constructors didn't have equal constant size."
+            ':$$: 'Text "Sry dunno how to thread errors thru LOL"
+            )
+
+-- TODO rewrite this stuff to thread error info through!
+data JustX a b
+data NothingX
+
+instance Generic a => IsCBLen (GenericallyNonSum a) where
+    type CBLen (GenericallyNonSum a) = CBLenGenericNonSum a

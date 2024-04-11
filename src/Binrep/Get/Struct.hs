@@ -25,6 +25,8 @@ import Data.ByteString qualified as B
 
 import Generic.Type.Assert
 
+import Binrep.Common.Via.Generically.NonSum
+
 type GetterC = Parser E
 
 -- | constant size parser
@@ -75,6 +77,12 @@ instance
   , GAssertNotVoid a, GAssertNotSum a
   ) => GetC (Generically a) where
     getC = Generically <$> getGenericStruct
+
+instance
+  ( Generic a, GParse GetC (Rep a)
+  , GAssertNotVoid a, GAssertNotSum a
+  ) => GetC (GenericallyNonSum a) where
+    getC = GenericallyNonSum <$> getGenericStruct
 
 instance GetC () where
     {-# INLINE getC #-}
