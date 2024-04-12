@@ -19,6 +19,8 @@ I think we do endian-neutral operations, but do confirm.
   * `newtype ZigZag size end = ZigZag { unZigZag :: I 'S size end }`
   * https://developers.google.com/protocol-buffers/docs/encoding
   * https://hackage.haskell.org/package/zigzag-0.0.1.0/docs/Data-Word-Zigzag.html
+* new primitive: ASCII numbers (for GNU tar)
+  * urgh this one sucks, think I only got part way on flatparse
 
 ## Support "known maximum length" serialization
 For some types, we don't know how long their binary representation will be

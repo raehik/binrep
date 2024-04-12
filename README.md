@@ -1,7 +1,9 @@
-[gh-strongweak]: https://github.com/raehik/strongweak
-[gh-flatparse]:  https://github.com/AndrasKovacs/flatparse
-[gh-mason]:      https://github.com/fumieval/mason
-[gh-refined]:    https://github.com/nikita-volkov/refined
+[gh-strongweak]:   https://github.com/raehik/strongweak
+[gh-flatparse]:    https://github.com/AndrasKovacs/flatparse
+[gh-mason]:        https://github.com/fumieval/mason
+[gh-refined]:      https://github.com/nikita-volkov/refined
+[hackage-gdf]:     https://hackage.haskell.org/package/generic-data-functions
+[hackage-bytezap]: https://hackage.haskell.org/package/bytezap
 
 # binrep
 binrep is a Haskell library for *precisely modelling binary schemas*, especially
@@ -12,16 +14,14 @@ Here's why it's useful:
     Use highly parameterized binary representation primitives including
     null-terminated data (e.g. C-style strings), Pascal-style data (length
     prefixed), sized explicit-endian machine integers, null-padded data. Write
-    your own as needed.
-  * **Low boilerplate:** Straightforward schemas can leverage efficient generic
-    parsers and serializers with just a few lines. (See [Generic binary
-    representation](#generic-binary-representation) for details.)
+    your own primitives if you want (if so, please consider making a PR!).
+  * **Low boilerplate:** Free performant parsers and serializers via generics.
+    _(See [Generic binary representation](#generic-binary-representation).)_
   * **Easy validation:** Use the [strongweak][gh-strongweak] library design
     pattern to define an unvalidated data type for easy internal transformation,
     and get validation code for free.
   * **Performant:** Parsing and serialization is *extremely fast*, using
-    [flatparse][gh-flatparse] and [mason][gh-mason] respectively. An
-    experimental non-allocating serializer is also provided.
+    [bytezap][hackage-bytezap] and [flatparse][gh-flatparse].
 
 ## Usage
 ### Dependencies
@@ -66,19 +66,10 @@ binary-safe "strong" type. My [strongweak][gh-strongweak] library provides
 supporting definitions for this pattern, and generic derivers which will work
 with binrep's binary representation primitives.
 
-### Performant primitives
-Parsing uses András Kovács' [flatparse][gh-flatparse] library. Serializing is
-via Fumiaki Kinoshita's [mason][gh-mason] library. These are about as fast as
-you can get in 2022.
-
-We only define serializers for validated types, meaning we can potentially skip
-safety checks, that other serializers would do. Except we still do them, but
-validation is an explicitly required step before serialization.
-
-*This might change if we start to support weirder binary representations,
-specifically offset-based data.*
-
 ## Generic binary representation
+_(Generics are now handled by [generic-data-functions][hackage-gdf]. This info
+is largely the same, but the code is elsewhere.)_
+
 binrep's generic deriving makes very few decisions:
 
   * Constructors are encoded by sequentially encoding every enclosed field.

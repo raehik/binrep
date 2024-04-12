@@ -1,3 +1,10 @@
+## Unreleased
+* add missing `And` predicate combinators instances (`PutC`, `GetC`)
+* add `Type.Derived.NullTermPadded` (type synonym over `And`)
+* add `Generically` instances for `PutC` and `GetC`, where only non-sums are
+  permitted
+* add `GenericallyNonSum` newtype wrapper
+
 ## 0.7.0 (2024-04-10)
 * provide "C struct" parser (from bytezap)
 * fill out some missing C struct instances
