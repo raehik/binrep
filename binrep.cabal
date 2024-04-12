@@ -67,6 +67,8 @@ library
       Binrep.Util.Prefix
       Raehik.Compat.FlatParse.Basic.Prim
       Raehik.Compat.FlatParse.Basic.WithLength
+      Raehik.Type.Common
+      Raehik.Type.Utf8
       Util.TypeNats
   other-modules:
       Paths_binrep

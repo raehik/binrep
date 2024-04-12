@@ -4,6 +4,8 @@
 * add `Generically` instances for `PutC` and `GetC`, where only non-sums are
   permitted
 * add `GenericallyNonSum` newtype wrapper
+* `Magic (a :: Symbol)` now supports UTF-8 symbols instead of just ASCII. All
+  work is still done on the type-level.
 
 ## 0.7.0 (2024-04-10)
 * provide "C struct" parser (from bytezap)

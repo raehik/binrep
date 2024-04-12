@@ -5,34 +5,29 @@
 
 There are two main flavors of magics:
 
-  * "random" bytes e.g. Zstandard: @28 B5 2F FD@
-  * printable ASCII bytes e.g. Ogg: @4F 67 67 53@ -> OggS
+  * byte magics e.g. Zstandard: @28 B5 2F FD@
+  * printable magics e.g. Ogg: @4F 67 67 53@ -> @OggS@ (in ASCII)
 
-For bytewise magics, use type-level 'Natural' lists.
-For ASCII magics, use 'Symbol's (type-level strings).
-
-Previously, I squashed these into a representationally-safe type. Now the check
-only occurs during reification. So you are able to define invalid magics now
-(bytes over 255, non-ASCII characters), and potentially use them, but you'll get
-a clear type error like "no instance for ByteVal 256" when attempting to reify.
-
-String magics are restricted to ASCII, and will type error during reification
-otherwise. If you really want UTF-8, please read 'Binrep.Type.Magic.UTF8'.
+For byte magics, use type-level 'Natural' lists.
+For printable magics, use 'Symbol's (type-level strings).
 -}
 
-module Binrep.Type.Magic where
+module Binrep.Type.Magic
+  ( Magic(Magic)
+  , Magical(type MagicBytes)
+  , type Length
+  ) where
 
-import Binrep
-import FlatParse.Basic qualified as FP
+import Raehik.Type.Utf8 ( type SymbolToUtf8 )
+
 import Util.TypeNats ( natValInt )
-
-import GHC.TypeLits
+import GHC.TypeLits ( type Natural, type Symbol, type KnownNat, type (+) )
 
 import GHC.Generics ( Generic )
 import Data.Data ( Data )
-
 import Strongweak
 
+import Binrep
 import Bytezap.Struct.TypeLits.Bytes ( ReifyBytesW64(reifyBytesW64) )
 import Bytezap.Parser.Struct.TypeLits.Bytes
   ( ParseReifyBytesW64(parseReifyBytesW64) )
@@ -40,6 +35,7 @@ import Bytezap.Parser.Struct qualified as BZ
 import Data.ByteString.Internal qualified as B
 import GHC.Exts ( Int(I#), plusAddr#, Ptr(Ptr) )
 import Foreign.Marshal.Utils ( copyBytes )
+import FlatParse.Basic qualified as FP
 
 -- | A singleton data type representing a "magic number" via a phantom type.
 --
@@ -98,43 +94,6 @@ deriving via ViaGetC (Magic a) instance
   , ReifyBytesW64 bs, KnownNat (Length bs)
   ) => Get (Magic a)
 
--- TODO might wanna move this
--- | The length of a type-level list.
-type family Length (a :: [k]) :: Natural where
-    Length '[]       = 0
-    Length (a ': as) = 1 + Length as
-
-{-
-I do lots of functions on lists, because they're structurally simple. But you
-can't pass type-level functions as arguments between type families. singletons
-solves a related (?) problem using defunctionalization, where you manually write
-out the function applications or something. Essentially, you can't do this:
-
-    type family Map (f :: x -> y) (a :: [x]) :: [y] where
-        Map _ '[]       = '[]
-        Map f (a ': as) = f a ': Map f as
-
-So you have to write that out for every concrete function over lists.
-
-TODO wellll we depend on defun-core now so may as well use that LOL
--}
-
-type family SymbolUnicodeCodepoints (a :: Symbol) :: [Natural] where
-    SymbolUnicodeCodepoints a = CharListUnicodeCodepoints (SymbolAsCharList a)
-
-type family CharListUnicodeCodepoints (a :: [Char]) :: [Natural] where
-    CharListUnicodeCodepoints '[]       = '[]
-    CharListUnicodeCodepoints (c ': cs) = CharToNat c ': CharListUnicodeCodepoints cs
-
-type family SymbolAsCharList (a :: Symbol) :: [Char] where
-    SymbolAsCharList a = SymbolAsCharList' (UnconsSymbol a)
-
-type family SymbolAsCharList' (a :: Maybe (Char, Symbol)) :: [Char] where
-    SymbolAsCharList' 'Nothing = '[]
-    SymbolAsCharList' ('Just '(c, s)) = c ': SymbolAsCharList' (UnconsSymbol s)
-
---------------------------------------------------------------------------------
-
 -- | Types which define a magic value.
 class Magical (a :: k) where
     -- | How to turn the type into a list of bytes.
@@ -143,8 +102,10 @@ class Magical (a :: k) where
 -- | Type-level naturals go as-is. (Make sure you don't go over 255, though!)
 instance Magical (ns :: [Natural]) where type MagicBytes ns = ns
 
--- | Type-level symbols are turned into their Unicode codepoints - but
---   multibyte characters aren't handled, so they'll simply be overlarge bytes,
---   which will fail further down.
-instance Magical (sym :: Symbol) where
-    type MagicBytes sym = SymbolUnicodeCodepoints sym
+-- | Type-level symbols are turned into UTF-8.
+instance Magical (sym :: Symbol) where type MagicBytes sym = SymbolToUtf8 sym
+
+-- | The length of a type-level list.
+type family Length (a :: [k]) :: Natural where
+    Length '[]       = 0
+    Length (a ': as) = 1 + Length as
