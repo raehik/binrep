@@ -157,7 +157,8 @@
         "generic-type-functions": "generic-type-functions",
         "haskell-flake": "haskell-flake",
         "nixpkgs": "nixpkgs",
-        "strongweak": "strongweak"
+        "strongweak": "strongweak",
+        "type-level-bytestrings": "type-level-bytestrings"
       }
     },
     "strongweak": {
@@ -173,6 +174,22 @@
       "original": {
         "owner": "raehik",
         "repo": "strongweak",
+        "type": "github"
+      }
+    },
+    "type-level-bytestrings": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1712964201,
+        "narHash": "sha256-gBklE0kLARrwhksP+nnyHEptQj4xyjIF9z1Hj+5hgNs=",
+        "owner": "raehik",
+        "repo": "type-level-bytestrings",
+        "rev": "509b240f87c034efdcf2b77f164fad0b0b3b8253",
+        "type": "github"
+      },
+      "original": {
+        "owner": "raehik",
+        "repo": "type-level-bytestrings",
         "type": "github"
       }
     }

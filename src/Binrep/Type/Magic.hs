@@ -18,7 +18,7 @@ module Binrep.Type.Magic
   , type Length
   ) where
 
-import Raehik.Type.Utf8 ( type SymbolToUtf8 )
+import Data.Type.Symbol.Utf8 ( type SymbolToUtf8 )
 
 import Util.TypeNats ( natValInt )
 import GHC.TypeLits ( type Natural, type Symbol, type KnownNat, type (+) )
@@ -102,7 +102,7 @@ class Magical (a :: k) where
 -- | Type-level naturals go as-is. (Make sure you don't go over 255, though!)
 instance Magical (ns :: [Natural]) where type MagicBytes ns = ns
 
--- | Type-level symbols are turned into UTF-8.
+-- | Type-level symbols are converted to UTF-8.
 instance Magical (sym :: Symbol) where type MagicBytes sym = SymbolToUtf8 sym
 
 -- | The length of a type-level list.

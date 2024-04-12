@@ -67,8 +67,6 @@ library
       Binrep.Util.Prefix
       Raehik.Compat.FlatParse.Basic.Prim
       Raehik.Compat.FlatParse.Basic.WithLength
-      Raehik.Type.Common
-      Raehik.Type.Utf8
       Util.TypeNats
   other-modules:
       Paths_binrep
@@ -100,6 +98,7 @@ library
     , refined1 ==0.9.*
     , strongweak >=0.6.0 && <0.7
     , text >=1.2.5.0 && <2.1
+    , type-level-bytestrings >=0.1.0 && <0.2
   default-language: GHC2021
   if flag(icu)
     cpp-options: -DHAVE_ICU
@@ -148,6 +147,7 @@ test-suite spec
     , refined1 ==0.9.*
     , strongweak >=0.6.0 && <0.7
     , text >=1.2.5.0 && <2.1
+    , type-level-bytestrings >=0.1.0 && <0.2
   default-language: GHC2021
   if flag(icu)
     cpp-options: -DHAVE_ICU
@@ -189,6 +189,7 @@ benchmark bench
     , refined1 ==0.9.*
     , strongweak >=0.6.0 && <0.7
     , text >=1.2.5.0 && <2.1
+    , type-level-bytestrings >=0.1.0 && <0.2
   default-language: GHC2021
   if flag(icu)
     cpp-options: -DHAVE_ICU

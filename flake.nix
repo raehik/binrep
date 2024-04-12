@@ -15,6 +15,8 @@
     generic-type-asserts.flake = false;
     generic-type-functions.url   = "github:raehik/generic-type-functions";
     generic-type-functions.flake = false;
+    type-level-bytestrings.url   = "github:raehik/type-level-bytestrings";
+    type-level-bytestrings.flake = false;
   };
   outputs = inputs:
   let
@@ -43,6 +45,7 @@
           packages.generic-data-functions.source = inputs.generic-data-functions;
           packages.generic-type-asserts.source = inputs.generic-type-asserts;
           packages.generic-type-functions.source = inputs.generic-type-functions;
+          packages.type-level-bytestrings.source = inputs.type-level-bytestrings;
           devShell = nondevDevShell "ghc98";
         };
         haskellProjects.ghc96 = {
@@ -53,6 +56,7 @@
           packages.generic-data-functions.source = inputs.generic-data-functions;
           packages.generic-type-asserts.source = inputs.generic-type-asserts;
           packages.generic-type-functions.source = inputs.generic-type-functions;
+          packages.type-level-bytestrings.source = inputs.type-level-bytestrings;
           devShell.mkShellArgs.name = "ghc96-binrep";
           devShell.tools = _: {
             haskell-language-server = null; # 2024-03-06: broken
@@ -66,6 +70,7 @@
           packages.generic-data-functions.source = inputs.generic-data-functions;
           packages.generic-type-asserts.source = inputs.generic-type-asserts;
           packages.generic-type-functions.source = inputs.generic-type-functions;
+          packages.type-level-bytestrings.source = inputs.type-level-bytestrings;
           devShell = nondevDevShell "ghc94";
         };
         haskellProjects.ghc92 = {
@@ -76,6 +81,7 @@
           packages.generic-data-functions.source = inputs.generic-data-functions;
           packages.generic-type-asserts.source = inputs.generic-type-asserts;
           packages.generic-type-functions.source = inputs.generic-type-functions;
+          packages.type-level-bytestrings.source = inputs.type-level-bytestrings;
           devShell = nondevDevShell "ghc92";
         };
       };
