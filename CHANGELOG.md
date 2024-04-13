@@ -1,4 +1,4 @@
-## Unreleased
+## 0.8.0 (2024-04-13)
 * add missing `And` predicate combinators instances (`PutC`, `GetC`)
 * add `Type.Derived.NullTermPadded` (type synonym over `And`)
 * add `Generically` instances for `PutC` and `GetC`, where only non-sums are
