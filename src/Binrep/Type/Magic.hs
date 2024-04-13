@@ -65,11 +65,8 @@ instance (bs ~ MagicBytes a, ReifyBytesW64 bs) => PutC (Magic a) where
 deriving via (ViaPutC (Magic a)) instance
   (bs ~ MagicBytes a, ReifyBytesW64 bs, KnownNat (Length bs)) => Put (Magic a)
 
-{- this works, but is ugly.
-* we have to duplicate our error wrapping because errors use parser internals
-* we throw the magic into the error, so we need the serializer constraints too
-I mean, it's fine. It's correct. It's as fast as possible. But it looks bad :<
--}
+-- | Parse a magic. Serialization constraints are included as we emit the
+--   expected magic in errors.
 instance
   ( bs ~ MagicBytes a, ParseReifyBytesW64 bs
   , ReifyBytesW64 bs, KnownNat (Length bs)
@@ -81,10 +78,7 @@ instance
             let bsActual = B.unsafeCreate len (\buf -> copyBytes buf (Ptr (base `plusAddr#` os#)) len)
                 eb = EExpected bsExpected bsActual
             in  BZ.Err# st1 (E (I# os#) $ EBase eb)
-          BZ.Err#  st1 e  ->
-            let bsActual = B.unsafeCreate len (\buf -> copyBytes buf (Ptr (base `plusAddr#` os#)) len)
-                eb = EExpected bsExpected bsActual
-            in  BZ.Err# st1 (E (I# os#) $ EAnd e eb)
+          BZ.Err#  _st1 e -> case e of {}
       where
         len = natValInt @(Length bs)
         bsExpected = runPutC (Magic :: Magic a)
