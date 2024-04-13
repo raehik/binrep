@@ -1,4 +1,4 @@
-{-# LANGUAGE UndecidableInstances #-} -- for weirder type families
+{-# LANGUAGE UndecidableInstances #-} -- for tons of stuff
 
 {- | Magic numbers (also just magic): short constant bytestrings usually
      found at the top of a file, often used as an early sanity check.
@@ -39,34 +39,34 @@ import FlatParse.Basic qualified as FP
 
 -- | A singleton data type representing a "magic number" via a phantom type.
 --
--- The phantom type variable unambiguously defines a constant bytestring.
--- A handful of types are supported for using magics conveniently, e.g. for pure
--- ASCII magics, you may use a 'Symbol' type-level string.
+-- The phantom type variable unambiguously defines a bytestring at compile time.
+-- The 'Magical' type class defines how this is calculated.
+-- Reification is done via regular binrep type classes.
 data Magic (a :: k) = Magic deriving stock (Generic, Data, Show, Eq)
 
--- | Weaken a @'Magic' a@ to the unit.
+-- | Weaken a @'Magic' a@ to the unit '()'.
 instance Weaken (Magic a) where
     type Weak (Magic a) = ()
     weaken Magic = ()
 
--- | Strengthen the unit to some @'Magic' a@.
+-- | Strengthen the unit '()' to some @'Magic' a@.
 instance Strengthen (Magic a) where strengthen () = pure Magic
 
 -- | The byte length of a magic is known at compile time.
 instance IsCBLen (Magic a) where type CBLen (Magic a) = Length (MagicBytes a)
 
--- | The byte length of a magic is obtained via reifying.
 deriving via ViaCBLen (Magic a) instance
     KnownNat (Length (MagicBytes a)) => BLen (Magic a)
 
+-- | Efficiently serialize a @'Magic' a@.
 instance (bs ~ MagicBytes a, ReifyBytesW64 bs) => PutC (Magic a) where
     putC Magic = reifyBytesW64 @bs
 
 deriving via (ViaPutC (Magic a)) instance
   (bs ~ MagicBytes a, ReifyBytesW64 bs, KnownNat (Length bs)) => Put (Magic a)
 
--- | Parse a magic. Serialization constraints are included as we emit the
---   expected magic in errors.
+-- | Efficiently parse a @'Magic' a@. Serialization constraints are included as
+--   we emit the expected bytestring in errors.
 instance
   ( bs ~ MagicBytes a, ParseReifyBytesW64 bs
   , ReifyBytesW64 bs, KnownNat (Length bs)
@@ -90,7 +90,7 @@ deriving via ViaGetC (Magic a) instance
 
 -- | Types which define a magic value.
 class Magical (a :: k) where
-    -- | How to turn the type into a list of bytes.
+    -- | How to turn the type into a list of bytes (stored using 'Natural's).
     type MagicBytes a :: [Natural]
 
 -- | Type-level naturals go as-is. (Make sure you don't go over 255, though!)
