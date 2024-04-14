@@ -15,3 +15,7 @@ natVal'' = natVal' (proxy# :: Proxy# n)
 natValInt :: forall n. KnownNat n => Int
 natValInt = fromIntegral $ natVal'' @n
 {-# INLINE natValInt #-}
+
+natValWord :: forall n. KnownNat n => Word
+natValWord = fromIntegral $ natVal'' @n
+{-# INLINE natValWord #-}

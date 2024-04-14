@@ -39,7 +39,10 @@ data EMiddle
     deriving stock (Eq, Show, Generic)
 
 data EBase
-  = EExpectedByte Word8 Word8
+  = EBaseString String
+  -- ^ arbitrary badness
+
+  | EExpectedByte Word8 Word8
   -- ^ expected first, got second
 
   | EOverlong Int Int
@@ -50,9 +53,6 @@ data EBase
 
   | EFailNamed String
   -- ^ known fail
-
-  | EFailParse String ByteString Word8
-  -- ^ parse fail (where you parse a larger object, then a smaller one in it)
 
   | ERanOut Int
   -- ^ ran out of input, needed precisely @n@ bytes for this part (n > 0)
