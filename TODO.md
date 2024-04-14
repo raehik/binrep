@@ -1,4 +1,17 @@
 # binrep to-dos
+## Clarify `Thin` stuff
+I use the `ByteString` instance internally sometimes (probably), and in those
+cases I want "thin" parsing since I'm consuming it right there and then. I need
+to clarify the precise setup here.
+
+## `And` ordering
+```haskell
+newtype Compose f g a = Compose { getCompose :: f (g a)}
+```
+
+Should I flip `And`? I guess it depends how one thinks of applying two
+predicates to a type. Is it `And l r` (l -> r), or `And f g` (=`f(g)`)?
+
 ## Assert fast magic handling is safe on either endian
 I think we do endian-neutral operations, but do confirm.
 
