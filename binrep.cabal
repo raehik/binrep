@@ -65,7 +65,6 @@ library
       Binrep.Type.Text.Encoding.Utf8
       Binrep.Type.Text.Internal
       Binrep.Type.Thin
-      Binrep.Util
       Binrep.Util.ByteOrder
       Binrep.Util.Generic
       Raehik.Compat.FlatParse.Basic.Prim
