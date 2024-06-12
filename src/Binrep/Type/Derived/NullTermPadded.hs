@@ -11,7 +11,7 @@ import Binrep.Type.NullTerminated
 import Binrep.Type.NullPadded
 
 import Rerefined.Predicate.Logical.And
-import Rerefined.Refine
+import Rerefined.Refine ( Refined )
 
 -- | Predicate for null-terminated, then null-padded data.
 type NullTermPad n = NullTerminate `And` NullPad n

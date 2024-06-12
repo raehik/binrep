@@ -18,9 +18,6 @@ data Ascii
 instance Predicate Ascii where type PredicateName d Ascii = "ASCII"
 
 -- | 'Text' must be validated if you want to permit 7-bit ASCII only.
---
--- TODO there should be a MUCH faster check here in text-2.0. text-short has it,
--- text doesn't yet. see: https://github.com/haskell/text/issues/496
 instance Refine Ascii Text where
     validate p t = validateBool p "not valid 7-bit ASCII" (Text.isAscii t)
 
