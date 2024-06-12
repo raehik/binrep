@@ -13,9 +13,8 @@ import Binrep
 
 import FlatParse.Basic qualified as FP
 
-import Refined
-import Refined.Unsafe
-import Data.Typeable ( typeRep )
+import Rerefined.Predicate.Common
+import Rerefined.Refine
 
 import Data.ByteString qualified as B
 import Data.Word ( Word8 )
@@ -23,19 +22,16 @@ import Data.Word ( Word8 )
 -- | Null-terminated data. Arbitrary length terminated with a null byte.
 --   Permits no null bytes inside the data.
 data NullTerminate
+
+instance Predicate NullTerminate where
+    type PredicateName d NullTerminate = "NullTerminate"
+
 type NullTerminated = Refined NullTerminate
 
 -- | Null-terminated data may not contain any null bytes.
-instance NullCheck a => Predicate NullTerminate a where
-    validate p a
-     | hasNoNulls a = throwRefineOtherException (typeRep p) $
-        "null byte not permitted in null-terminated data"
-     | otherwise = success
-
-class NullCheck a where hasNoNulls :: a -> Bool
-instance NullCheck B.ByteString where
-    {-# INLINE hasNoNulls #-}
-    hasNoNulls = B.any (== 0x00)
+instance Refine NullTerminate B.ByteString where
+    validate p a = validateBool p e (B.any (== 0x00) a)
+      where e = "null byte not permitted in null-terminated data"
 
 instance BLen a => BLen (NullTerminated a) where
     blen ra = 1 + blen (unrefine ra)
@@ -50,7 +46,7 @@ instance Put a => Put (NullTerminated a) where
 -- | We may parse any null-terminated data using a special flatparse combinator.
 instance Get a => Get (NullTerminated a) where
     {-# INLINE get #-}
-    get = reallyUnsafeRefine <$> getEBase (FP.isolateToNextNull get) (EFailNamed "cstring")
+    get = unsafeRefine <$> getEBase (FP.isolateToNextNull get) (EFailNamed "cstring")
 
 {-
 I don't know how to do @[a]@. Either I nullterm each element, which is weird

@@ -37,10 +37,11 @@ import Binrep.Util.ByteOrder
 import Data.Monoid qualified as Monoid
 import GHC.Generics
 import Generic.Data.Function.FoldMap
+import Generic.Data.MetaParse.Cstr ( Raw )
 import Generic.Type.Assert
 
-import Refined
-import Refined.Unsafe
+import Rerefined.Refine
+import Rerefined.Predicate.Logical.And
 
 -- | Class for types with easily-calculated length in bytes.
 --
@@ -73,18 +74,18 @@ blenGenericNonSum = Monoid.getSum . genericFoldMapNonSum @BLen
 -- Alas. Do write your own instance if you want better performance!
 blenGenericSum
     :: forall a
-    .  ( Generic a, GFoldMapSum BLen (Rep a)
+    .  ( Generic a, GFoldMapSum BLen Raw (Rep a)
        , GAssertNotVoid a, GAssertSum a
     ) => (String -> Int) -> a -> Int
 blenGenericSum f =
-    Monoid.getSum . genericFoldMapSum @BLen (Monoid.Sum <$> f)
+    Monoid.getSum . genericFoldMapSumRaw @BLen (Monoid.Sum <$> f)
 
 -- We can't provide a Generically instance because the user must choose between
 -- sum and non-sum handlers.
 
 instance BLen (Refined pr (Refined pl a))
   => BLen (Refined (pl `And` pr) a) where
-    blen = blen . reallyUnsafeRefine @_ @pr . reallyUnsafeRefine @_ @pl . unrefine
+    blen = blen . unsafeRefine @_ @pr . unsafeRefine @_ @pl . unrefine
 
 instance TypeError ENoEmpty => BLen Void where blen = undefined
 instance TypeError ENoSum => BLen (Either a b) where blen = undefined

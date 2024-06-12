@@ -31,14 +31,18 @@ import Generic.Type.Assert
 
 import GHC.Exts ( minusAddr#, Int(I#), Int#, plusAddr#, (+#) )
 
-import Refined
-import Refined.Unsafe
+import Rerefined.Refine
+import Rerefined.Predicate.Logical.And
 
 import Data.Word
 import Data.Int
 import Data.Void
 import Data.Functor.Identity
 import Binrep.Common.Via.Generically.NonSum
+
+import Generic.Data.FOnCstr
+import Generic.Data.Function.Traverse.Constructor hiding ( ENoEmpty )
+import GHC.Exts ( Proxy# )
 
 type Getter a = FP.Parser E a
 
@@ -91,6 +95,13 @@ getGenericSum = genericTraverseSum @Get
 
 -- We can't provide a Generically instance because the user must choose between
 -- sum and non-sum handlers.
+
+instance GenericFOnCstr Get where
+    type GenericFOnCstrF Get = FP.Parser E
+    type GenericFOnCstrC Get dtName cstrName gf =
+        GTraverseC Get dtName cstrName 0 gf
+    genericFOnCstrF (_ :: Proxy# '(dtName, cstrName)) =
+        gTraverseC @Get @dtName @cstrName @0
 
 eBase :: EBase -> Getter a
 eBase eb = FP.ParserT \_fp eob s st ->
@@ -229,7 +240,7 @@ deriving via ViaPrim (ByteOrdered    'BigEndian a)
     instance (Prim' a, ByteSwap a) => Get (ByteOrdered    'BigEndian a)
 
 instance Get (Refined pr (Refined pl a)) => Get (Refined (pl `And` pr) a) where
-    get = (reallyUnsafeRefine . unrefine @pl . unrefine @pr) <$> get
+    get = (unsafeRefine . unrefine @pl . unrefine @pr) <$> get
 
 {-
 

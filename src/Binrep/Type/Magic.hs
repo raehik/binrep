@@ -50,7 +50,7 @@ instance Weaken (Magic a) where
     weaken Magic = ()
 
 -- | Strengthen the unit '()' to some @'Magic' a@.
-instance Strengthen (Magic a) where strengthen () = pure Magic
+instance Strengthen (Magic a) where strengthen () = Right Magic
 
 -- | The byte length of a magic is known at compile time.
 instance IsCBLen (Magic a) where type CBLen (Magic a) = Length (MagicBytes a)

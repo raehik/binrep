@@ -10,7 +10,8 @@ module Binrep.Type.Derived.NullTermPadded where
 import Binrep.Type.NullTerminated
 import Binrep.Type.NullPadded
 
-import Refined
+import Rerefined.Predicate.Logical.And
+import Rerefined.Refine
 
 -- | Predicate for null-terminated, then null-padded data.
 type NullTermPad n = NullTerminate `And` NullPad n

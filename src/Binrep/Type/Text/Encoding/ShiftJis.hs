@@ -2,7 +2,7 @@
 
 module Binrep.Type.Text.Encoding.ShiftJis where
 
-import Refined
+import Rerefined.Predicate
 
 import Data.Text ( Text )
 
@@ -15,9 +15,10 @@ import Binrep.Type.Text.Internal
 #endif
 
 data ShiftJis
+instance Predicate ShiftJis where type PredicateName d ShiftJis = "Shift-JIS"
 
 -- | TODO Unsafely assume all 'Text's are valid Shift-JIS.
-instance Predicate ShiftJis Text where validate _ _ = success
+instance Refine ShiftJis Text where validate _ _ = Nothing
 
 #ifdef HAVE_ICU
 instance Encode ShiftJis where encode' = encodeViaTextICU' "Shift-JIS"

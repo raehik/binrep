@@ -13,7 +13,8 @@ import Util.TypeNats ( natValInt )
 
 import DeFun.Core ( type (~>), type App )
 
-import Refined
+import Rerefined.Refine
+import Rerefined.Predicate.Logical.And
 
 import Binrep.Common.Class.TypeErrors ( ENoEmpty )
 

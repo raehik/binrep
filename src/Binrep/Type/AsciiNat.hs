@@ -7,12 +7,13 @@ decision on byte ordering. Pretty silly.
 As with other binrep string-likes, you probably want to wrap this with
 'Binrep.Type.Sized.Sized' or 'Binrep.Type.Prefix.Size.SizePrefixed'.
 
-TODO
-
-  * behaviour with empty input? (seems to return 0. which seems bad...)
+We use a refinement to permit using any numeric type, while ensuring that
+negative values are not permitted.
 -}
 
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE OverloadedStrings #-} -- for refined error
+{-# LANGUAGE UndecidableInstances #-} -- for deriving predicate instance
 
 module Binrep.Type.AsciiNat where
 
@@ -31,58 +32,52 @@ import Data.List.NonEmpty ( NonEmpty( (:|) ) )
 
 import GHC.TypeNats ( Natural, KnownNat )
 
-import GHC.Generics ( Generic )
-import Data.Data ( Data )
-import Numeric ( showOct, showHex, showBin, showInt )
-
 import Data.ByteString qualified as B
 import Binrep.Type.Thin ( Thin(Thin) )
+
+import Rerefined.Predicate
+import Rerefined.Predicate.Via
+import Rerefined.Predicate.Relational.Value
+import Rerefined.Predicate.Relational
+import Rerefined.Refine
+import TypeLevelShow.Natural
+import TypeLevelShow.Utils
 
 -- | A natural represented in binary as an ASCII string, where each character is
 --   a digit in the given base.
 --
 -- Only certain bases are supported: 2, 8, 10 and 16.
 --
--- 'Show' instances display the stored number in the given base. If the base has
--- a common prefix (e.g. @0x@ for hex), it is used.
---
 -- Hex parsing permits mixed case digits when parsing (@1-9a-fA-F@), and
 -- serializes with lower-case ASCII hex digits.
---
--- TODO hangs when putting negative numbers!!!!
-newtype AsciiNat (base :: Natural) a = AsciiNat { unAsciiNat :: a }
-    deriving (Ord, Eq, Num, Real, Enum, Integral) via a
-    deriving stock (Generic, Data)
+data AsciiNat (base :: Natural)
+--type AsciiNat base = Refined (AsciiNat base)
 
--- | Show binary (base 2) ASCII naturals with an @0o@ prefix.
-instance Integral a => Show (AsciiNat 2 a) where
-    showsPrec _ n = showString "0b" . showBin (unAsciiNat n)
+instance Predicate (AsciiNat base) where
+    type PredicateName d (AsciiNat base) = ShowParen (d > 9)
+        ("AsciiNat " ++ ShowNatDec base)
 
--- | Show octal (base 8) ASCII naturals with an @0o@ prefix.
-instance Integral a => Show (AsciiNat 8  a) where
-    showsPrec _ n = showString "0o" . showOct (unAsciiNat n)
+instance (KnownPredicateName (AsciiNat base), Num a, Ord a)
+  => Refine (AsciiNat base) a where
+    validate = validateVia @(CompareValue GTE Pos 0)
 
--- | Show decimal (base 10) ASCII naturals with no prefix.
-instance Integral a => Show (AsciiNat 10 a) where
-    showsPrec _ = showInt . unAsciiNat
-
--- | Show hex (base 16) ASCII naturals with an @0x@ prefix.
-instance Integral a => Show (AsciiNat 16 a) where
-    showsPrec _ n = showString "0x" . showHex (unAsciiNat n)
+{-
+instance (Ord a, Num a, KnownNat base) => Refine (AsciiNat base) a where
+    validate p a
+      | a >= 0 = success
+      | otherwise = throwRefineOtherException (typeRep p) "AsciiNat was < 0"
+-}
 
 -- | Compare two 'AsciiNat's, ignoring base information.
-asciiNatCompare :: Ord a => AsciiNat bl a -> AsciiNat br a -> Ordering
-asciiNatCompare (AsciiNat l) (AsciiNat r) = compare l r
+asciiNatCompare
+    :: Ord a => Refined (AsciiNat bl) a -> Refined (AsciiNat br) a -> Ordering
+asciiNatCompare l r = compare (unrefine l) (unrefine r)
 
 -- | The bytelength of an 'AsciiNat' is the number of digits in the number in
 --   the given base. We can calculate this generally with great efficiency
 --   using GHC (ghc-bignum) primitives!
---
--- We could be slightly faster if we didn't abstract over base e.g. see
--- implementation of 'GHC.Num.Primitives.wordLogBase#'. But speed is not a
--- concern for this silly type. So we'll keep our pretty polymorphism.
-instance (HasBaseOps a, KnownNat base) => BLen (AsciiNat base a) where
-    blen (AsciiNat n) = I# (word2Int# (sizeInBase# base# n))
+instance (HasBaseOps a, KnownNat base) => BLen (Refined (AsciiNat base) a) where
+    blen n = I# (word2Int# (sizeInBase# base# (unrefine n)))
       where
         !(W# base#) = natValWord @base
 
@@ -128,42 +123,42 @@ sizeInBaseWordSize base a =
     !(W# w#) = fromIntegral a
 
 -- | Serialize any term of an 'Integral' type to binary (base 2) ASCII.
-instance Integral a => Put (AsciiNat 2 a) where
-    put = sconcat . fmap (put . (+) 0x30) . unsafeDigits @Word8 2 . unAsciiNat
+instance Integral a => Put (Refined (AsciiNat  2) a) where
+    put = sconcat . fmap (put . (+) 0x30) . unsafeDigits @Word8  2 . unrefine
 
 -- | Serialize any term of an 'Integral' type to octal (base 8) ASCII.
-instance Integral a => Put (AsciiNat 8 a) where
-    put = sconcat . fmap (put . (+) 0x30) . unsafeDigits @Word8 8 . unAsciiNat
+instance Integral a => Put (Refined (AsciiNat  8) a) where
+    put = sconcat . fmap (put . (+) 0x30) . unsafeDigits @Word8  8 . unrefine
 
 -- | Serialize any term of an 'Integral' type to decimal (base 10) ASCII.
-instance Integral a => Put (AsciiNat 10 a) where
-    put = sconcat . fmap (put . (+) 0x30) . unsafeDigits @Word8 10 . unAsciiNat
+instance Integral a => Put (Refined (AsciiNat 10) a) where
+    put = sconcat . fmap (put . (+) 0x30) . unsafeDigits @Word8 10 . unrefine
 
 -- | Serialize any term of an 'Integral' type to hex (base 16) ASCII.
 --
 -- Uses lower-case ASCII.
-instance Integral a => Put (AsciiNat 16 a) where
+instance Integral a => Put (Refined (AsciiNat 16) a) where
     put =
           sconcat . fmap (put . unsafeHexDigitToAsciiLower)
-        . unsafeDigits @Word8 16 . unAsciiNat
+        . unsafeDigits @Word8 16 . unrefine
 
 -- | Parse a  binary  (base 2) ASCII natural to any 'Num' type.
-instance (Num a, Ord a) => Get (AsciiNat 2  a) where
-    get = AsciiNat <$> getAsciiNatByByte 2  "binary"  parseBinaryAsciiDigit
+instance (Num a, Ord a) => Get (Refined (AsciiNat  2)  a) where
+    get = unsafeRefine <$> getAsciiNatByByte 2  "binary"  parseBinaryAsciiDigit
 
 -- | Parse an octal   (base 8) ASCII natural to any 'Num' type.
-instance (Num a, Ord a) => Get (AsciiNat 8  a) where
-    get = AsciiNat <$> getAsciiNatByByte 8  "octal"   parseOctalAsciiDigit
+instance (Num a, Ord a) => Get (Refined (AsciiNat  8)  a) where
+    get = unsafeRefine <$> getAsciiNatByByte 8  "octal"   parseOctalAsciiDigit
 
 -- | Parse a  decimal (base 10) ASCII natural to any 'Num' type.
-instance (Num a, Ord a) => Get (AsciiNat 10 a) where
-    get = AsciiNat <$> getAsciiNatByByte 10 "decimal" parseDecimalAsciiDigit
+instance (Num a, Ord a) => Get (Refined (AsciiNat 10) a) where
+    get = unsafeRefine <$> getAsciiNatByByte 10 "decimal" parseDecimalAsciiDigit
 
 -- | Parse a  hex     (base 16) ASCII natural to any 'Num' type.
 --
 -- Parses lower and upper case (mixed permitted).
-instance (Num a, Ord a) => Get (AsciiNat 16 a) where
-    get = AsciiNat <$> getAsciiNatByByte 16 "hex"     parseHexAsciiDigit
+instance (Num a, Ord a) => Get (Refined (AsciiNat 16) a) where
+    get = unsafeRefine <$> getAsciiNatByByte 16 "hex"     parseHexAsciiDigit
 
 -- | Parse an ASCII natural in the given base with the given digit parser.
 --
@@ -179,9 +174,6 @@ getAsciiNatByByte base baseStr f = do
                   "non-"<>baseStr<>" ASCII digit in "
                 <>baseStr<>" ASCII natural: "<>show b
           Right n -> pure n
-
--- Not sure how to Get. Maybe have to grab all remaining, and hope that we're
--- used in Sized or something. (Think that's what I wrote originally.)
 
 {- | Get the digits in the given number as rendered in the given base.
 
@@ -245,3 +237,27 @@ unsafeHexDigitToAsciiLower :: (Num a, Ord a) => a -> a
 unsafeHexDigitToAsciiLower a
   | a <= 9    = 0x30 + a
   | otherwise = 0x57 + a
+
+{-
+
+-- | Print a binary (base 2) ASCII natural with an @0b@ prefix.
+prettyAsciiNat2 :: Integral a => Int -> a -> ShowS
+prettyAsciiNat2 _ n = showString "0b" . showBin n
+
+-- | Show binary (base 2) ASCII naturals with an @0b@ prefix.
+instance Integral a => Show (AsciiNat 2 a) where
+    showsPrec _ n = showString "0b" . showBin (unAsciiNat n)
+
+-- | Show octal (base 8) ASCII naturals with an @0o@ prefix.
+instance Integral a => Show (AsciiNat 8  a) where
+    showsPrec _ n = showString "0o" . showOct (unAsciiNat n)
+
+-- | Show decimal (base 10) ASCII naturals with no prefix.
+instance Integral a => Show (AsciiNat 10 a) where
+    showsPrec _ = showInt . unAsciiNat
+
+-- | Show hex (base 16) ASCII naturals with an @0x@ prefix.
+instance Integral a => Show (AsciiNat 16 a) where
+    showsPrec _ n = showString "0x" . showHex (unAsciiNat n)
+
+-}

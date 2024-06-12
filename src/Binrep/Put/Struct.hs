@@ -26,8 +26,8 @@ import Generic.Type.Assert
 
 import Binrep.Common.Via.Generically.NonSum
 
-import Refined
-import Refined.Unsafe
+import Rerefined.Refine
+import Rerefined.Predicate.Logical.And
 
 type PutterC = Struct.Poke RealWorld
 
@@ -65,8 +65,7 @@ instance
 
 instance PutC (Refined pr (Refined pl a))
   => PutC (Refined (pl `And` pr) a) where
-    putC =
-        putC . reallyUnsafeRefine @_ @pr . reallyUnsafeRefine @_ @pl . unrefine
+    putC = putC . unsafeRefine @_ @pr . unsafeRefine @_ @pl . unrefine
 
 instance Prim' a => PutC (ViaPrim a) where
     putC = Struct.prim . unViaPrim

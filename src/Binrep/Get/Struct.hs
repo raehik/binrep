@@ -27,8 +27,8 @@ import Generic.Type.Assert
 
 import Binrep.Common.Via.Generically.NonSum
 
-import Refined
-import Refined.Unsafe
+import Rerefined.Refine
+import Rerefined.Predicate.Logical.And
 
 type GetterC = Parser E
 
@@ -89,7 +89,7 @@ instance
 
 instance GetC (Refined pr (Refined pl a))
   => GetC (Refined (pl `And` pr) a) where
-    getC = (reallyUnsafeRefine . unrefine @pl . unrefine @pr) <$> getC
+    getC = (unsafeRefine . unrefine @pl . unrefine @pr) <$> getC
 
 instance GetC () where
     {-# INLINE getC #-}

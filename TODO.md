@@ -1,4 +1,11 @@
 # binrep to-dos
+## Faster sum generics
+Thanks to my type-level UTF-8, I could now provide a good amount of type-level
+sum tag handlers. This might improve performance, since I'm not sure how well
+GHC can inline that part of the code.
+
+This would probably be gdf and bytezap code.
+
 ## Clarify `Thin` stuff
 I use the `ByteString` instance internally sometimes (probably), and in those
 cases I want "thin" parsing since I'm consuming it right there and then. I need

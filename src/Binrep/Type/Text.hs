@@ -22,7 +22,7 @@ module Binrep.Type.Text
 
 import Binrep.Type.Text.Internal
 
-import Refined
+import Rerefined
 
 import Binrep.Type.Text.Encoding.Utf8
 import Binrep.Type.Text.Encoding.Ascii
@@ -47,7 +47,7 @@ encode = encode' @enc . unrefine
 -- bs :: Refined 'C Bytes
 encodeToRep
     :: forall rep enc
-    .  (Encode enc, Predicate rep Bytes)
+    .  (Encode enc, Refine rep Bytes)
     => AsText enc
-    -> Either RefineException (Refined rep Bytes)
+    -> Either RefineFailure (Refined rep Bytes)
 encodeToRep = refine . encode

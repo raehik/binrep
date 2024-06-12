@@ -3,34 +3,44 @@
 
 module Binrep.Type.Prefix.Count where
 
-import Binrep.Util.Prefix
+import Binrep.Type.Prefix.Internal
 import Binrep
 import Control.Monad.Combinators qualified as Monad
 
 import GHC.TypeNats
 import Util.TypeNats ( natValInt )
-import Refined hiding ( Weaken(..), strengthen )
-import Refined.Unsafe ( reallyUnsafeRefine1 )
 
-import Data.Typeable ( Typeable, typeRep )
-import Data.Kind
+import Rerefined.Predicate.Common
+import Rerefined.Refine
+import TypeLevelShow.Utils
+
+import Data.Kind ( type Type )
 
 import Data.Foldable qualified as Foldable
 
+-- TODO put monofoldable in here, instead of that useless @(f a)@ stuff
+
 data CountPrefix (pfx :: Type)
-type CountPrefixed pfx = Refined1 (CountPrefix pfx)
 
-instance (KnownNat (Max pfx), Foldable f, Typeable pfx)
-  => Predicate1 (CountPrefix pfx) f where
-    validate1 p fa
-      | Foldable.length fa <= natValInt @(Max pfx) = success
-      | otherwise = throwRefineOtherException (typeRep p) "TODO bad"
+instance Predicate (CountPrefix pfx) where
+    type PredicateName d (CountPrefix pfx) = ShowParen (d > 9)
+        ("CountPrefix " ++ LenNatName pfx)
 
-instance (KnownNat (Max pfx), Foldable f, Typeable pfx)
-  => Predicate (CountPrefix pfx) (f a) where
+instance
+  ( KnownPredicateName (CountPrefix pfx), KnownNat (LenNatMax pfx), Foldable f
+  ) => Refine1 (CountPrefix pfx) f where
+    validate1 p fa =
+        validateBool p e (Foldable.length fa <= natValInt @(LenNatMax pfx))
+      where e = "TODO bad"
+
+instance
+  ( KnownPredicateName (CountPrefix pfx), KnownNat (LenNatMax pfx), Foldable f
+  ) => Refine (CountPrefix pfx) (f a) where
     validate = validate1
 
--- | We can know byte length at compile time _if_ we know it for the prefix and
+type CountPrefixed pfx = Refined1 (CountPrefix pfx)
+
+-- | We can know byte length at compile time /if/ we know it for the prefix and
 --   the list-like.
 --
 -- This is extremely unlikely, because then what counting are we even
@@ -42,22 +52,22 @@ instance IsCBLen (CountPrefixed pfx f a) where
 --   (holding the length of the type) plus the length of the type.
 --
 -- Bit confusing. How to explain this? TODO
-instance (Prefix pfx, Foldable f, BLen pfx, BLen (f a))
+instance (LenNat pfx, Foldable f, BLen pfx, BLen (f a))
   => BLen (CountPrefixed pfx f a) where
-    blen rfa = blen (lenToPfx @pfx (Foldable.length fa)) + blen fa
+    blen rfa = blen (lenToNat @pfx (Foldable.length fa)) + blen fa
       where fa = unrefine1 rfa
 
-instance (Prefix pfx, Foldable f, Put pfx, Put (f a))
+instance (LenNat pfx, Foldable f, Put pfx, Put (f a))
   => Put (CountPrefixed pfx f a) where
-    put rfa = put (lenToPfx @pfx (Foldable.length fa)) <> put fa
+    put rfa = put (lenToNat @pfx (Foldable.length fa)) <> put fa
       where fa = unrefine1 rfa
 
 class GetCount f where getCount :: Get a => Int -> Getter (f a)
 instance GetCount [] where getCount n = Monad.count n get
 
-instance (Prefix pfx, GetCount f, Get pfx, Get a)
+instance (LenNat pfx, GetCount f, Get pfx, Get a)
   => Get (CountPrefixed pfx f a) where
     get = do
         pfx <- get @pfx
-        fa <- getCount (pfxToLen pfx)
-        pure $ reallyUnsafeRefine1 fa
+        fa <- getCount (natToLen pfx)
+        pure $ unsafeRefine1 fa

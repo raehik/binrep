@@ -39,6 +39,8 @@ library
       Binrep.Common.Class.TypeErrors
       Binrep.Common.Via.Generically.NonSum
       Binrep.Common.Via.Prim
+      Binrep.Example.Sum
+      Binrep.Example.Tga
       Binrep.Generic
       Binrep.Get
       Binrep.Get.Error
@@ -52,6 +54,7 @@ library
       Binrep.Type.NullPadded
       Binrep.Type.NullTerminated
       Binrep.Type.Prefix.Count
+      Binrep.Type.Prefix.Internal
       Binrep.Type.Prefix.Size
       Binrep.Type.Sized
       Binrep.Type.Text
@@ -65,7 +68,6 @@ library
       Binrep.Util
       Binrep.Util.ByteOrder
       Binrep.Util.Generic
-      Binrep.Util.Prefix
       Raehik.Compat.FlatParse.Basic.Prim
       Raehik.Compat.FlatParse.Basic.WithLength
       Util.TypeNats
@@ -91,16 +93,19 @@ library
     , bytezap >=1.3.0 && <1.4
     , deepseq >=1.4.6.1 && <1.6
     , defun-core ==0.1.*
+    , either >=5.0.2 && <5.1
     , flatparse >=0.5.0.2 && <0.6
     , generic-data-functions >=0.5.0 && <0.6
     , generic-type-asserts >=0.3.0 && <0.4
     , generic-type-functions >=0.1.0 && <0.2
     , ghc-bignum
     , parser-combinators >=1.3.0 && <1.4
-    , refined1 ==0.9.*
-    , strongweak >=0.6.0 && <0.7
+    , rerefined >=0.5.1 && <0.6
+    , strongweak >=0.8.0 && <0.9
     , text >=1.2.5.0 && <2.1
-    , type-level-bytestrings >=0.1.0 && <0.2
+    , text-builder-linear >=0.1.2 && <0.2
+    , type-level-bytestrings >=0.1.0 && <0.3
+    , type-level-show >=0.3.0 && <0.4
   default-language: GHC2021
   if flag(icu)
     cpp-options: -DHAVE_ICU
@@ -138,6 +143,7 @@ test-suite spec
     , bytezap >=1.3.0 && <1.4
     , deepseq >=1.4.6.1 && <1.6
     , defun-core ==0.1.*
+    , either >=5.0.2 && <5.1
     , flatparse >=0.5.0.2 && <0.6
     , generic-data-functions >=0.5.0 && <0.6
     , generic-random >=1.5.0.1 && <1.6
@@ -147,10 +153,12 @@ test-suite spec
     , hspec >=2.7 && <2.12
     , parser-combinators >=1.3.0 && <1.4
     , quickcheck-instances >=0.3.26 && <0.4
-    , refined1 ==0.9.*
-    , strongweak >=0.6.0 && <0.7
+    , rerefined >=0.5.1 && <0.6
+    , strongweak >=0.8.0 && <0.9
     , text >=1.2.5.0 && <2.1
-    , type-level-bytestrings >=0.1.0 && <0.2
+    , text-builder-linear >=0.1.2 && <0.2
+    , type-level-bytestrings >=0.1.0 && <0.3
+    , type-level-show >=0.3.0 && <0.4
   default-language: GHC2021
   if flag(icu)
     cpp-options: -DHAVE_ICU
@@ -183,6 +191,7 @@ benchmark bench
     , bytezap >=1.3.0 && <1.4
     , deepseq >=1.4.6.1 && <1.6
     , defun-core ==0.1.*
+    , either >=5.0.2 && <5.1
     , flatparse >=0.5.0.2 && <0.6
     , gauge
     , generic-data-functions >=0.5.0 && <0.6
@@ -190,10 +199,12 @@ benchmark bench
     , generic-type-functions >=0.1.0 && <0.2
     , ghc-bignum
     , parser-combinators >=1.3.0 && <1.4
-    , refined1 ==0.9.*
-    , strongweak >=0.6.0 && <0.7
+    , rerefined >=0.5.1 && <0.6
+    , strongweak >=0.8.0 && <0.9
     , text >=1.2.5.0 && <2.1
-    , type-level-bytestrings >=0.1.0 && <0.2
+    , text-builder-linear >=0.1.2 && <0.2
+    , type-level-bytestrings >=0.1.0 && <0.3
+    , type-level-show >=0.3.0 && <0.4
   default-language: GHC2021
   if flag(icu)
     cpp-options: -DHAVE_ICU

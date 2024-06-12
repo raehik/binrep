@@ -1,6 +1,7 @@
 -- | Data null-padded to a given length.
 
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE UndecidableInstances #-} -- for PredicateName
+{-# LANGUAGE OverloadedStrings #-} -- for refine error builder
 
 module Binrep.Type.NullPadded where
 
@@ -11,20 +12,22 @@ import FlatParse.Basic qualified as FP
 import Raehik.Compat.FlatParse.Basic.WithLength qualified as FP
 import Control.Monad.Combinators ( skipCount )
 
-import Binrep.Util ( tshow )
-
-import Refined
-import Refined.Unsafe
+import Rerefined.Predicate.Common
+import Rerefined.Refine
+import TypeLevelShow.Natural
+import TypeLevelShow.Utils
+import Data.Text.Builder.Linear qualified as TBL
 
 import GHC.TypeNats
 import Util.TypeNats ( natValInt )
-
-import Data.Typeable ( typeRep )
 
 import Bytezap.Parser.Struct qualified as BZG
 import GHC.Exts ( Int(I#) )
 
 data NullPad (n :: Natural)
+instance Predicate (NullPad n) where
+    type PredicateName d (NullPad n) = ShowParen (d > 9)
+        ("NullPad " ++ ShowNatDec n)
 
 {- | A type which is to be null-padded to a given total length.
 
@@ -48,15 +51,13 @@ instance IsCBLen (NullPadded n a) where type CBLen (NullPadded n a) = n
 deriving via ViaCBLen (NullPadded n a) instance KnownNat n => BLen (NullPadded n a)
 
 -- | Assert that term will fit.
-instance (BLen a, KnownNat n) => Predicate (NullPad n) a where
-    validate p a
-      | len <= n = success
-      | otherwise
-          = throwRefineOtherException (typeRep p) $
-                   "too long: " <> tshow len <> " > " <> tshow n
+instance (KnownPredicateName (NullPad n), BLen a, KnownNat n)
+  => Refine (NullPad n) a where
+    validate p a = validateBool p e (len <= n)
       where
         n = natValInt @n
         len = blen a
+        e = "too long: " <> TBL.fromDec len <> " > " <> TBL.fromDec n
 
 instance (BLen a, KnownNat n, Put a) => PutC (NullPadded n a) where
     putC ra = BZ.Struct.sequencePokes (BZ.toStructPoke (put a)) len
@@ -78,7 +79,7 @@ instance (BLen a, KnownNat n, Put a) => Put (NullPadded n a) where
 instance (KnownNat n, Get a) => GetC (NullPadded n a) where
     getC = fpToBz get len# $ \a _unconsumed# ->
         -- TODO consume nulls lol
-        BZG.constParse $ reallyUnsafeRefine a
+        BZG.constParse $ unsafeRefine a
       where
         !(I# len#) = natValInt @n
 
@@ -90,4 +91,4 @@ instance (Get a, KnownNat n) => Get (NullPadded n a) where
         then eBase $ EFailNamed "TODO used to be EOverlong, cba"
         else do
             skipCount paddingLen (FP.word8 0x00)
-            pure $ reallyUnsafeRefine a
+            pure $ unsafeRefine a

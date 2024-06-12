@@ -17,14 +17,15 @@ import GHC.TypeLits ( TypeError, KnownNat )
 
 import GHC.Generics
 import Generic.Data.Function.FoldMap
+import Generic.Data.MetaParse.Cstr ( Raw )
 import Generic.Type.Assert
 
 import Control.Monad.ST ( RealWorld )
 
 import Binrep.Put.Struct ( PutC(putC) )
 
-import Refined
-import Refined.Unsafe
+import Rerefined.Refine
+import Rerefined.Predicate.Logical.And
 
 import Data.Word
 import Data.Int
@@ -65,10 +66,10 @@ instance
 -- if you want better performance!
 putGenericSum
     :: forall a
-    .  ( Generic a, GFoldMapSum Put (Rep a)
+    .  ( Generic a, GFoldMapSum Put Raw (Rep a)
        , GAssertNotVoid a, GAssertSum a
     ) => (String -> Putter) -> a -> Putter
-putGenericSum = genericFoldMapSum @Put
+putGenericSum = genericFoldMapSumRaw @Put
 
 newtype ViaPutC a = ViaPutC { unViaPutC :: a }
 instance (PutC a, KnownNat (CBLen a)) => Put (ViaPutC a) where
@@ -129,4 +130,4 @@ deriving via ViaPrim (ByteOrdered    'BigEndian a)
 -- | Put types refined with multiple predicates by wrapping the left
 --   predicate with the right. LOL REALLY?
 instance Put (Refined pr (Refined pl a)) => Put (Refined (pl `And` pr) a) where
-    put = put . reallyUnsafeRefine @_ @pr . reallyUnsafeRefine @_ @pl . unrefine
+    put = put . unsafeRefine @_ @pr . unsafeRefine @_ @pl . unrefine

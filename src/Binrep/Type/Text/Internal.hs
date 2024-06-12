@@ -4,8 +4,7 @@ module Binrep.Type.Text.Internal where
 
 import Data.Text ( Text )
 import Data.ByteString qualified as B
-import Refined
-import Refined.Unsafe ( reallyUnsafeRefine )
+import Rerefined.Refine
 
 import System.IO.Unsafe qualified
 import Control.Exception qualified
@@ -40,7 +39,7 @@ decodeText
     :: forall enc e
     .  (e -> String) -> (Bytes -> Either e Text) -> Bytes
     -> Either String (AsText enc)
-decodeText g f = bimap g reallyUnsafeRefine . f
+decodeText g f = bimap g unsafeRefine . f
 
 -- | Run an unsafe decoder safely.
 --
