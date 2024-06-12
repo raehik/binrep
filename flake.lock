@@ -53,11 +53,11 @@
     "generic-data-functions": {
       "flake": false,
       "locked": {
-        "lastModified": 1717317334,
-        "narHash": "sha256-o+643ATetL+MrWUf3BAnwVBkx65IznVqGzHAuq0THPY=",
+        "lastModified": 1718194171,
+        "narHash": "sha256-z7//dL2CmtBrVgl6R5zwID6U2oaH8BfqxJM+btkR6fE=",
         "owner": "raehik",
         "repo": "generic-data-functions",
-        "rev": "dc427c326e51b517bef91bd3c4bab3bc17636a68",
+        "rev": "930c3a59392ccc52c1915f0f95dad052f6e47809",
         "type": "github"
       },
       "original": {

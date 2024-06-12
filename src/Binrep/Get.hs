@@ -27,6 +27,7 @@ import GHC.TypeLits ( TypeError )
 
 import GHC.Generics
 import Generic.Data.Function.Traverse
+import Generic.Data.MetaParse.Cstr ( Raw )
 import Generic.Type.Assert
 
 import GHC.Exts ( minusAddr#, Int(I#), Int#, plusAddr#, (+#) )
@@ -65,12 +66,14 @@ instance GenericTraverse Get where
     genericTraverseAction cd cc mcs si =
         getWrapGeneric cd $ EGenericField cc mcs si
 
+{-
 instance GenericTraverseSum Get where
     genericTraverseSumPfxTagAction cd =
         getWrapGeneric cd $ EGenericSum . EGenericSumTag
     -- TODO proper offset info
     genericTraverseSumNoMatchingCstrAction cd cstrs ptText =
         FP.err $ E 0 $ EGeneric cd $ EGenericSum $ EGenericSumTagNoMatch cstrs ptText
+-}
 
 getGenericNonSum
     :: forall a
@@ -87,11 +90,17 @@ instance
 
 getGenericSum
     :: forall pt a
-    .  ( Generic a, GTraverseSum Get (Rep a)
+    .  ( Generic a, GTraverseSum Get Raw (Rep a)
        , Get pt
        , GAssertNotVoid a, GAssertSum a
-    ) => PfxTagCfg pt -> Getter a
-getGenericSum = genericTraverseSum @Get
+    ) => (String -> pt)
+      -> (String -> FP.Parser E pt)
+      -> (pt -> pt -> Bool)
+      -> Getter a
+getGenericSum parseCstr ptGet ptEq =
+    genericTraverseSumRaw @Get parseCstr ptGet fNoMatch ptEq
+  where
+      fNoMatch _cd = FP.err EFail -- TODO
 
 -- We can't provide a Generically instance because the user must choose between
 -- sum and non-sum handlers.
