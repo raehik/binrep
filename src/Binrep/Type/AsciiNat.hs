@@ -61,13 +61,6 @@ instance (KnownPredicateName (AsciiNat base), Num a, Ord a)
   => Refine (AsciiNat base) a where
     validate = validateVia @(CompareValue GTE Pos 0)
 
-{-
-instance (Ord a, Num a, KnownNat base) => Refine (AsciiNat base) a where
-    validate p a
-      | a >= 0 = success
-      | otherwise = throwRefineOtherException (typeRep p) "AsciiNat was < 0"
--}
-
 -- | Compare two 'AsciiNat's, ignoring base information.
 asciiNatCompare
     :: Ord a => Refined (AsciiNat bl) a -> Refined (AsciiNat br) a -> Ordering
