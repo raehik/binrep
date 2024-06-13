@@ -16,6 +16,8 @@ import GHC.TypeNats
 
 import Binrep.Common.Via.Generically.NonSum
 
+import FlatParse.Basic qualified as FP
+
 data DMagic = DMagic
   { dMagic1_8b :: Magic '[0xFF, 0, 1, 0, 1, 0, 1, 0xFF]
   } deriving stock Generic
@@ -29,7 +31,7 @@ data DStruct = DStruct
     deriving (IsCBLen, PutC, GetC) via GenericallyNonSum DStruct
 
 data DMagicSum = DMagicSum1 (Magic '[0]) | DMagicSum2 (Magic '[0xFF])
-    deriving stock Generic
+    deriving stock (Generic, Show)
 
 instance CstrParser' DMagicSum where
     type CstrParseResult DMagicSum = Natural
@@ -45,7 +47,8 @@ instance Put DMagicSum where
     put = putGenericSum @DMagicSum
         (\p -> put (fromIntegral @_ @Word8 (natVal' p)))
 
-{-
 instance Get DMagicSum where
-    get = getGenericSum @DMagicSum _
--}
+    get = getGenericSum @DMagicSum
+        (\p -> fromIntegral @_ @Word8 (natVal' p))
+        (\_cd -> get)
+        (==)

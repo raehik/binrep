@@ -1,4 +1,4 @@
-{-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
+{-# LANGUAGE UndecidableInstances #-} -- for various stuff
 {-# LANGUAGE AllowAmbiguousTypes #-} -- for type-level sum type handling
 
 module Binrep.Put where
@@ -69,7 +69,7 @@ putGenericSum
 putGenericSum = genericFoldMapSum @Put @sumtag
 
 -- | Serialize a term of the sum type @a@ via its 'Generic' instance, without
--- pre-parsing constructor names.
+--   pre-parsing constructor names.
 putGenericSumRaw
     :: forall a
     .  ( Generic a, GFoldMapSum Put Raw (Rep a)

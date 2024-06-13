@@ -1,5 +1,5 @@
-{-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
-{-# LANGUAGE BlockArguments #-}
+{-# LANGUAGE UndecidableInstances #-} -- for various stuff
+{-# LANGUAGE AllowAmbiguousTypes #-} -- for type-level sum type handling
 
 module Binrep.Get
   ( module Binrep.Get
@@ -27,7 +27,7 @@ import GHC.TypeLits ( TypeError )
 
 import GHC.Generics
 import Generic.Data.Function.Traverse
-import Generic.Data.MetaParse.Cstr ( Raw )
+import Generic.Data.MetaParse.Cstr ( Raw, ParseCstrTo )
 import Generic.Type.Assert
 
 import GHC.Exts ( minusAddr#, Int(I#), Int#, plusAddr#, (+#) )
@@ -88,6 +88,20 @@ instance
   ) => Get (GenericallyNonSum a) where
     get = GenericallyNonSum <$> getGenericNonSum
 
+getGenericSum
+    :: forall sumtag pt a
+    .  ( Generic a, GTraverseSum Get sumtag (Rep a)
+       , Get pt
+       , GAssertNotVoid a, GAssertSum a
+    ) => ParseCstrTo sumtag pt
+      -> (String -> FP.Parser E pt)
+      -> (pt -> pt -> Bool)
+      -> Getter a
+getGenericSum parseCstr fIdk ptEq =
+    genericTraverseSum @Get @sumtag parseCstr fIdk fNoMatch ptEq
+  where
+      fNoMatch _cd = FP.err EFail -- TODO
+
 getGenericSumRaw
     :: forall pt a
     .  ( Generic a, GTraverseSum Get Raw (Rep a)
@@ -97,8 +111,8 @@ getGenericSumRaw
       -> (String -> FP.Parser E pt)
       -> (pt -> pt -> Bool)
       -> Getter a
-getGenericSumRaw parseCstr ptGet ptEq =
-    genericTraverseSumRaw @Get parseCstr ptGet fNoMatch ptEq
+getGenericSumRaw parseCstr fIdk ptEq =
+    genericTraverseSumRaw @Get parseCstr fIdk fNoMatch ptEq
   where
       fNoMatch _cd = FP.err EFail -- TODO
 
@@ -113,13 +127,13 @@ instance GenericFOnCstr Get where
         gTraverseC @Get @dtName @cstrName @0
 
 eBase :: EBase -> Getter a
-eBase eb = FP.ParserT \_fp eob s st ->
+eBase eb = FP.ParserT $ \_fp eob s st ->
     let os = I# (minusAddr# eob s)
      in FP.Err# st (E os $ EBase eb)
 
 getEBase :: Getter a -> EBase -> Getter a
 getEBase (FP.ParserT f) eb =
-    FP.ParserT \fp eob s st ->
+    FP.ParserT $ \fp eob s st ->
         let os = I# (minusAddr# eob s)
          in case f fp eob s st of
               FP.Fail# st'   -> FP.Err# st' (E os $ EBase eb)
@@ -156,7 +170,7 @@ getWrapGeneric = getWrapGeneric' get
 
 getWrapGeneric' :: Getter a -> String -> (E -> EGeneric E) -> Getter a
 getWrapGeneric' (FP.ParserT f) cd fe =
-    FP.ParserT \fp eob s st ->
+    FP.ParserT $ \fp eob s st ->
         let os = I# (minusAddr# eob s)
          in case f fp eob s st of
               FP.Fail# st'   -> FP.Err# st' (E os $ EGeneric cd $ fe EFail)
