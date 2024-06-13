@@ -94,13 +94,14 @@ getGenericSum
        , Get pt
        , GAssertNotVoid a, GAssertSum a
     ) => ParseCstrTo sumtag pt
-      -> (String -> FP.Parser E pt)
       -> (pt -> pt -> Bool)
       -> Getter a
-getGenericSum parseCstr fIdk ptEq =
-    genericTraverseSum @Get @sumtag parseCstr fIdk fNoMatch ptEq
+getGenericSum parseCstr ptEq =
+    genericTraverseSum @Get @sumtag parseCstr getPt fNoMatch ptEq
   where
       fNoMatch _cd = FP.err EFail -- TODO
+      getPt cd = getWrapGeneric cd $ EGenericSum . EGenericSumTag
+
 
 getGenericSumRaw
     :: forall pt a
@@ -173,9 +174,9 @@ getWrapGeneric' (FP.ParserT f) cd fe =
     FP.ParserT $ \fp eob s st ->
         let os = I# (minusAddr# eob s)
          in case f fp eob s st of
-              FP.Fail# st'   -> FP.Err# st' (E os $ EGeneric cd $ fe EFail)
-              FP.Err#  st' e -> FP.Err# st' (E os $ EGeneric cd $ fe e)
-              x -> x
+              FP.OK#   st' a s -> FP.OK# st' a s
+              FP.Fail# st'     -> FP.Err# st' (E os $ EGeneric cd $ fe EFail)
+              FP.Err#  st' e   -> FP.Err# st' (E os $ EGeneric cd $ fe e)
 
 newtype ViaGetC a = ViaGetC { unViaGetC :: a }
 instance (GetC a, KnownNat (CBLen a)) => Get (ViaGetC a) where

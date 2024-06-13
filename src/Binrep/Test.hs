@@ -50,5 +50,4 @@ instance Put DMagicSum where
 instance Get DMagicSum where
     get = getGenericSum @DMagicSum
         (\p -> fromIntegral @_ @Word8 (natVal' p))
-        (\_cd -> get)
         (==)
