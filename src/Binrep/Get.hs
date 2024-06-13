@@ -88,7 +88,7 @@ instance
   ) => Get (GenericallyNonSum a) where
     get = GenericallyNonSum <$> getGenericNonSum
 
-getGenericSum
+getGenericSumRaw
     :: forall pt a
     .  ( Generic a, GTraverseSum Get Raw (Rep a)
        , Get pt
@@ -97,7 +97,7 @@ getGenericSum
       -> (String -> FP.Parser E pt)
       -> (pt -> pt -> Bool)
       -> Getter a
-getGenericSum parseCstr ptGet ptEq =
+getGenericSumRaw parseCstr ptGet ptEq =
     genericTraverseSumRaw @Get parseCstr ptGet fNoMatch ptEq
   where
       fNoMatch _cd = FP.err EFail -- TODO

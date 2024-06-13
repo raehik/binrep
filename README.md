@@ -7,14 +7,13 @@
 
 # binrep
 binrep is a Haskell library for *precisely modelling binary schemas*, especially
-byte-oriented file formats, and working with them effectively and efficiently.
-Here's why it's useful:
+low-context byte-oriented file formats e.g. C enums, and working with them
+effectively and efficiently. Here's why it's useful:
 
   * **Explicit:** Define Haskell data types with the binary schema "baked in".
     Use highly parameterized binary representation primitives including
     null-terminated data (e.g. C-style strings), Pascal-style data (length
-    prefixed), sized explicit-endian machine integers, null-padded data. Write
-    your own primitives if you want (if so, please consider making a PR!).
+    prefixed), sized explicit-endian machine integers, null-padded data.
   * **Low boilerplate:** Free performant parsers and serializers via generics.
     _(See [Generic binary representation](#generic-binary-representation).)_
   * **Easy validation:** Use the [strongweak][gh-strongweak] library design
@@ -70,12 +69,23 @@ with binrep's binary representation primitives.
 _(Generics are now handled by [generic-data-functions][hackage-gdf]. This info
 is largely the same, but the code is elsewhere.)_
 
-binrep's generic deriving makes very few decisions:
+binrep includes powerful generics for automatically writing instances.
+They all work the same way:
 
   * Constructors are encoded by sequentially encoding every enclosed field.
     * Empty constructors thus serialize to 0 bytes.
-  * Sum types are encoded via a tag obtained from the constructor names.
-    * It's the same approach as aeson, with a bit more flexibility: see below.
+  * For sum types, the constructor is disambiguated via a tag obtained from the
+    constructor name.
+    * Tags may be parsed on the type or term level.
+
+Note that when parsing sum types, we compare tags sequentially. You may design
+your tag schema to have a more efficient approach. In such cases, consider using
+`Generic.Data.FOnCstr` from [generic-data-functions][hackage-gdf].
+
+As an example, you could encode constructor names as a null-terminated ASCII
+bytestring for a tag. (This is provided at `Binrep.Generic.nullTermCstrPfxTag`.)
+Alternatively, you may encode each constructor at a unique byte value, stated at
+the end of the constructor name.
 
 Sum types (data types with multiple constructors) are handled by first encoding
 a "tag field", the value of which then indicates which constructor to use. You

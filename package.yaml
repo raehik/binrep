@@ -75,6 +75,8 @@ dependencies:
 - defun-core ^>= 0.1
 - ghc-bignum
 
+- symparsec # TODO tmp
+
 library:
   source-dirs: src
 

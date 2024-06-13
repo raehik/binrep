@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-} -- for 'ViaCBLen', 'TypeError'
+{-# LANGUAGE AllowAmbiguousTypes #-} -- for type-level sum type handling
 
 {- | Byte length as a simple pure function, no bells or whistles.
 
@@ -37,7 +38,7 @@ import Binrep.Util.ByteOrder
 import Data.Monoid qualified as Monoid
 import GHC.Generics
 import Generic.Data.Function.FoldMap
-import Generic.Data.MetaParse.Cstr ( Raw )
+import Generic.Data.MetaParse.Cstr ( Raw, ParseCstrTo )
 import Generic.Type.Assert
 
 import Rerefined.Refine
@@ -68,16 +69,25 @@ blenGenericNonSum = Monoid.getSum . genericFoldMapNonSum @BLen
 
 -- | Measure the byte length of a term of the sum type @a@ via its 'Generic'
 --   instance.
---
--- You must provide a function to obtain the byte length for the prefix tag, via
--- inspecting the reified constructor names. This is regrettably inefficient.
--- Alas. Do write your own instance if you want better performance!
 blenGenericSum
+    :: forall sumtag a
+    .  ( Generic a, GFoldMapSum BLen sumtag (Rep a)
+       , GAssertNotVoid a, GAssertSum a
+    ) => ParseCstrTo sumtag Int -> a -> Int
+blenGenericSum f =
+    Monoid.getSum . genericFoldMapSum @BLen @sumtag (\p -> Monoid.Sum (f p))
+
+-- TODO perhaps provide some handy wrappers that fill in blen for sumtag type
+-- with cblen? how to do this well?
+
+-- | Measure the byte length of a term of the sum type @a@ via its 'Generic'
+--   instance.
+blenGenericSumRaw
     :: forall a
     .  ( Generic a, GFoldMapSum BLen Raw (Rep a)
        , GAssertNotVoid a, GAssertSum a
     ) => (String -> Int) -> a -> Int
-blenGenericSum f =
+blenGenericSumRaw f =
     Monoid.getSum . genericFoldMapSumRaw @BLen (Monoid.Sum <$> f)
 
 -- We can't provide a Generically instance because the user must choose between

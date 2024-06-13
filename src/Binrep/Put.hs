@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-} -- required below GHC 9.6
+{-# LANGUAGE AllowAmbiguousTypes #-} -- for type-level sum type handling
 
 module Binrep.Put where
 
@@ -17,7 +18,7 @@ import GHC.TypeLits ( TypeError, KnownNat )
 
 import GHC.Generics
 import Generic.Data.Function.FoldMap
-import Generic.Data.MetaParse.Cstr ( Raw )
+import Generic.Data.MetaParse.Cstr ( Raw, ParseCstrTo )
 import Generic.Type.Assert
 
 import Control.Monad.ST ( RealWorld )
@@ -60,16 +61,21 @@ instance
     put = putGenericNonSum . unGenericallyNonSum
 
 -- | Serialize a term of the sum type @a@ via its 'Generic' instance.
---
--- You must provide a serializer for @a@'s constructors. This is regrettably
--- inefficient due to having to use 'String's. Alas. Do write your own instance
--- if you want better performance!
 putGenericSum
+    :: forall sumtag a
+    .  ( Generic a, GFoldMapSum Put sumtag (Rep a)
+       , GAssertNotVoid a, GAssertSum a
+    ) => ParseCstrTo sumtag Putter -> a -> Putter
+putGenericSum = genericFoldMapSum @Put @sumtag
+
+-- | Serialize a term of the sum type @a@ via its 'Generic' instance, without
+-- pre-parsing constructor names.
+putGenericSumRaw
     :: forall a
     .  ( Generic a, GFoldMapSum Put Raw (Rep a)
        , GAssertNotVoid a, GAssertSum a
     ) => (String -> Putter) -> a -> Putter
-putGenericSum = genericFoldMapSumRaw @Put
+putGenericSumRaw = genericFoldMapSumRaw @Put
 
 newtype ViaPutC a = ViaPutC { unViaPutC :: a }
 instance (PutC a, KnownNat (CBLen a)) => Put (ViaPutC a) where
