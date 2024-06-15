@@ -53,11 +53,11 @@
     "generic-data-functions": {
       "flake": false,
       "locked": {
-        "lastModified": 1718194171,
-        "narHash": "sha256-z7//dL2CmtBrVgl6R5zwID6U2oaH8BfqxJM+btkR6fE=",
+        "lastModified": 1718472941,
+        "narHash": "sha256-zCajve2b9e10g6B2Xpf+NrmJ498lFexYwsJX3Y0Pi7I=",
         "owner": "raehik",
         "repo": "generic-data-functions",
-        "rev": "930c3a59392ccc52c1915f0f95dad052f6e47809",
+        "rev": "e8bfe0c02c24a691d1debf5ab56df6eca3407b2d",
         "type": "github"
       },
       "original": {
@@ -216,11 +216,11 @@
     "symparsec": {
       "flake": false,
       "locked": {
-        "lastModified": 1717255379,
-        "narHash": "sha256-F5HjKPWwPDHpGX/OopLeq1LlMbKTL9iASourvz6JmzY=",
+        "lastModified": 1718471386,
+        "narHash": "sha256-Qy+9D9pF7/2INaUB6N3RjZk9IdavclgisYWYnpyjIgk=",
         "owner": "raehik",
         "repo": "symparsec",
-        "rev": "e5790577897ec13074583e56369bd302b320000d",
+        "rev": "a452f9c02a1c197fd6dabfdb16e8997237adbbac",
         "type": "github"
       },
       "original": {

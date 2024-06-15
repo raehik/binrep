@@ -10,8 +10,8 @@ import Data.Word
 import Binrep.Util.ByteOrder
 
 import Generic.Data.MetaParse.Cstr
-import Generic.Data.MetaParse.Symparsec
 import Symparsec.Parsers
+import Symparsec.Run ( Run'_ )
 import GHC.TypeNats
 
 import Binrep.Common.Via.Generically.NonSum
@@ -38,7 +38,7 @@ instance CstrParser' DMagicSum where
 $(pure [])
 instance CstrParser  DMagicSum where
     type ReifyCstrParseResult DMagicSum n = KnownNat n
-    type ParseCstr DMagicSum str = SymIt (Literal "DMagicSum" :*>: NatHex) str
+    type ParseCstr DMagicSum str = Run'_ (Literal "DMagicSum" :*>: NatHex) str
 
 instance BLen DMagicSum where
     blen = blenGenericSum @DMagicSum (\_p -> 1)

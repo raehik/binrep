@@ -19,7 +19,7 @@ the extra explicitness. So it's here to stay :)
 
 module Binrep.BLen
   ( BLen(blen)
-  , blenGenericNonSum, blenGenericSum
+  , blenGenericNonSum, blenGenericSum, blenGenericSumRaw
   , ViaCBLen(..), cblen
   ) where
 
