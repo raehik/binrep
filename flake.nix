@@ -45,13 +45,17 @@
         packages.default  = self'.packages.ghc98-binrep;
         devShells.default = self'.devShells.ghc98;
         haskellProjects.ghc910 = {
-          basePackages = pkgs.haskell.packages.ghc98;
-          # v https://github.com/phadej/defun/pull/5
-          settings.defun-core.jailbreak = true;
+          basePackages = pkgs.haskell.packages.ghc910;
+          devShell = defDevShell "ghc910";
+
           settings.strongweak.broken = false;
           settings.text-icu.check = false; # 2025-09-25: one test fails???
           packages.bytezap.source = inputs.bytezap;
-          devShell = defDevShell "ghc98";
+
+          # v https://github.com/phadej/defun/pull/5
+          settings.defun-core.jailbreak = true;
+          packages.finite-typelits.source = "0.2.1.0";
+          packages.vector-sized.source = "1.6.1";
         };
         haskellProjects.ghc98 = {
           basePackages = pkgs.haskell.packages.ghc98;
