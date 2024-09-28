@@ -118,7 +118,8 @@ test-suite spec
   main-is: Spec.hs
   other-modules:
       ArbitraryOrphans
-      Binrep.LawsSpec
+      Binrep.GenericSpec
+      Binrep.TypesSpec
       Paths_binrep
   hs-source-dirs:
       test

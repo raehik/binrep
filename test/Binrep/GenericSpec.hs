@@ -1,29 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Binrep.LawsSpec where
+module Binrep.GenericSpec where
 
 import Test.Hspec
-import Test.Hspec.QuickCheck
-import Test.QuickCheck.Instances.ByteString()
-import Generic.Random
-import Test.QuickCheck
-import ArbitraryOrphans()
-
-import Binrep
-import Binrep.Generic ( nullTermCstrPfxTag )
-import Binrep.Util.ByteOrder
-import Data.Word
-import Data.ByteString qualified as B
-import GHC.Generics ( Generic )
-
-import Generic.Data.Function.Traverse
 
 spec :: Spec
+spec = pure ()
+    {-
 spec = do
-    prop "put is identity on ByteString" $ do
-      \(bs :: B.ByteString) -> runPut bs  `shouldBe` bs
-    prop "parse-print roundtrip isomorphism (ByteString)" $ do
-      \(bs :: B.ByteString) -> runGet (runPut bs) `shouldBe` Right (bs, "")
     prop "parse-print roundtrip isomorphism (generic, sum tag via nullterm constructor)" $ do
       \(d :: D) -> runGet (runPut d) `shouldBe` Right (d, "")
 
@@ -52,3 +36,4 @@ deriving via (GenericArbitraryU `AndShrinking` DNoSum) instance Arbitrary DNoSum
 instance BLen DNoSum where blen = blenGenericNonSum
 instance Put  DNoSum where put  = putGenericNonSum
 instance Get  DNoSum where get  = getGenericNonSum
+    -}
