@@ -1,92 +1,60 @@
--- | Error data type definitions (shared between parsers).
+{-# LANGUAGE OverloadedStrings #-} -- for easy error building
+
+-- | Common parser error definitions.
 
 module Binrep.Get.Error where
 
-import GHC.Generics ( Generic )
-import Data.Text ( Text )
+import Data.Text.Builder.Linear qualified as TBL
+import Data.Text qualified as Text
 import Numeric.Natural ( Natural )
-import Data.Word ( Word8 )
-import Data.ByteString ( ByteString )
 
--- | Structured parse error.
-data E
-  = E Int EMiddle
-
-  -- | Unhandled parse error.
-  --
-  -- You get this if you don't change a flatparse fail to an error.
-  --
-  -- Should not be set except by library code.
-  | EFail
-
-    deriving stock (Eq, Show, Generic)
-
-data EMiddle
-
-  -- | Parse error with no further context.
-  = EBase EBase
-
-  -- | Somehow, we got two parse errors.
-  --
-  -- I have a feeling that seeing this indicates a problem in your code.
-  | EAnd E EBase
-
-  -- | Parse error decorated with generic info.
-  --
-  -- Should not be set except by library code.
-  | EGeneric String {- ^ data type name -} (EGeneric E)
-
-    deriving stock (Eq, Show, Generic)
-
-data EBase
-  = EBaseString String
-  -- ^ arbitrary badness
-
-  | EExpectedByte Word8 Word8
-  -- ^ expected first, got second
-
-  | EOverlong Int Int
-  -- ^ expected first, got second
-
-  | EExpected ByteString ByteString
-  -- ^ expected first, got second
-
-  | EFailNamed String
-  -- ^ known fail
-
-  | ERanOut Int
-  -- ^ ran out of input, needed precisely @n@ bytes for this part (n > 0)
-  --
-  -- Actually a 'Natural', but we use 'Int' because that's what flatparse uses
-  -- internally.
-
-    deriving stock (Eq, Show, Generic)
-
--- | A generic context layer for a parse error of type @e@.
+-- | Top-level parse error.
 --
--- Recursive: parse errors occurring in fields are wrapped up here. (Those
--- errors may also have a generic context layer.)
+-- The final element is the concrete error. Prior elements should "contain" the
+-- error (i.e. be the larger part that the error occurred in).
 --
--- Making this explicitly recursive may seem strange, but it clarifies that this
--- data type is to be seen as a layer over a top-level type.
-data EGeneric e
-  -- | Parse error relating to sum types (constructors).
-  = EGenericSum (EGenericSum e)
+-- Really should be non-empty-- but by using List, we can use the empty list for
+-- Fail. Bit of a cute cheat.
+type ParseError pos text = [ParseErrorSingle pos text]
 
-  -- | Parse error in a constructor field.
-  | EGenericField
-        String          -- ^ constructor name
-        (Maybe String)  -- ^ field record name (if present)
-        Natural         -- ^ field index in constructor
-        e               -- ^ field parse error
-    deriving stock (Eq, Show, Generic)
+-- | A single indexed parse error.
+data ParseErrorSingle pos text = ParseErrorSingle
+  { parseErrorSinglePos  :: pos
+  , parseErrorSingleText :: [text]
+  } deriving stock Show
 
-data EGenericSum e
-  -- | Parse error parsing prefix tag.
-  = EGenericSumTag e
+-- | Map over the @pos@ index type of a 'ParseErrorSingle'.
+mapParseErrorSinglePos
+    :: (pos1 -> pos2)
+    -> ParseErrorSingle pos1 text
+    -> ParseErrorSingle pos2 text
+mapParseErrorSinglePos f (ParseErrorSingle pos text) =
+    ParseErrorSingle (f pos) text
 
-  -- | Unable to match a constructor to the parsed prefix tag.
-  | EGenericSumTagNoMatch
-        [String] -- ^ constructors tested
-        Text     -- ^ prettified prefix tag
-    deriving stock (Eq, Show, Generic)
+-- | Shorthand for one parse error.
+parseError1 :: [text] -> pos -> ParseError pos text
+parseError1 texts pos = [ParseErrorSingle pos texts]
+
+-- | Construct a parse error message for a generic field failure.
+parseErrorTextGenericFieldBld
+    :: String -> String -> Maybe String -> Natural
+    -> [TBL.Builder]
+parseErrorTextGenericFieldBld dtName cstrName (Just fieldName) _fieldIdx =
+  [    "in " <> TBL.fromText (Text.pack dtName)
+    <>   "." <> TBL.fromText (Text.pack cstrName)
+    <>   "." <> TBL.fromText (Text.pack fieldName) ]
+parseErrorTextGenericFieldBld dtName cstrName Nothing           fieldIdx =
+  [    "in " <> TBL.fromText (Text.pack dtName)
+    <>   "." <> TBL.fromText (Text.pack cstrName)
+    <>   "." <> TBL.fromUnboundedDec fieldIdx ]
+
+-- | Construct a parse error message for a generic sum tag no-match.
+parseErrorTextGenericNoCstrMatchBld :: String -> [TBL.Builder]
+parseErrorTextGenericNoCstrMatchBld dtName =
+  [    "sum tag did not match any constructors in "
+    <> TBL.fromText (Text.pack dtName) ]
+
+-- | Construct a parse error message for a generic sum tag parse error.
+parseErrorTextGenericSumTagBld :: String -> [TBL.Builder]
+parseErrorTextGenericSumTagBld dtName =
+  [    "while parsing sum tag in " <> TBL.fromText (Text.pack dtName) ]

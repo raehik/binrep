@@ -16,12 +16,10 @@ import GHC.TypeNats
 
 import Binrep.Common.Via.Generically.NonSum
 
-import FlatParse.Basic qualified as FP
-
 data DMagic = DMagic
   { dMagic1_8b :: Magic '[0xFF, 0, 1, 0, 1, 0, 1, 0xFF]
-  } deriving stock Generic
-    deriving (IsCBLen, PutC) via GenericallyNonSum DMagic
+  } deriving stock (Show, Generic)
+    deriving (IsCBLen, PutC, GetC) via GenericallyNonSum DMagic
 
 data DStruct = DStruct
   { dStruct1 :: Magic '[0xFF, 0, 1, 0xFF]

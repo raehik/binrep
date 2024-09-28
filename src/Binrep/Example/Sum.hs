@@ -2,7 +2,6 @@ module Binrep.Example.Sum where
 
 import Binrep
 import Data.Word
-import FlatParse.Basic qualified as FP
 import GHC.Generics ( type Generic )
 import Generic.Data.FOnCstr
 

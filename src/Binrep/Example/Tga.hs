@@ -1,9 +1,11 @@
 module Binrep.Example.Tga where
 
+{-
 import Binrep
 import Binrep.Type.Derived.NullTermPadded
 import Binrep.Type.AsciiNat
 import Rerefined
+-}
 import Strongweak
 import Data.Word
 

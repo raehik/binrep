@@ -1,8 +1,15 @@
 {-# LANGUAGE UndecidableInstances #-} -- for Generically instance
+{-# LANGUAGE OverloadedStrings #-} -- for easy error building
 
-module Binrep.Get.Struct where
+module Binrep.Get.Struct
+  ( GetterC, GetC(getC)
+  , getGenericStruct
+  , runGetCBs
+  , unsafeRunGetCPtr
+  ) where
 
 import Binrep.Get.Error
+import Data.Text.Builder.Linear qualified as TBL
 import Bytezap.Parser.Struct
 import Bytezap.Parser.Struct.Generic
 import Binrep.CBLen
@@ -30,42 +37,63 @@ import Binrep.Common.Via.Generically.NonSum
 import Rerefined.Refine
 import Rerefined.Predicate.Logical.And
 
-type GetterC = Parser E
+type GetterC = Parser (ParseError Int TBL.Builder)
 
 -- | constant size parser
 class GetC a where getC :: GetterC a
 
+-- | Consume 'Result'.
+finishGetterC
+    :: Result (ParseError Int TBL.Builder) a
+    -> Either (ParseError Int TBL.Builder) a
+finishGetterC = \case
+  OK  a -> Right a
+  Err e -> Left  e
+  Fail  -> Left  []
+
 runGetCBs
     :: forall a. (GetC a, KnownNat (CBLen a))
-    => B.ByteString -> Either E a
+    => B.ByteString -> Either (ParseError Int TBL.Builder) a
 runGetCBs bs =
-    if   cblen @a <= B.length bs
-    then unsafeRunGetC' unsafeRunParserBs bs
-    else Left $ E 0 $ EBase $ ERanOut 0 -- TODO made up numbers
-
--- | doesn't check len
-unsafeRunGetC'
-    :: forall a buf. GetC a
-    => (forall e. buf -> Parser e a -> Result e a)
-    -> buf -> Either E a
-unsafeRunGetC' p buf =
-    case p buf getC of
-      OK   a -> Right a
-      Fail   -> Left EFail
-      Err  e -> Left e
+    if   lenReq <= lenAvail
+    then finishGetterC $ unsafeRunParserBs bs getC
+    else Left [ParseErrorSingle 0 [errMsg]]
+  where
+    lenReq   = cblen @a
+    lenAvail = B.length bs
+    errMsg   =
+        "input too short (need "<>TBL.fromDec lenReq
+                      <>", got "<>TBL.fromDec lenAvail<>")"
 
 -- | doesn't check len
 unsafeRunGetCPtr
     :: forall a. GetC a
-    => Ptr Word8 -> Either E a
-unsafeRunGetCPtr = unsafeRunGetC' unsafeRunParserPtr
+    => Ptr Word8 -> Either (ParseError Int TBL.Builder) a
+unsafeRunGetCPtr ptr = finishGetterC $ unsafeRunParserPtr ptr getC
 
 instance GParseBase GetC where
     type GParseBaseSt GetC = Proxy# Void
     type GParseBaseC  GetC a = GetC a
-    type GParseBaseE  GetC = E
-    gParseBase = getC
+    type GParseBaseE  GetC = ParseError Int TBL.Builder
+    gParseBase dtName cstrName mFieldName fieldIdx = getC `cutting1` e
+      where
+        e = parseErrorTextGenericFieldBld dtName cstrName mFieldName fieldIdx
     type GParseBaseLenTF GetC = CBLenSym
+
+-- | Turn a 'Fail' into a single error, or prepend it to any existing ones.
+--
+-- Use when wrapping other 'get'ters.
+--
+-- We reimplement @cutting@ with a tweak. Otherwise, we'd have to join lists in
+-- the error case (instead of simply prepending).
+cutting1
+    :: ParserT st (ParseError Int text) a -> [text]
+    -> ParserT st (ParseError Int text) a
+cutting1 (ParserT p) texts = ParserT $ \fpc base# os# st ->
+    case p fpc base# os# st of
+      Fail# st'    -> Err# st' [ParseErrorSingle (I# os#) texts]
+      Err#  st' e' -> Err# st' (ParseErrorSingle (I# os#) texts : e')
+      x               -> x
 
 -- | Serialize a term of the struct-like type @a@ via its 'Generic' instance.
 getGenericStruct
@@ -128,14 +156,3 @@ instance (PutC l, KnownNat (CBLen l), PutC r) => PutC (l, r) where
     putC (l, r) = sequencePokes (putC l) (cblen @l) (putC r)
 
 -}
-
-eCBase :: EBase -> GetterC a
-eCBase eb = ParserT $ \_fpc _base os# st ->
-    Err# st (E (I# os#) $ EBase eb)
-
-getECBase :: GetterC a -> EBase -> GetterC a
-getECBase (ParserT p) eb = ParserT $ \fpc base os# st0 ->
-    case p fpc base os# st0 of
-      Fail# st1   -> Err# st1 (E (I# os#) $ EBase eb)
-      Err#  st1 e -> Err# st1 (E (I# os#) $ EAnd e eb)
-      x -> x

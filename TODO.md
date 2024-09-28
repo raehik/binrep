@@ -1,23 +1,8 @@
 # binrep to-dos
-## Faster sum generics
-Thanks to my type-level UTF-8, I could now provide a good amount of type-level
-sum tag handlers. This might improve performance, since I'm not sure how well
-GHC can inline that part of the code.
-
-This would probably be gdf and bytezap code.
-
 ## Clarify `Thin` stuff
 I use the `ByteString` instance internally sometimes (probably), and in those
 cases I want "thin" parsing since I'm consuming it right there and then. I need
 to clarify the precise setup here.
-
-## `And` ordering
-```haskell
-newtype Compose f g a = Compose { getCompose :: f (g a)}
-```
-
-Should I flip `And`? I guess it depends how one thinks of applying two
-predicates to a type. Is it `And l r` (l -> r), or `And f g` (=`f(g)`)?
 
 ## Assert fast magic handling is safe on either endian
 I think we do endian-neutral operations, but do confirm.
@@ -41,31 +26,6 @@ I think we do endian-neutral operations, but do confirm.
   * https://hackage.haskell.org/package/zigzag-0.0.1.0/docs/Data-Word-Zigzag.html
 * new primitive: ASCII numbers (for GNU tar)
   * urgh this one sucks, think I only got part way on flatparse
-
-## Support "known maximum length" serialization
-For some types, we don't know how long their binary representation will be
-before serializing-- but we _do_ know their maximum possible length. The prime
-example here is serializing floats into their ASCII representation. For these,
-we have no choice but to deny a binrep instance, instead requesting that the
-user first transform to a simpler type (here, `Double -> ByteString`).
-That's sensible for types where their serialized form can vary greatly
-in length, but floats are small and, assuming random input, tend to hit close to
-the maximum possible length. So it feels like a bit of a waste.
-
-We could have a type-level switch that tracks whether we've ever encountered a
-max-length type. If we have, you have to use the `createUpTo` family. If not,
-you can use the `create` family (where we know precisely the size).
-
-I note that `createUpTo`, uh, isn't really any less efficient than `create`.
-It's essentially identical. So as long as your low-level builder can easily
-determine so-far serialized length, which bytezap can, it's free!
-(Unsure if mason can, but I bet so.)
-
-This is highly relevant to the question "can we use binrep/bytezap to
-efficiently serialize JSON?". Numbers are one thing, the other is text, which
-requires escaping. If we could figure out a fast size counter, we probably could
-do it. Perhaps we could figure out a fast, semi-accurate size counter, which
-only figures out the maximum (but does it faster).
 
 ## Test new parser errors
 Where we keep track of the offset. It's very weird and probably bad :(

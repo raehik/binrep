@@ -43,6 +43,8 @@ import Rerefined.Refine
 import TypeLevelShow.Natural
 import TypeLevelShow.Utils
 
+import Data.Text.Builder.Linear qualified as TBL
+
 -- | A natural represented in binary as an ASCII string, where each character is
 --   a digit in the given base.
 --
@@ -156,16 +158,15 @@ instance (Num a, Ord a) => Get (Refined (AsciiNat 16) a) where
 -- | Parse an ASCII natural in the given base with the given digit parser.
 --
 -- Parses byte-by-byte. As such, it only supports bases up to 256.
-getAsciiNatByByte :: Num a => a -> String -> (a -> Maybe a) -> Getter a
+getAsciiNatByByte :: Num a => a -> TBL.Builder -> (a -> Maybe a) -> Getter a
 getAsciiNatByByte base baseStr f = do
     Thin bs <- get -- no need to copy since we consume during parsing!
     if   B.null bs
-    then eBase $ EBaseString "ASCII natural cannot be empty"
+    then err1 ["ASCII natural cannot be empty"]
     else case asciiBytesToNat f base bs of
-          Left  b ->
-            eBase $ EBaseString $
-                  "non-"<>baseStr<>" ASCII digit in "
-                <>baseStr<>" ASCII natural: "<>show b
+          Left  b -> err1 [
+            "non-"<>baseStr<>" ASCII digit in "
+            <>baseStr<>" ASCII natural: "<>TBL.fromDec b]
           Right n -> pure n
 
 {- | Get the digits in the given number as rendered in the given base.

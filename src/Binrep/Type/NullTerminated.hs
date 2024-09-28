@@ -44,9 +44,16 @@ instance Put a => Put (NullTerminated a) where
     put a = put (unrefine a) <> put @Word8 0x00
 
 -- | We may parse any null-terminated data using a special flatparse combinator.
+--
+-- The combinator doesn't permit distinguishing between the two possible
+-- failures: either there was no next null, or the inner parser didn't consume
+-- up to it.
 instance Get a => Get (NullTerminated a) where
     {-# INLINE get #-}
-    get = unsafeRefine <$> getEBase (FP.isolateToNextNull get) (EFailNamed "cstring")
+    get = unsafeRefine <$> cut1 (FP.isolateToNextNull get) e
+      where e = [ "while isolating to next null"
+                , "either there was no next null in the input,"
+                , "or the inner parser didn't fully consume its input" ]
 
 {-
 I don't know how to do @[a]@. Either I nullterm each element, which is weird

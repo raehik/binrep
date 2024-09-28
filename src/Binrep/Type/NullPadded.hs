@@ -88,7 +88,6 @@ instance (Get a, KnownNat n) => Get (NullPadded n a) where
         (a, len) <- FP.parseWithLength get
         let paddingLen = natValInt @n - len
         if   paddingLen < 0
-        then eBase $ EFailNamed "TODO used to be EOverlong, cba"
-        else do
-            skipCount paddingLen (FP.word8 0x00)
-            pure $ unsafeRefine a
+        then err1 ["TODO used to be EOverlong, cba"]
+        else do skipCount paddingLen (FP.word8 0x00)
+                pure $ unsafeRefine a

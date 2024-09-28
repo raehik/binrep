@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.2.
+-- This file has been generated from package.yaml by hpack version 0.36.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -67,6 +67,7 @@ library
       Binrep.Type.Thin
       Binrep.Util.ByteOrder
       Binrep.Util.Generic
+      Raehik.Compat.FlatParse.Basic.CutWithPos
       Raehik.Compat.FlatParse.Basic.Prim
       Raehik.Compat.FlatParse.Basic.WithLength
       Util.TypeNats
@@ -89,7 +90,7 @@ library
   build-depends:
       base >=4.18 && <5
     , bytestring >=0.11 && <0.13
-    , bytezap >=1.3.0 && <1.4
+    , bytezap >=1.6.0 && <1.7
     , deepseq >=1.4.6.1 && <1.6
     , defun-core ==0.1.*
     , either >=5.0.2 && <5.1
@@ -103,7 +104,7 @@ library
     , strongweak >=0.8.0 && <0.9
     , symparsec
     , text >=2.0 && <2.2
-    , text-builder-linear >=0.1.2 && <0.2
+    , text-builder-linear >=0.1.3 && <0.2
     , type-level-bytestrings >=0.1.0 && <0.3
     , type-level-show >=0.3.0 && <0.4
   default-language: GHC2021
@@ -140,7 +141,7 @@ test-suite spec
     , base >=4.18 && <5
     , binrep
     , bytestring >=0.11 && <0.13
-    , bytezap >=1.3.0 && <1.4
+    , bytezap >=1.6.0 && <1.7
     , deepseq >=1.4.6.1 && <1.6
     , defun-core ==0.1.*
     , either >=5.0.2 && <5.1
@@ -157,7 +158,7 @@ test-suite spec
     , strongweak >=0.8.0 && <0.9
     , symparsec
     , text >=2.0 && <2.2
-    , text-builder-linear >=0.1.2 && <0.2
+    , text-builder-linear >=0.1.3 && <0.2
     , type-level-bytestrings >=0.1.0 && <0.3
     , type-level-show >=0.3.0 && <0.4
   default-language: GHC2021
@@ -189,7 +190,7 @@ benchmark bench
       base >=4.18 && <5
     , binrep
     , bytestring >=0.11 && <0.13
-    , bytezap >=1.3.0 && <1.4
+    , bytezap >=1.6.0 && <1.7
     , deepseq >=1.4.6.1 && <1.6
     , defun-core ==0.1.*
     , either >=5.0.2 && <5.1
@@ -204,7 +205,7 @@ benchmark bench
     , strongweak >=0.8.0 && <0.9
     , symparsec
     , text >=2.0 && <2.2
-    , text-builder-linear >=0.1.2 && <0.2
+    , text-builder-linear >=0.1.3 && <0.2
     , type-level-bytestrings >=0.1.0 && <0.3
     , type-level-show >=0.3.0 && <0.4
   default-language: GHC2021

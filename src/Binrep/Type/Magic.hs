@@ -1,4 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-} -- for tons of stuff
+{-# LANGUAGE PatternSynonyms #-} -- TODO wip
+{-# LANGUAGE OverloadedStrings #-} -- for easy error building
 
 {- | Magic numbers (also just magic): short constant bytestrings usually
      found at the top of a file, often used as an early sanity check.
@@ -8,8 +10,8 @@ There are two main flavors of magics:
   * byte magics e.g. Zstandard: @28 B5 2F FD@
   * printable magics e.g. Ogg: @4F 67 67 53@ -> @OggS@ (in ASCII)
 
-For byte magics, use type-level 'Natural' lists.
-For printable magics, use 'Symbol's (type-level strings).
+For byte magics, use type-level 'Natural' lists e.g. @'Magic' \@'[0xFF, 0x01]@
+For printable (UTF-8) magics, use 'Symbol's e.g. @'Magic' \@"hello"@.
 -}
 
 module Binrep.Type.Magic
@@ -20,7 +22,6 @@ module Binrep.Type.Magic
 
 import Data.Type.Symbol.Utf8 ( type SymbolToUtf8 )
 
-import Util.TypeNats ( natValInt )
 import GHC.TypeLits ( type Natural, type Symbol, type KnownNat, type (+) )
 
 import GHC.Generics ( Generic )
@@ -32,17 +33,21 @@ import Bytezap.Struct.TypeLits.Bytes ( ReifyBytesW64(reifyBytesW64) )
 import Bytezap.Parser.Struct.TypeLits.Bytes
   ( ParseReifyBytesW64(parseReifyBytesW64) )
 import Bytezap.Parser.Struct qualified as BZ
-import Data.ByteString.Internal qualified as B
-import GHC.Exts ( Int(I#), plusAddr#, Ptr(Ptr) )
-import Foreign.Marshal.Utils ( copyBytes )
+import GHC.Exts ( Int(I#) )
 import FlatParse.Basic qualified as FP
+import Data.Text.Builder.Linear qualified as TBL
 
--- | A singleton data type representing a "magic number" via a phantom type.
---
--- The phantom type variable unambiguously defines a bytestring at compile time.
--- The 'Magical' type class defines how this is calculated.
--- Reification is done via regular binrep type classes.
-data Magic (a :: k) = Magic deriving stock (Generic, Data, Show, Eq)
+{- | A unit data type representing a "magic number" via a phantom type.
+
+The phantom type unambiguously defines a bytestring at compile time. This
+depends on the type's kind. See 'MagicBytes' for details.
+
+This is defined using GADT syntax to permit labelling the phantom type kind as
+/inferred/, which effectively means hidden (not available for visible type
+applications). That kind is always evident from the type, so it's just nicer.
+-}
+data Magic a where Magic :: forall {k} (a :: k). Magic a
+    deriving stock (Generic, Data, Show, Eq)
 
 -- | Weaken a @'Magic' a@ to the unit '()'.
 instance Weaken (Magic a) where
@@ -67,24 +72,17 @@ deriving via (ViaPutC (Magic a)) instance
 
 -- | Efficiently parse a @'Magic' a@. Serialization constraints are included as
 --   we emit the expected bytestring in errors.
-instance
-  ( bs ~ MagicBytes a, ParseReifyBytesW64 bs
-  , ReifyBytesW64 bs, KnownNat (Length bs)
-  ) => GetC (Magic a) where
-    getC = BZ.ParserT $ \fpc base os# st0 ->
-        case BZ.runParserT# (parseReifyBytesW64 @bs) fpc base os# st0 of
-          BZ.OK#   st1 () -> BZ.OK#  st1 Magic
-          BZ.Fail# st1    ->
-            let bsActual = B.unsafeCreate len (\buf -> copyBytes buf (Ptr (base `plusAddr#` os#)) len)
-                eb = EExpected bsExpected bsActual
-            in  BZ.Err# st1 (E (I# os#) $ EBase eb)
-          BZ.Err#  _st1 e -> case e of {}
-      where
-        len = natValInt @(Length bs)
-        bsExpected = runPutC (Magic :: Magic a)
+instance (bs ~ MagicBytes a, ParseReifyBytesW64 0 bs) => GetC (Magic a) where
+    getC = BZ.ParserT $ \fpc base# os# st0 ->
+        case BZ.runParserT# (parseReifyBytesW64 @0 @bs) fpc base# os# st0 of
+          BZ.OK#   st1 ()             -> BZ.OK#   st1 Magic
+          BZ.Err#  st1 (pos, bActual) -> BZ.Err#  st1 (parseError1
+            ["TODO magic parse error: "<>TBL.fromDec bActual]
+            (pos + I# os#))
+          BZ.Fail# st1                -> BZ.Fail# st1 -- shouldn't occur
 
 deriving via ViaGetC (Magic a) instance
-  ( bs ~ MagicBytes a, ParseReifyBytesW64 bs
+  ( bs ~ MagicBytes a, ParseReifyBytesW64 0 bs
   , ReifyBytesW64 bs, KnownNat (Length bs)
   ) => Get (Magic a)
 
@@ -94,12 +92,12 @@ class Magical (a :: k) where
     type MagicBytes a :: [Natural]
 
 -- | Type-level naturals go as-is. (Make sure you don't go over 255, though!)
-instance Magical (ns :: [Natural]) where type MagicBytes ns = ns
+instance Magical (bs :: [Natural]) where type MagicBytes bs = bs
 
 -- | Type-level symbols are converted to UTF-8.
 instance Magical (sym :: Symbol) where type MagicBytes sym = SymbolToUtf8 sym
 
 -- | The length of a type-level list.
 type family Length (a :: [k]) :: Natural where
-    Length '[]       = 0
     Length (a ': as) = 1 + Length as
+    Length '[]       = 0
