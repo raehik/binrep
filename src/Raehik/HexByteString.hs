@@ -135,6 +135,32 @@ cf4w11 nibbleHex dst# dstOff# w32 = do
     n7  = nibbleHex @Word8  (fromIntegral ((w32 `unsafeShiftR` 24) .&. 0xF))
     w32_64 :: Word64 = fromIntegral w32
 
+-- | consume final 5 bytes, writes 14 (8+4+2) bytes
+{-
+{-# INLINE cf5w14 #-}
+cf5w14
+    :: (forall a. Integral a => a -> a)
+    -> MutableByteArray# s -> Int# -> Word32 -> Word8
+    -> ST s ()
+cf5w14 nibbleHex dst# dstOff# w32 w8 = do
+    writeWord8ByteArrayAs dst#  dstOff#         c0
+    writeWord8ByteArrayAs dst# (dstOff# +#  8#) c1
+    writeWord8ByteArrayAs dst# (dstOff# +# 10#) c2
+  where
+    c0  = packW64WithW8 n0   n1 0x20 n2 n3 0x20 n4 n5
+    c1  = packW32WithW8 0x20 n6 n7 0x20
+    c1  = packW16WithW8 n8 n9
+    n0  = nibbleHex ((w32_64 `unsafeShiftR`  4) .&. 0xF)
+    n1  = nibbleHex  (w32_64                    .&. 0xF)
+    n2  = nibbleHex ((w32_64 `unsafeShiftR` 12) .&. 0xF)
+    n3  = nibbleHex ((w32_64 `unsafeShiftR`  8) .&. 0xF)
+    n4  = nibbleHex ((w32_64 `unsafeShiftR` 20) .&. 0xF)
+    n5  = nibbleHex ((w32_64 `unsafeShiftR` 16) .&. 0xF)
+    n6  = nibbleHex @Word16 (fromIntegral ((w32 `unsafeShiftR` 28) .&. 0xF))
+    n7  = nibbleHex @Word8  (fromIntegral ((w32 `unsafeShiftR` 24) .&. 0xF))
+    w32_64 :: Word64 = fromIntegral w32
+-}
+
 {-
 idk :: (Bits a, Integral a) => (Word8 -> Word8) -> a -> Int -> Word8
 idk f a idx = f (fromIntegral ((a `unsafeShiftR` idx) .&. 0xF))
