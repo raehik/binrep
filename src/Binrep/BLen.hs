@@ -40,6 +40,7 @@ import GHC.Generics
 import Generic.Data.Function.FoldMap
 import Generic.Data.MetaParse.Cstr ( Raw, ParseCstrTo )
 import Generic.Type.Assert
+import Binrep.Common.Via.Generically.NonSum
 
 import Rerefined.Refine
 import Rerefined.Predicate.Logical.And
@@ -66,6 +67,12 @@ blenGenericNonSum
        , GAssertNotVoid a, GAssertNotSum a
     ) => a -> Int
 blenGenericNonSum = Monoid.getSum . genericFoldMapNonSum @BLen
+
+instance
+  ( Generic a, GFoldMapNonSum BLen (Rep a)
+  , GAssertNotVoid a, GAssertNotSum a
+  ) => BLen (GenericallyNonSum a) where
+    blen = blenGenericNonSum . unGenericallyNonSum
 
 -- | Measure the byte length of a term of the sum type @a@ via its 'Generic'
 --   instance.
