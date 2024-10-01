@@ -19,7 +19,7 @@ instance Predicate Ascii where type PredicateName d Ascii = "ASCII"
 
 -- | 'Text' must be validated if you want to permit 7-bit ASCII only.
 instance Refine Ascii Text where
-    validate p t = validateBool p "not valid 7-bit ASCII" (Text.isAscii t)
+    validate p t = validateBool p (Text.isAscii t) "not valid 7-bit ASCII"
 
 -- | We reuse UTF-8 encoding for ASCII, since it is a subset of UTF-8.
 instance Encode Ascii where encode' = encode' @Utf8

@@ -30,8 +30,8 @@ instance
   ( KnownPredicateName (CountPrefix pfx), KnownNat (LenNatMax pfx), Foldable f
   ) => Refine1 (CountPrefix pfx) f where
     validate1 p fa =
-        validateBool p e (Foldable.length fa <= natValInt @(LenNatMax pfx))
-      where e = "TODO bad"
+        validateBool p (Foldable.length fa <= natValInt @(LenNatMax pfx)) $
+            "TODO too large for count prefix"
 
 instance
   ( KnownPredicateName (CountPrefix pfx), KnownNat (LenNatMax pfx), Foldable f

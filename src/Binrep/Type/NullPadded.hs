@@ -53,11 +53,11 @@ deriving via ViaCBLen (NullPadded n a) instance KnownNat n => BLen (NullPadded n
 -- | Assert that term will fit.
 instance (KnownPredicateName (NullPad n), BLen a, KnownNat n)
   => Refine (NullPad n) a where
-    validate p a = validateBool p e (len <= n)
+    validate p a = validateBool p (len <= n) $
+        "too long: " <> TBL.fromDec len <> " > " <> TBL.fromDec n
       where
         n = natValInt @n
         len = blen a
-        e = "too long: " <> TBL.fromDec len <> " > " <> TBL.fromDec n
 
 instance (BLen a, KnownNat n, Put a) => PutC (NullPadded n a) where
     putC ra = BZ.Struct.sequencePokes (BZ.toStructPoke (put a)) len

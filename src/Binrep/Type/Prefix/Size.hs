@@ -29,8 +29,8 @@ type SizePrefixed pfx = Refined (SizePrefix pfx)
 instance
   ( KnownPredicateName (SizePrefix pfx), KnownNat (LenNatMax pfx), BLen a
   ) => Refine (SizePrefix pfx) a where
-    validate p a = validateBool p e (blen a <= natValInt @(LenNatMax pfx))
-      where e = "thing too big for length prefix type"
+    validate p a = validateBool p (blen a <= natValInt @(LenNatMax pfx)) $
+        "thing too big for length prefix type"
 
 -- TODO no idea if this is sensible
 instance IsCBLen (SizePrefixed pfx a) where

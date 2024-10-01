@@ -28,11 +28,11 @@ type Sized n = Refined (Size n)
 
 instance (KnownPredicateName (Size n), BLen a, KnownNat n)
   => Refine (Size n) a where
-    validate p a = validateBool p e (len == n)
+    validate p a = validateBool p (len == n) $
+        "not correctly sized: "<>TBL.fromDec len<>" /= "<>TBL.fromDec n
       where
         n = natValInt @n
         len = blen a
-        e = "not correctly sized: "<>TBL.fromDec len<>" /= "<>TBL.fromDec n
 
 instance IsCBLen (Sized n a) where type CBLen (Sized n a) = n
 deriving via ViaCBLen (Sized n a) instance KnownNat n => BLen (Sized n a)

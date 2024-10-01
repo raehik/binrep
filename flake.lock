@@ -34,70 +34,6 @@
         "type": "github"
       }
     },
-    "flatparse": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1724794690,
-        "narHash": "sha256-gKu+puqbGlSLnAiza3rdymIq2NLDgmd8UJlScJlq8cE=",
-        "owner": "AndrasKovacs",
-        "repo": "flatparse",
-        "rev": "76e34765c5c5022b812d650cc297b93b05de14dc",
-        "type": "github"
-      },
-      "original": {
-        "owner": "AndrasKovacs",
-        "repo": "flatparse",
-        "type": "github"
-      }
-    },
-    "generic-data-functions": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1718472941,
-        "narHash": "sha256-zCajve2b9e10g6B2Xpf+NrmJ498lFexYwsJX3Y0Pi7I=",
-        "owner": "raehik",
-        "repo": "generic-data-functions",
-        "rev": "e8bfe0c02c24a691d1debf5ab56df6eca3407b2d",
-        "type": "github"
-      },
-      "original": {
-        "owner": "raehik",
-        "repo": "generic-data-functions",
-        "type": "github"
-      }
-    },
-    "generic-type-asserts": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1712969791,
-        "narHash": "sha256-40VH7mDJtTiXdk9rUger0xqbA/e19W3VNCbFx5PucBA=",
-        "owner": "raehik",
-        "repo": "generic-type-asserts",
-        "rev": "9594ecc1b389d2522d8ed736dff0eb09b3bd14e3",
-        "type": "github"
-      },
-      "original": {
-        "owner": "raehik",
-        "repo": "generic-type-asserts",
-        "type": "github"
-      }
-    },
-    "generic-type-functions": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1713110907,
-        "narHash": "sha256-jizvozxKxa/8KVEtLo1PBm5rTyyhlMFpC+/AsHMLPxE=",
-        "owner": "raehik",
-        "repo": "generic-type-functions",
-        "rev": "6699e7aea0a130b505c22154f62bd87c9af0aee0",
-        "type": "github"
-      },
-      "original": {
-        "owner": "raehik",
-        "repo": "generic-type-functions",
-        "type": "github"
-      }
-    },
     "haskell-flake": {
       "locked": {
         "lastModified": 1725811060,
@@ -144,11 +80,11 @@
     "rerefined": {
       "flake": false,
       "locked": {
-        "lastModified": 1718203406,
-        "narHash": "sha256-V9vdtYHRskvf8UJQhmShvsXopw0MRgKWQy0rK/m+CMk=",
+        "lastModified": 1727796801,
+        "narHash": "sha256-UKkK0PmBg4lLCbc9IKDJggpBwq3Wx2P9gb/897KAsuY=",
         "owner": "raehik",
         "repo": "rerefined",
-        "rev": "c033bcc906f34e933cab0a9b43876f5610049b13",
+        "rev": "a1df4c118a97ff2efc538301fe62980e72921fe1",
         "type": "github"
       },
       "original": {
@@ -161,97 +97,25 @@
       "inputs": {
         "bytezap": "bytezap",
         "flake-parts": "flake-parts",
-        "flatparse": "flatparse",
-        "generic-data-functions": "generic-data-functions",
-        "generic-type-asserts": "generic-type-asserts",
-        "generic-type-functions": "generic-type-functions",
         "haskell-flake": "haskell-flake",
         "nixpkgs": "nixpkgs",
         "rerefined": "rerefined",
-        "singleraeh": "singleraeh",
-        "strongweak": "strongweak",
-        "symparsec": "symparsec",
-        "type-level-bytestrings": "type-level-bytestrings",
-        "type-level-show": "type-level-show"
-      }
-    },
-    "singleraeh": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1717254854,
-        "narHash": "sha256-mKKaWggqDQMaI18zkuXEg35aMWTjCqcW75sEdWKnlfQ=",
-        "owner": "raehik",
-        "repo": "singleraeh",
-        "rev": "314143f4b45819c81126aa12d9b7f4b9a9bccdcf",
-        "type": "github"
-      },
-      "original": {
-        "owner": "raehik",
-        "repo": "singleraeh",
-        "type": "github"
+        "strongweak": "strongweak"
       }
     },
     "strongweak": {
       "flake": false,
       "locked": {
-        "lastModified": 1720980319,
-        "narHash": "sha256-dJvFc5SrEEhiiCxdANaqgQ0KvAy2Bm2O/X13dozJZpQ=",
+        "lastModified": 1727797408,
+        "narHash": "sha256-Iv+7IW7bIDYCSd3c3l6o39VqTYXxO3wy94+pqm064hA=",
         "owner": "raehik",
         "repo": "strongweak",
-        "rev": "d38c99f78ef89b203a4d3e01918d9d93f2da6bf8",
+        "rev": "74496ba01af8de3933b5fd09e39dd1084defc7ab",
         "type": "github"
       },
       "original": {
         "owner": "raehik",
         "repo": "strongweak",
-        "type": "github"
-      }
-    },
-    "symparsec": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1723477148,
-        "narHash": "sha256-b424FtxAFQ8iy7zu67iw5+4ew3U33Jfcny5bW/NIQZk=",
-        "owner": "raehik",
-        "repo": "symparsec",
-        "rev": "c81a1b15a6cecdc9024ec16c43486fc1694f3bbd",
-        "type": "github"
-      },
-      "original": {
-        "owner": "raehik",
-        "repo": "symparsec",
-        "type": "github"
-      }
-    },
-    "type-level-bytestrings": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1716656662,
-        "narHash": "sha256-7Wp8LWvYNqDKCiizYq9E/2oBvGNC0PI6pNspeamV4N4=",
-        "owner": "raehik",
-        "repo": "type-level-bytestrings",
-        "rev": "3a9979cfb53817a025adc0bd0819e917714dfe2a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "raehik",
-        "repo": "type-level-bytestrings",
-        "type": "github"
-      }
-    },
-    "type-level-show": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1717254796,
-        "narHash": "sha256-MnhAS7rS+eKHMx4AVh6Tq/g6olwXkoA5M6GvxIBvGII=",
-        "owner": "raehik",
-        "repo": "type-level-show",
-        "rev": "21284c84306f5c952047769e7872b44aae80f6a5",
-        "type": "github"
-      },
-      "original": {
-        "owner": "raehik",
-        "repo": "type-level-show",
         "type": "github"
       }
     }
