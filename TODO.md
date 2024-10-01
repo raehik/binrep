@@ -1,4 +1,8 @@
 # binrep to-dos
+## Discrepancy in generic sum interface
+In `Get`, I require a `Getter pt`. But in `Put`/`BLen`, you have to pass the
+`Putter`/`BLen` manually. I'm not sure which one is correct. Probably `Get`.
+
 ## Clarify `Thin` stuff
 I use the `ByteString` instance internally sometimes (probably), and in those
 cases I want "thin" parsing since I'm consuming it right there and then. I need
