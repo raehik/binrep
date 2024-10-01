@@ -233,13 +233,10 @@ instance (Get l, Get r) => Get (l, r) where
 
 -- | Parse elements until EOF. Sometimes used at the "top" of binary formats.
 instance Get a => Get [a] where
-    get = go
+    -- TODO slow, uses reverse. build a DList instead
+    get = go []
       where
-        go = do
-            FP.withOption FP.eof (\() -> pure []) $ do
-                a <- get
-                as <- go
-                pure $ a : as
+        go as = FP.branch FP.eof (pure (reverse as)) (get >>= \a -> go (a : as))
 
 -- | Return the rest of the input.
 --
