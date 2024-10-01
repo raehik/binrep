@@ -30,7 +30,8 @@ type NullTerminated = Refined NullTerminate
 
 -- | Null-terminated data may not contain any null bytes.
 instance Refine NullTerminate B.ByteString where
-    validate p a = validateBool p e (B.any (== 0x00) a)
+    -- TODO is there a faster check we can conjure up here...?
+    validate p a = validateBool p e (not (B.any (== 0x00) a))
       where e = "null byte not permitted in null-terminated data"
 
 instance BLen a => BLen (NullTerminated a) where
