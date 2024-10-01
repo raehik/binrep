@@ -1,4 +1,5 @@
 ## Unreleased
+* fix `NullTerminate` check being inverted (OOPS LOL)
 * add missing `BLen (GenericallyNonSum a)` instance
 
 ## 0.8.0 (2024-04-13)
