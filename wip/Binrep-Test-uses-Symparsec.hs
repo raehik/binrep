@@ -1,3 +1,5 @@
+-- TODO this is fine but uses Symparsec. move to tests or another pkg
+
 {-# LANGUAGE UndecidableInstances #-} -- for CBLen instances
 {-# LANGUAGE TemplateHaskell #-} -- for type-level cstr parsing
 

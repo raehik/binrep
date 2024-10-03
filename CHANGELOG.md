@@ -1,6 +1,11 @@
-## Unreleased
+## 1.0.0 (2024-10-03)
 * fix `NullTerminate` check being inverted (OOPS LOL)
+* fix `Get [a]` instance (list backwards xd)
+* add type-level constructor parsing for generics (!!)
+* rewrite `AsciiNat`
+* switch from refined to rerefined (my refined rewrite)
 * add missing `BLen (GenericallyNonSum a)` instance
+* other various cleanup
 
 ## 0.8.0 (2024-04-13)
 * add missing `And` predicate combinators instances (`PutC`, `GetC`)

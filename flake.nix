@@ -34,8 +34,6 @@
           basePackages = pkgs.haskell.packages.ghc910;
           devShell = defDevShell "ghc910";
 
-          #settings.text-icu.check = false; # 2025-09-25: one test fails???
-
           packages.finite-typelits.source = "0.2.1.0";
           packages.vector-sized.source = "1.6.1";
 
