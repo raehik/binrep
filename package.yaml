@@ -51,6 +51,10 @@ default-extensions:
 ghc-options:
 - -Wall
 
+# omitting ticks is good; see https://gitlab.haskell.org/ghc/ghc/-/issues/20531
+# (off by default since GHC 9.4)
+- -Wno-unticked-promoted-constructors
+
 #- -ddump-to-file
 #- -ddump-simpl
 #- -ddump-stg-final
