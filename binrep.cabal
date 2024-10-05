@@ -85,7 +85,7 @@ library
       TypeFamilies
       DataKinds
       MagicHash
-  ghc-options: -Wall -Wno-unticked-promoted-constructors
+  ghc-options: -Wall -fhide-source-paths -Wno-unticked-promoted-constructors
   build-depends:
       base >=4.18 && <5
     , bytestring >=0.11 && <0.13
@@ -131,7 +131,7 @@ test-suite spec
       TypeFamilies
       DataKinds
       MagicHash
-  ghc-options: -Wall -Wno-unticked-promoted-constructors
+  ghc-options: -Wall -fhide-source-paths -Wno-unticked-promoted-constructors
   build-tool-depends:
       hspec-discover:hspec-discover >=2.7 && <2.12
   build-depends:
@@ -181,7 +181,7 @@ benchmark bench
       TypeFamilies
       DataKinds
       MagicHash
-  ghc-options: -Wall -Wno-unticked-promoted-constructors
+  ghc-options: -Wall -fhide-source-paths -Wno-unticked-promoted-constructors
   build-depends:
       base >=4.18 && <5
     , binrep
