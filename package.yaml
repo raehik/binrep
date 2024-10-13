@@ -68,11 +68,11 @@ dependencies:
 - generic-data-functions ^>= 0.6.0
 - generic-type-asserts ^>= 0.3.0
 - generic-type-functions ^>= 0.1.0
-- strongweak ^>= 0.9.1
+- strongweak ^>= 0.10.0
 - defun-core ^>= 0.1
 
 # core instances
-- rerefined ^>= 0.6.0
+- rerefined ^>= 0.8.0
 
 # types
 - type-level-show ^>= 0.3.0

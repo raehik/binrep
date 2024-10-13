@@ -61,7 +61,7 @@ instance Predicate (AsciiNat base) where
 
 instance (KnownPredicateName (AsciiNat base), Num a, Ord a)
   => Refine (AsciiNat base) a where
-    validate = validateVia @(CompareValue GTE Pos 0)
+    validate = validateVia @(CompareValue RelOpGTE Pos 0)
 
 -- | Compare two 'AsciiNat's, ignoring base information.
 asciiNatCompare

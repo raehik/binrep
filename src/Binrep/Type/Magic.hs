@@ -50,8 +50,8 @@ data Magic a where Magic :: forall {k} (a :: k). Magic a
     deriving stock (Generic, Data, Show, Eq)
 
 -- | Weaken a @'Magic' a@ to the unit '()'.
-instance Weaken (Magic a) where
-    type Weak (Magic a) = ()
+instance Weaken   (Magic a) where
+    type Weakened (Magic a) = ()
     weaken Magic = ()
 
 -- | Strengthen the unit '()' to some @'Magic' a@.

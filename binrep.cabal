@@ -98,8 +98,8 @@ library
     , generic-type-functions >=0.1.0 && <0.2
     , ghc-bignum ==1.3.*
     , parser-combinators >=1.3.0 && <1.4
-    , rerefined >=0.6.0 && <0.7
-    , strongweak >=0.9.1 && <0.10
+    , rerefined >=0.8.0 && <0.9
+    , strongweak >=0.10.0 && <0.11
     , text >=2.0 && <2.2
     , text-builder-linear >=0.1.3 && <0.2
     , type-level-bytestrings >=0.1.0 && <0.3
@@ -151,8 +151,8 @@ test-suite spec
     , hspec >=2.7 && <2.12
     , parser-combinators >=1.3.0 && <1.4
     , quickcheck-instances >=0.3.26 && <0.4
-    , rerefined >=0.6.0 && <0.7
-    , strongweak >=0.9.1 && <0.10
+    , rerefined >=0.8.0 && <0.9
+    , strongweak >=0.10.0 && <0.11
     , text >=2.0 && <2.2
     , text-builder-linear >=0.1.3 && <0.2
     , type-level-bytestrings >=0.1.0 && <0.3
@@ -196,8 +196,8 @@ benchmark bench
     , generic-type-functions >=0.1.0 && <0.2
     , ghc-bignum ==1.3.*
     , parser-combinators >=1.3.0 && <1.4
-    , rerefined >=0.6.0 && <0.7
-    , strongweak >=0.9.1 && <0.10
+    , rerefined >=0.8.0 && <0.9
+    , strongweak >=0.10.0 && <0.11
     , text >=2.0 && <2.2
     , text-builder-linear >=0.1.3 && <0.2
     , type-level-bytestrings >=0.1.0 && <0.3
