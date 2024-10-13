@@ -266,16 +266,20 @@ deriving via  Int8 instance Get (ByteOrdered end  Int8)
 
 -- | Parse any 'Prim''.
 getPrim :: forall a. Prim' a => Getter a
-getPrim = FP.anyPrim `FP.cut'` parseError1 ["IDK"]
+getPrim = FP.anyPrim `FP.cut'` parseError1
+    [  "couldn't parse primitive type, not enough bytes (TODO sizeOf)" ]
+    --    <> TBL.fromDec (sizeOf (undefined :: a))
+    -- TODO legit I cba to do this. And I think I want more stuff in type-level,
+    -- like @name :: 'Symbol'@ of the type (without going through Typeable).
 
 instance Prim' a => Get (ViaPrim a) where get = ViaPrim <$> getPrim
 
 -- ByteSwap is required on opposite endian platforms, but we're not checking
 -- here, so make sure to keep it on both.
-deriving via ViaPrim (ByteOrdered 'LittleEndian a)
-    instance (Prim' a, ByteSwap a) => Get (ByteOrdered 'LittleEndian a)
-deriving via ViaPrim (ByteOrdered    'BigEndian a)
-    instance (Prim' a, ByteSwap a) => Get (ByteOrdered    'BigEndian a)
+deriving via ViaPrim (ByteOrdered LittleEndian a)
+    instance (Prim' a, ByteSwap a) => Get (ByteOrdered LittleEndian a)
+deriving via ViaPrim (ByteOrdered    BigEndian a)
+    instance (Prim' a, ByteSwap a) => Get (ByteOrdered    BigEndian a)
 
 instance Get (Refined pr (Refined pl a)) => Get (Refined (pl `And` pr) a) where
     get = (unsafeRefine . unrefine @pl . unrefine @pr) <$> get

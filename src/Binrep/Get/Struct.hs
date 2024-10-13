@@ -136,10 +136,10 @@ deriving via  Int8 instance GetC (ByteOrdered end  Int8)
 
 -- ByteSwap is required on opposite endian platforms, but we're not checking
 -- here, so make sure to keep it on both.
-deriving via ViaPrim (ByteOrdered 'LittleEndian a)
-    instance (Prim' a, ByteSwap a) => GetC (ByteOrdered 'LittleEndian a)
-deriving via ViaPrim (ByteOrdered    'BigEndian a)
-    instance (Prim' a, ByteSwap a) => GetC (ByteOrdered    'BigEndian a)
+deriving via ViaPrim (ByteOrdered LittleEndian a)
+    instance (Prim' a, ByteSwap a) => GetC (ByteOrdered LittleEndian a)
+deriving via ViaPrim (ByteOrdered    BigEndian a)
+    instance (Prim' a, ByteSwap a) => GetC (ByteOrdered    BigEndian a)
 
 {-
 
