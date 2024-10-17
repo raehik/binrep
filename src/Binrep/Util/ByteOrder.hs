@@ -7,11 +7,7 @@ module Binrep.Util.ByteOrder
 
 import Raehik.Compat.Data.Primitive.Types.Endian ( ByteOrdered(..) )
 import GHC.ByteOrder ( ByteOrder(..) )
-import Strongweak
 import GHC.TypeLits ( type Symbol )
-
-deriving via SWCoercibly a instance     Weaken (ByteOrdered end a)
-deriving via SWCoercibly a instance Strengthen (ByteOrdered end a)
 
 -- shorter names I originally used
 type LE = LittleEndian
