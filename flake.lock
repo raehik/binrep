@@ -106,11 +106,11 @@
     "strongweak": {
       "flake": false,
       "locked": {
-        "lastModified": 1729133132,
-        "narHash": "sha256-bgogGEH725EE/6xXm0QOkJyj2OkcR9xbjO9mBmR2Kss=",
+        "lastModified": 1729135838,
+        "narHash": "sha256-0a2d62gu3s+j1ArBba1SZju2nnc+xF+DXCRe/fvBtU4=",
         "owner": "raehik",
         "repo": "strongweak",
-        "rev": "71dad8bbbcdd9add3acd9d5f84853d2f5f8f3f38",
+        "rev": "35831d7524cbfd4e9881b413911e66dc8fccb06a",
         "type": "github"
       },
       "original": {
