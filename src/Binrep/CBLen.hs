@@ -54,8 +54,7 @@ instance IsCBLen Word64 where type CBLen Word64 = 2^3
 instance IsCBLen  Int64 where type CBLen  Int64 = 2^3
 
 -- | Endianness does not alter constant length.
---deriving via (a :: Type) instance IsCBLen a => IsCBLen (ByteOrdered end a)
-deriving via (a :: Type) instance IsCBLen (ByteOrdered end a)
+deriving via (a :: Type) instance IsCBLen a => IsCBLen (ByteOrdered end a)
 
 -- | Reify a type's constant byte length to the term level.
 cblen :: forall a. KnownNat (CBLen a) => Int
