@@ -1,4 +1,18 @@
 # binrep to-dos
+## Separate from strongweak
+I don't use strongweak here, only write a few useful instances.
+I could have a separate package for orphan instances instead.
+This would make me much happier about:
+
+* the `WeakenN` instances, which are the only "through" newtype currently
+  permitted in binrep -- these would be over there
+* the `ByteOrdered` orphans -- they would be over there
+
+But I feel comfortable with the `Magic` weakening being here. And strongweak is
+a small package. But still...
+
+Yes, I think I should do this. No, I don't think it's very interesting or fun.
+
 ## Discrepancy in generic sum interface
 In `Get`, I require a `Getter pt`. But in `Put`/`BLen`, you have to pass the
 `Putter`/`BLen` manually. I'm not sure which one is correct. Probably `Get`.
