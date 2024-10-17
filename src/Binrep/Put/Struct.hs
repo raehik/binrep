@@ -15,7 +15,6 @@ import Raehik.Compat.Data.Primitive.Types ( Prim' )
 import Data.Word
 import Data.Int
 import Binrep.Util.ByteOrder
-import Data.Functor.Identity
 import Raehik.Compat.Data.Primitive.Types.Endian ( ByteSwap )
 
 import Binrep.Common.Class.TypeErrors ( ENoSum, ENoEmpty )
@@ -28,8 +27,6 @@ import Binrep.Common.Via.Generically.NonSum
 
 import Rerefined.Refine
 import Rerefined.Predicate.Logical.And
-
-import Strongweak.WeakenN
 
 type PutterC = Struct.Poke RealWorld
 
@@ -76,8 +73,6 @@ instance Prim' a => PutC (ViaPrim a) where
 instance TypeError ENoEmpty => PutC Void where putC = undefined
 instance TypeError ENoSum => PutC (Either a b) where putC = undefined
 
-instance PutC a => PutC (Identity a) where putC = putC . runIdentity
-
 instance PutC PutterC where putC = id
 
 -- | Unit type serializes to nothing. How zen.
@@ -110,7 +105,3 @@ deriving via ViaPrim (ByteOrdered LittleEndian a)
     instance (Prim' a, ByteSwap a) => PutC (ByteOrdered LittleEndian a)
 deriving via ViaPrim (ByteOrdered    BigEndian a)
     instance (Prim' a, ByteSwap a) => PutC (ByteOrdered    BigEndian a)
-
--- | Unwrap strongweak wrapper.
-instance PutC a => PutC (WeakenN n a) where
-    putC = putC . unWeakenN

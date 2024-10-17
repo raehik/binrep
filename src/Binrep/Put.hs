@@ -31,10 +31,7 @@ import Rerefined.Predicate.Logical.And
 import Data.Word
 import Data.Int
 import Data.Void
-import Data.Functor.Identity
 import Binrep.Common.Via.Generically.NonSum
-
-import Strongweak.WeakenN
 
 type Putter = Poke RealWorld
 class Put a where put :: a -> Putter
@@ -92,8 +89,6 @@ instance Prim' a => Put (ViaPrim a) where
 instance TypeError ENoEmpty => Put Void where put = undefined
 instance TypeError ENoSum => Put (Either a b) where put = undefined
 
-instance Put a => Put (Identity a) where put = put . runIdentity
-
 instance Put Putter where put = id
 
 -- | Unit type serializes to nothing. How zen.
@@ -139,7 +134,3 @@ deriving via ViaPrim (ByteOrdered    BigEndian a)
 --   predicate with the right. LOL REALLY?
 instance Put (Refined pr (Refined pl a)) => Put (Refined (pl `And` pr) a) where
     put = put . unsafeRefine @_ @pr . unsafeRefine @_ @pl . unrefine
-
--- | Unwrap strongweak wrapper.
-instance Put a => Put (WeakenN n a) where
-    put = put . unWeakenN

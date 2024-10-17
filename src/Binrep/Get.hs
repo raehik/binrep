@@ -43,7 +43,6 @@ import Rerefined.Predicate.Logical.And
 import Data.Word
 import Data.Int
 import Data.Void
-import Data.Functor.Identity
 import Binrep.Common.Via.Generically.NonSum
 
 import Generic.Data.FOnCstr
@@ -51,8 +50,6 @@ import Generic.Data.Function.Traverse.Constructor hiding ( ENoEmpty )
 import GHC.Exts ( Proxy# )
 
 import Data.Typeable ( Typeable, TypeRep, typeRep, Proxy(Proxy) )
-
-import Strongweak.WeakenN
 
 type Getter = FP.Parser (ParseError FP.Pos TBL.Builder)
 
@@ -222,8 +219,6 @@ instance Get Write where
 
 -}
 
-instance Get a => Get (Identity a) where get = Identity <$> get
-
 -- | Unit type parses nothing.
 instance Get () where
     {-# INLINE get #-}
@@ -324,7 +319,3 @@ runGetWith
 runGetWith r bs = runGetter (getWith r) bs
 
 -}
-
--- | Unwrap strongweak wrapper.
-instance Get a => Get (WeakenN n a) where
-    get = WeakenN <$> get
