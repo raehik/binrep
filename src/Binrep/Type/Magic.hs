@@ -26,7 +26,6 @@ import GHC.TypeLits ( type Natural, type Symbol, type KnownNat, type (+) )
 
 import GHC.Generics ( Generic )
 import Data.Data ( Data )
-import Strongweak
 
 import Binrep
 import Bytezap.Struct.TypeLits.Bytes ( ReifyBytesW64(reifyBytesW64) )
@@ -48,14 +47,6 @@ applications). That kind is always evident from the type, so it's just nicer.
 -}
 data Magic a where Magic :: forall {k} (a :: k). Magic a
     deriving stock (Generic, Data, Show, Eq)
-
--- | Weaken a @'Magic' a@ to the unit '()'.
-instance Weaken   (Magic a) where
-    type Weakened (Magic a) = ()
-    weaken Magic = ()
-
--- | Strengthen the unit '()' to some @'Magic' a@.
-instance Strengthen (Magic a) where strengthen () = Right Magic
 
 -- | The byte length of a magic is known at compile time.
 instance IsCBLen (Magic a) where type CBLen (Magic a) = Length (MagicBytes a)
