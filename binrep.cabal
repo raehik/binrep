@@ -68,6 +68,7 @@ library
       Binrep.Util.Generic
       Raehik.Compat.FlatParse.Basic.CutWithPos
       Raehik.Compat.FlatParse.Basic.Prim
+      Raehik.Compat.FlatParse.Basic.Remaining
       Raehik.Compat.FlatParse.Basic.WithLength
       Util.TypeNats
   other-modules:

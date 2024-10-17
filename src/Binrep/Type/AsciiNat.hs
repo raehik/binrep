@@ -45,6 +45,18 @@ import TypeLevelShow.Utils
 
 import Data.Text.Builder.Linear qualified as TBL
 
+{- TODO 2024-10-15 raehik
+
+Should this be a newtype over @a@ where we don't check for >0 ?
+After doing some thinking about strongweak vs. generic coerce, I kind of want to
+handle cases where we don't really do a check/make a value-level change.
+This is the closest I have.
+
+Maybe I want a @Tagged@-like newtype in strongweak that states "strengthen
+through the given type as if it's a newtype (that can be coerced)". Maybe that
+gets me what I want. @ByteOrdered@ would then use it too.
+-}
+
 -- | A natural represented in binary as an ASCII string, where each character is
 --   a digit in the given base.
 --

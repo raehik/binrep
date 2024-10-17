@@ -1,3 +1,8 @@
+## 1.1.0 (unreleased)
+* fix ByteOrdered orphan strongweak instances to follow strongweak pattern --
+  for original behaviour, use `WeakenN 2 (ByteOrdered end a)`
+* update rerefined, strongweak
+
 ## 1.0.0 (2024-10-03)
 * fix `NullTerminate` check being inverted (OOPS LOL)
 * fix `Get [a]` instance (list backwards xd)

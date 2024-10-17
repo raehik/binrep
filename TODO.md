@@ -3,6 +3,9 @@
 In `Get`, I require a `Getter pt`. But in `Put`/`BLen`, you have to pass the
 `Putter`/`BLen` manually. I'm not sure which one is correct. Probably `Get`.
 
+## Move `Binrep.Type.Text`
+It's fine, but it's not binrep (module imports appear separate).
+
 ## Clarify `Thin` stuff
 I use the `ByteString` instance internally sometimes (probably), and in those
 cases I want "thin" parsing since I'm consuming it right there and then. I need

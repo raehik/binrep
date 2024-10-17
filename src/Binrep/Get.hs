@@ -9,9 +9,10 @@ module Binrep.Get
 
 import Binrep.Get.Error
 import Data.Text.Builder.Linear qualified as TBL
+import GHC.Exts ( fromString )
 import Binrep.Util.ByteOrder
 import Binrep.Common.Via.Prim ( ViaPrim(..) )
-import Raehik.Compat.Data.Primitive.Types ( Prim' )
+import Raehik.Compat.Data.Primitive.Types ( Prim', sizeOf )
 import Raehik.Compat.Data.Primitive.Types.Endian ( ByteSwap )
 
 import Binrep.Get.Struct ( GetC(getC), GetterC )
@@ -22,6 +23,7 @@ import GHC.TypeLits ( KnownNat )
 import FlatParse.Basic qualified as FP
 import Raehik.Compat.FlatParse.Basic.Prim qualified as FP
 import Raehik.Compat.FlatParse.Basic.CutWithPos qualified as FP
+import Raehik.Compat.FlatParse.Basic.Remaining qualified as FP
 
 import Data.ByteString qualified as B
 
@@ -47,6 +49,8 @@ import Binrep.Common.Via.Generically.NonSum
 import Generic.Data.FOnCstr
 import Generic.Data.Function.Traverse.Constructor hiding ( ENoEmpty )
 import GHC.Exts ( Proxy# )
+
+import Data.Typeable ( Typeable, TypeRep, typeRep, Proxy(Proxy) )
 
 type Getter = FP.Parser (ParseError FP.Pos TBL.Builder)
 
@@ -265,21 +269,32 @@ deriving via Word8 instance Get (ByteOrdered end Word8)
 deriving via  Int8 instance Get (ByteOrdered end  Int8)
 
 -- | Parse any 'Prim''.
-getPrim :: forall a. Prim' a => Getter a
-getPrim = FP.anyPrim `FP.cut'` parseError1
-    [  "couldn't parse primitive type, not enough bytes (TODO sizeOf)" ]
-    --    <> TBL.fromDec (sizeOf (undefined :: a))
-    -- TODO legit I cba to do this. And I think I want more stuff in type-level,
-    -- like @name :: 'Symbol'@ of the type (without going through Typeable).
+getPrim :: forall a. (Prim' a, Typeable a) => Getter a
+getPrim = do
+    lenAvail <- FP.remaining
+    FP.anyPrim `cut1`
+        [  "ran out of bytes while parsing " <> strTR
+        <> ", needed "    <> strLenNeed
+        <> ", remaining " <> TBL.fromDec lenAvail
+        ]
+  where
+    strTR       = fromString (show (typeRep' @a))
+    strLenNeed  = TBL.fromDec (sizeOf (undefined :: a))
 
-instance Prim' a => Get (ViaPrim a) where get = ViaPrim <$> getPrim
+typeRep' :: forall a. Typeable a => TypeRep
+typeRep' = typeRep (Proxy @a)
+
+instance (Prim' a, Typeable a) => Get (ViaPrim a) where
+    get = ViaPrim <$> getPrim
 
 -- ByteSwap is required on opposite endian platforms, but we're not checking
 -- here, so make sure to keep it on both.
 deriving via ViaPrim (ByteOrdered LittleEndian a)
-    instance (Prim' a, ByteSwap a) => Get (ByteOrdered LittleEndian a)
+    instance (Prim' a, ByteSwap a, Typeable a)
+      => Get (ByteOrdered LittleEndian a)
 deriving via ViaPrim (ByteOrdered    BigEndian a)
-    instance (Prim' a, ByteSwap a) => Get (ByteOrdered    BigEndian a)
+    instance (Prim' a, ByteSwap a, Typeable a)
+      => Get (ByteOrdered    BigEndian a)
 
 instance Get (Refined pr (Refined pl a)) => Get (Refined (pl `And` pr) a) where
     get = (unsafeRefine . unrefine @pl . unrefine @pr) <$> get
