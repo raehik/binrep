@@ -52,6 +52,8 @@ import GHC.Exts ( Proxy# )
 
 import Data.Typeable ( Typeable, TypeRep, typeRep, Proxy(Proxy) )
 
+import Strongweak.WeakenN
+
 type Getter = FP.Parser (ParseError FP.Pos TBL.Builder)
 
 class Get a where
@@ -322,3 +324,7 @@ runGetWith
 runGetWith r bs = runGetter (getWith r) bs
 
 -}
+
+-- | Unwrap strongweak wrapper.
+instance Get a => Get (WeakenN n a) where
+    get = WeakenN <$> get

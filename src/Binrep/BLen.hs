@@ -45,6 +45,8 @@ import Binrep.Common.Via.Generically.NonSum
 import Rerefined.Refine
 import Rerefined.Predicate.Logical.And
 
+import Strongweak.WeakenN
+
 -- | Class for types with easily-calculated length in bytes.
 --
 -- If it appears hard to calculate byte length for a given type (e.g. without
@@ -130,6 +132,10 @@ deriving via ViaCBLen Word64 instance BLen Word64
 deriving via ViaCBLen  Int64 instance BLen  Int64
 deriving via ViaCBLen (ByteOrdered end a)
     instance KnownNat (CBLen a) => BLen (ByteOrdered end a)
+
+-- | Unwrap strongweak wrapper.
+instance BLen a => BLen (WeakenN n a) where
+    blen = blen . unWeakenN
 
 --------------------------------------------------------------------------------
 

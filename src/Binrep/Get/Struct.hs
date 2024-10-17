@@ -37,6 +37,8 @@ import Binrep.Common.Via.Generically.NonSum
 import Rerefined.Refine
 import Rerefined.Predicate.Logical.And
 
+import Strongweak.WeakenN
+
 type GetterC = Parser (ParseError Int TBL.Builder)
 
 -- | constant size parser
@@ -156,3 +158,7 @@ instance (PutC l, KnownNat (CBLen l), PutC r) => PutC (l, r) where
     putC (l, r) = sequencePokes (putC l) (cblen @l) (putC r)
 
 -}
+
+-- | Unwrap strongweak wrapper.
+instance GetC a => GetC (WeakenN n a) where
+    getC = WeakenN <$> getC

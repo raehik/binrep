@@ -29,6 +29,8 @@ import Bytezap.Common.Generic ( type GTFoldMapCAddition )
 
 import Binrep.Common.Via.Generically.NonSum
 
+import Strongweak.WeakenN
+
 class IsCBLen a where type CBLen a :: Natural
 
 -- | Deriving via this instance necessitates @UndecidableInstances@.
@@ -55,6 +57,10 @@ instance IsCBLen  Int64 where type CBLen  Int64 = 2^3
 
 instance IsCBLen a => IsCBLen (ByteOrdered end a) where
     type CBLen (ByteOrdered end a) = CBLen a
+
+-- | Unwrap strongweak wrapper.
+instance IsCBLen a => IsCBLen (WeakenN n a) where
+    type CBLen (WeakenN n a) = CBLen a
 
 -- | Reify a type's constant byte length to the term level.
 cblen :: forall a. KnownNat (CBLen a) => Int

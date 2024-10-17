@@ -29,6 +29,8 @@ import Binrep.Common.Via.Generically.NonSum
 import Rerefined.Refine
 import Rerefined.Predicate.Logical.And
 
+import Strongweak.WeakenN
+
 type PutterC = Struct.Poke RealWorld
 
 -- | constant size putter
@@ -108,3 +110,7 @@ deriving via ViaPrim (ByteOrdered LittleEndian a)
     instance (Prim' a, ByteSwap a) => PutC (ByteOrdered LittleEndian a)
 deriving via ViaPrim (ByteOrdered    BigEndian a)
     instance (Prim' a, ByteSwap a) => PutC (ByteOrdered    BigEndian a)
+
+-- | Unwrap strongweak wrapper.
+instance PutC a => PutC (WeakenN n a) where
+    putC = putC . unWeakenN
