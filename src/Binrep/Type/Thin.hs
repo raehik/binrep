@@ -15,10 +15,7 @@ instance Copy B.ByteString where copy = B.copy
 @
 
 But this just doesn't fly, because it would invert the behaviour.
-
 -}
-
-{-# LANGUAGE UndecidableInstances #-} -- for strongweak derivingvia
 
 module Binrep.Type.Thin where
 
@@ -31,8 +28,6 @@ import Data.Data ( Data )
 import GHC.Exts ( IsList )
 import Data.String
 import Control.DeepSeq
-import Data.Functor.Identity
-import Strongweak
 
 import Data.ByteString qualified as B
 
@@ -44,8 +39,5 @@ newtype Thin a = Thin { unThin :: a }
       , NFData, IsString, IsList -- weird
       , BLen, Put -- binrep
       ) via a
-
-    -- at the end of the day, we are the identity functor
-    deriving (Weaken, Strengthen) via Identity a
 
 instance Get (Thin B.ByteString) where get = Thin <$> FP.takeRest

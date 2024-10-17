@@ -25,7 +25,6 @@ import Raehik.Compat.Data.Primitive.Types ( Prim' )
 import Data.Word ( Word8 )
 import Data.Int ( Int8 )
 import Binrep.Util.ByteOrder
-import Data.Functor.Identity
 import Raehik.Compat.Data.Primitive.Types.Endian ( ByteSwap )
 
 import Data.ByteString qualified as B
@@ -36,8 +35,6 @@ import Binrep.Common.Via.Generically.NonSum
 
 import Rerefined.Refine
 import Rerefined.Predicate.Logical.And
-
-import Strongweak.WeakenN
 
 type GetterC = Parser (ParseError Int TBL.Builder)
 
@@ -129,8 +126,6 @@ instance Prim' a => GetC (ViaPrim a) where
     getC = ViaPrim <$> prim
     {-# INLINE getC #-}
 
-instance GetC a => GetC (Identity a) where getC = Identity <$> getC
-
 deriving via ViaPrim Word8 instance GetC Word8
 deriving via ViaPrim  Int8 instance GetC  Int8
 deriving via Word8 instance GetC (ByteOrdered end Word8)
@@ -142,23 +137,3 @@ deriving via ViaPrim (ByteOrdered LittleEndian a)
     instance (Prim' a, ByteSwap a) => GetC (ByteOrdered LittleEndian a)
 deriving via ViaPrim (ByteOrdered    BigEndian a)
     instance (Prim' a, ByteSwap a) => GetC (ByteOrdered    BigEndian a)
-
-{-
-
-instance TypeError ENoEmpty => PutC Void where putC = undefined
-instance TypeError ENoSum => PutC (Either a b) where putC = undefined
-
-instance PutC a => PutC (Identity a) where putC = putC . runIdentity
-
-instance PutC PutterC where putC = id
-
--- | Look weird? Yeah. But it's correct :)
-instance (PutC l, KnownNat (CBLen l), PutC r) => PutC (l, r) where
-    {-# INLINE putC #-}
-    putC (l, r) = sequencePokes (putC l) (cblen @l) (putC r)
-
--}
-
--- | Unwrap strongweak wrapper.
-instance GetC a => GetC (WeakenN n a) where
-    getC = WeakenN <$> getC
