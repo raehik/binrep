@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -fno-warn-orphans #-}
-
 module Binrep.Util.ByteOrder
   ( ByteOrder(..), ByteOrdered(..), type EndianSuffix
   , type LE, type BE, type Endian
