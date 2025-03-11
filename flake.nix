@@ -7,8 +7,6 @@
     rerefined.flake = false;
     bytezap.url   = "github:raehik/bytezap";
     bytezap.flake = false;
-    strongweak.url   = "github:raehik/strongweak";
-    strongweak.flake = false;
   };
 
   outputs = inputs:
@@ -42,8 +40,6 @@
 
           # waiting on nixpkgs update
           #packages.rerefined.source = inputs.rerefined;
-          settings.strongweak.broken = false;
-          packages.strongweak.source = inputs.strongweak;
           #packages.bytezap.source = inputs.bytezap;
         };
 
@@ -53,8 +49,6 @@
 
           # waiting on nixpkgs update
           packages.rerefined.source = inputs.rerefined;
-          settings.strongweak.broken = false;
-          packages.strongweak.source = inputs.strongweak;
           packages.bytezap.source = inputs.bytezap;
         };
 
@@ -64,8 +58,6 @@
 
           # waiting on nixpkgs update
           packages.rerefined.source = inputs.rerefined;
-          settings.strongweak.broken = false;
-          packages.strongweak.source = inputs.strongweak;
           packages.bytezap.source = inputs.bytezap;
         };
       };

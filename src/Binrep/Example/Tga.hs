@@ -1,6 +1,8 @@
 module Binrep.Example.Tga where
 
 {-
+
+{-
 import Binrep
 import Binrep.Type.Derived.NullTermPadded
 import Binrep.Type.AsciiNat
@@ -26,3 +28,5 @@ data ImageType
   | RLEColorMapped
   | RLETrueColor
   | RLEBW
+
+-}
