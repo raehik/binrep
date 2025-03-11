@@ -1,21 +1,5 @@
 {
   "nodes": {
-    "bytezap": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1727486916,
-        "narHash": "sha256-C7Lo/8stL35tVAFNN1Ab2Hpyp8qoxJNf84BNLtZOGWE=",
-        "owner": "raehik",
-        "repo": "bytezap",
-        "rev": "0970bfe3a6e660544c73e76ac377a4a836a8ab28",
-        "type": "github"
-      },
-      "original": {
-        "owner": "raehik",
-        "repo": "bytezap",
-        "type": "github"
-      }
-    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
@@ -80,29 +64,11 @@
         "type": "github"
       }
     },
-    "rerefined": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1729790883,
-        "narHash": "sha256-s5zJhJN0au3EBuRWJMZyeFV0Z4ZP6Q0Qy9/piTxS2Xs=",
-        "owner": "raehik",
-        "repo": "rerefined",
-        "rev": "5e0a616003945a2c22edc77820329b36662240a5",
-        "type": "github"
-      },
-      "original": {
-        "owner": "raehik",
-        "repo": "rerefined",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
-        "bytezap": "bytezap",
         "flake-parts": "flake-parts",
         "haskell-flake": "haskell-flake",
-        "nixpkgs": "nixpkgs",
-        "rerefined": "rerefined"
+        "nixpkgs": "nixpkgs"
       }
     }
   },
