@@ -1,4 +1,4 @@
-## 1.1.0 (unreleased)
+## 1.1.0 (2025-03-11)
 * remove strongweak integration
   * to be released in separate package binrep-instances
 * update rerefined
