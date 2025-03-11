@@ -41,10 +41,10 @@
           settings.defun-core.jailbreak = true;
 
           # waiting on nixpkgs update
-          packages.rerefined.source = inputs.rerefined;
+          #packages.rerefined.source = inputs.rerefined;
           settings.strongweak.broken = false;
           packages.strongweak.source = inputs.strongweak;
-          packages.bytezap.source = inputs.bytezap;
+          #packages.bytezap.source = inputs.bytezap;
         };
 
         haskellProjects.ghc98 = {
