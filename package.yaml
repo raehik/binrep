@@ -92,7 +92,7 @@ tests:
     dependencies:
     - binrep
     - hspec >= 2.7 && < 2.12
-    - QuickCheck ^>= 2.14.2
+    - QuickCheck >= 2.14.2 && < 2.16
     - quickcheck-instances ^>= 0.3.26
     - generic-random ^>= 1.5.0.1
 

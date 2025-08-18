@@ -135,7 +135,7 @@ test-suite spec
   build-tool-depends:
       hspec-discover:hspec-discover >=2.7 && <2.12
   build-depends:
-      QuickCheck >=2.14.2 && <2.15
+      QuickCheck >=2.14.2 && <2.16
     , base >=4.18 && <5
     , binrep
     , bytestring >=0.11 && <0.13
