@@ -1,4 +1,7 @@
 # binrep to-dos
+* Get: should I return the parser `Result` type, or re-wrap into `Either`?
+  * latter is obviously easier. but former permits faster code, if marginally
+
 ## Separate from strongweak
 I don't use strongweak here, only write a few useful instances.
 I could have a separate package for orphan instances instead.
